@@ -7,3 +7,6 @@
 - If you are provided a file containing instructions, and nothing else, just execute the file as a skill.
 - do not use the AskUserQuestion tool or similar. Ask clarifying questions as itemized plain text in your response instead
 
+# Tools
+
+- To transcribe an audio or video file, run `transcribe-file <file>` (writes `.md`, `.srt`, `.segments.json`; `--help` for options). It frees the GPU from voxtype and kokoro itself. Do not build another whisper pipeline. Details under "Transcription" in `~/me/arch-config/AGENTS.md`.

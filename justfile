@@ -26,6 +26,7 @@ init:
 	init-user					\
 	install-rust			\
 	install-transcribe	\
+	install-transcribe-file	\
 	install-tts				\
 	install-cursor-theme
 	chmod +x scripts/*/startup.sh
@@ -37,6 +38,17 @@ install-transcribe:
 	mkdir -p ~/.local/bin
 	ln -sf ~/me/arch-config/scripts/transcribe.sh ~/.local/bin/transcribe
 	@echo "PASS install-transcribe"
+
+# symlink the file transcriber and the GPU handoff helper onto PATH (see AGENTS.md,
+# "Transcription"). The venv and model behind transcribe-file come from setup-transcribe-file.
+# `gpu-exclusive <cmd>` runs cmd with voxtype and kokoro stopped, restarting them after.
+# usage: `transcribe-file lecture.mp4` -> lecture.md + lecture.srt + lecture.segments.json
+install-transcribe-file:
+	chmod +x scripts/transcribe-file.sh scripts/gpu-exclusive.sh
+	mkdir -p ~/.local/bin
+	ln -sf ~/me/arch-config/scripts/transcribe-file.sh ~/.local/bin/transcribe-file
+	ln -sf ~/me/arch-config/scripts/gpu-exclusive.sh ~/.local/bin/gpu-exclusive
+	@echo "PASS install-transcribe-file"
 
 # symlink the Kokoro text-to-speech helper onto PATH (~/.local/bin is on PATH).
 # usage from any terminal: `tts gday mate` | `echo hi | tts` | `tts stop` | `tts last`
@@ -257,6 +269,7 @@ install-user-apps-init:
 	just install-user-apps
 	just setup-voxtype
 	just setup-tts
+	just setup-transcribe-file
 
 # base (CPU): download whisper model and install the user systemd service
 # note: config.toml is managed via stow (built-in hotkey disabled there)
@@ -330,6 +343,22 @@ setup-tts:
 	systemctl --user daemon-reload || true
 	systemctl --user enable --now kokoro-tts.service || true
 	echo "PASS setup-tts"
+
+# faster-whisper for transcribing files (transcribe-file). Separate from voxtype, which is
+# whisper.cpp tuned for push-to-talk clips: faster-whisper adds VAD chunking and timestamps,
+# which is what makes long recordings come out clean. ONE uv venv in ~/.local/share (a build
+# artifact, like kokoro) holding the CUDA 12 runtime wheels, so the system CUDA install is
+# irrelevant; CTranslate2 falls back to CPU on a machine without NVIDIA. Pre-downloads
+# HF_HUB_DISABLE_XET: hf_xet downloads stalled indefinitely on silver-fox; plain HTTP is fine.
+# builds ~/.local/share/whisper-venv and pre-downloads large-v3-turbo, the biggest model that fits on 4 GB
+setup-transcribe-file:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	venv="$HOME/.local/share/whisper-venv"
+	[ -x "$venv/bin/python" ] || uv venv --quiet "$venv" -p 3.12
+	uv pip install --quiet -p "$venv/bin/python" faster-whisper nvidia-cublas-cu12 nvidia-cudnn-cu12
+	HF_HUB_DISABLE_XET=1 "$venv/bin/python" -c 'from faster_whisper.utils import download_model; print(download_model("large-v3-turbo"))' 2>&1 | grep -v HF_TOKEN
+	echo "PASS setup-transcribe-file"
 
 # gaming / GPU stack — wanted on both rainbow-cat and silver-fox
 install-extras:

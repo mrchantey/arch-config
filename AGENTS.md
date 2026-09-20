@@ -57,6 +57,18 @@ PATH is assembled by `/usr/share/omarchy/default/bash/env-bootstrap`, which appe
 
 Updates flow through `omarchy update`, which calls `omarchy-update-mise` (`MISE_MINIMUM_RELEASE_AGE=0 mise up`). The `mup` alias is the same thing by hand.
 
+## Transcription
+
+Three tools, all on PATH from `scripts/` via `just install-transcribe` and `just install-transcribe-file`, and all sharing one 4 GB GPU with the voxtype and kokoro daemons:
+
+- `voxtype` is dictation: push-to-talk, whisper.cpp on Vulkan running large-v3-turbo, model kept resident so capture is instant, clips capped at 60 s, with the replacement dictionary in `stow/voxtype/.config/voxtype/config.toml`. Do not use it for files.
+- `transcribe [name]` records the mic to `name.wav` and transcribes it with voxtype's engine to `name.txt`. Plain text, no timestamps; for a quick note, not a lecture.
+- `transcribe-file <file> [--out BASE] [--title TEXT]` is for existing audio or video. faster-whisper (CTranslate2 on CUDA), Silero VAD so long silences do not turn into hallucinated text, segment timestamps, and a model ladder that picks the biggest Whisper that fits: on the A2000 that is large-v3-turbo, since large-v3 shares turbo's encoder (which alone peaks near 3.5 GB) and its extra decoder weights do not fit in any configuration. Writes `BASE.md` (paragraphs prefixed `**[hh:mm:ss]**`, header names the model), `BASE.srt` and `BASE.segments.json`. A 75 minute recording takes about 2.5 minutes. `transcribe-file --help` has the options. Setup is `just setup-transcribe-file`: a uv venv at `~/.local/share/whisper-venv` with the CUDA runtime wheels, and large-v3-turbo in `~/.cache/huggingface`.
+
+`gpu-exclusive <cmd>` is the handoff both transcribers use: it stops whichever of `voxtype.service` and `kokoro-tts.service` are running, runs the command, and restarts exactly those from an EXIT trap, so an error or Ctrl-C still brings dictation back. Its status lines go to stderr, the command's stdout is untouched, and `GPU_EXCLUSIVE_SERVICES=voxtype.service` narrows it (the mic `transcribe` does this so kokoro keeps talking). Nested calls are no-ops via `GPU_EXCLUSIVE=1`. Anything else that wants the whole card should go through it rather than growing its own stop/start.
+
+Lessons that cost time: Hugging Face downloads through `hf_xet` stall indefinitely on silver-fox (75 MB then nothing), so both the setup recipe and the script export `HF_HUB_DISABLE_XET=1`; if a model still will not come down, `curl -L https://huggingface.co/<repo>/resolve/main/<file>` the four files (`config.json`, `model.bin`, `tokenizer.json`, `vocabulary.txt`) into a folder and pass it to `--model`. CTranslate2 dlopens `libcublas.so.12` and `libcudnn*.so.9`, which the script supplies from the pip wheels via `LD_LIBRARY_PATH`, so pacman's CUDA is not involved. A stopped kokoro sits in `failed` rather than `inactive` (uvicorn exits non-zero on SIGTERM); `systemctl --user start` works from there. Neither pipeline does speaker diarisation; WhisperX with pyannote would, at the cost of gated model downloads and another 2 GB of VRAM, so it is not set up.
+
 ## Cursor theme
 
 The pointer is Never-Lost Rainbow, converted from the Windows `.ani` set in `neverlost/` (see its readme for what the conversion changes). `just install-cursor-theme` runs `scripts/install-cursor-theme.py`, which builds the XCursor theme into `~/.local/share/icons/Never-Lost-Rainbow`. That script also owns the Windows-role-to-X11-name mapping, so it is the file to edit to change which cursor plays which role.

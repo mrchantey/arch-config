@@ -17,9 +17,10 @@
 #
 # GPU note: the voxtype daemon keeps the Whisper model resident on the discrete GPU,
 # and on a 4GB card a second copy won't fit — so a bare `voxtype transcribe` silently
-# falls back to the (much slower) integrated GPU. We briefly stop the daemon to free
-# VRAM, pin the same GPU the daemon uses (read from its systemd drop-in), transcribe,
-# then bring the daemon back.
+# falls back to the (much slower) integrated GPU. The transcribe step runs under
+# gpu-exclusive (scripts/gpu-exclusive.sh), which stops the daemon, and brings it back
+# when the step exits; we pin the same GPU the daemon uses (read from its systemd drop-in).
+# For transcribing existing files, use `transcribe-file` instead.
 
 set -euo pipefail
 
@@ -33,12 +34,9 @@ segments=()
 seg_index=0
 rec_pid=""
 paused=0
-daemon_stopped=0
 
 cleanup() {
 	[[ -n "$rec_pid" ]] && kill -INT "$rec_pid" 2>/dev/null || true
-	# always bring the daemon back if we were the one who stopped it
-	[[ "$daemon_stopped" -eq 1 ]] && systemctl --user start voxtype.service 2>/dev/null || true
 	rm -rf "$workdir"
 }
 trap cleanup EXIT
@@ -124,18 +122,10 @@ if [[ -f "$gpu_conf" ]]; then
 fi
 
 printf 'Transcribing...\n'
-if systemctl --user is-active --quiet voxtype.service; then
-	systemctl --user stop voxtype.service
-	daemon_stopped=1
-	sleep 0.5                                   # let the driver release VRAM
-fi
-
-env "${gpu_env[@]}" voxtype -q transcribe "$out" 2>/dev/null \
+# only voxtype needs to go: the CLI's turbo model fits beside kokoro, and stopping kokoro
+# would cut off any speech it is playing.
+GPU_EXCLUSIVE_SERVICES=voxtype.service \
+	"$(dirname "$(readlink -f "$0")")/gpu-exclusive.sh" env "${gpu_env[@]}" voxtype -q transcribe "$out" 2>/dev/null \
 	| awk 'flag; /^[[:space:]]*$/{flag=1}' > "$txt"
-
-if [[ "$daemon_stopped" -eq 1 ]]; then
-	systemctl --user start voxtype.service
-	daemon_stopped=0
-fi
 
 printf 'Transcript -> %s\n' "$txt"
