@@ -77,6 +77,10 @@ The pointer is Never-Lost Rainbow, converted from the Windows `.ani` set in `nev
 
 `XCURSOR_THEME` and `XCURSOR_SIZE` are set in the shared `hypr/envs.lua`, which is required from `hyprland.lua` after Omarchy's defaults so it overrides their size of 24. It reads the same flag the toggle writes, which is what makes the choice survive a reload. Both branches assign every variable, because `hyprctl reload` can overwrite an env var but never unsets one. GTK apps read the theme from gsettings instead, which the toggle sets.
 
+## Shared pictures
+
+`~/Pictures/shared` is a mirror of the `pictures/` prefix of the `mrchantey-os` S3 bucket (wallpapers, headshots, the omarchy-logo template), shared across machines and tracked in no repo. `just pull-pictures` syncs it down and `just push-pictures` syncs it up with `--delete`, so a file removed locally is removed from the bucket on the next push. `init-user` runs the pull on a fresh install, but the bucket policy only makes `GetObject` public, not `ListBucket`, so the sync needs `aws configure` first; without credentials the recipe prints a SKIP and exits 0 rather than failing `init`, and the README's AWS step says to rerun it. Individual files remain fetchable unsigned at `https://mrchantey-os.s3.us-west-2.amazonaws.com/pictures/<path>`, which is how `stow-files-init` gets the Firewatch wallpaper before aws is configured.
+
 ## Keeping single-instance apps on the current workspace
 
 Chrome, Zed, Nautilus and Element all hand a second invocation to the already-running process over an IPC socket instead of starting fresh. That process places the payload (a URL, a file, a folder) in whichever of its windows was activated last, which is routinely on a workspace you cannot see. Hyprland cannot fix this: no window is created, so there is no event for a window rule to match on. It has to be handled at the launch site.

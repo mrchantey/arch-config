@@ -186,6 +186,7 @@ init-user:
 	just setup-editor
 	just install-user-apps-init
 	just pull-repos
+	just pull-pictures
 
 install-apps-init:
 	sudo pacman -Rns --noconfirm spotify 				|| true
@@ -559,7 +560,7 @@ stow-files-init:
 	# is auto-selected on every switch to either theme (see setup-theme).
 	mkdir -p ~/.config/omarchy/backgrounds/everforest ~/.config/omarchy/backgrounds/solarized-light
 	curl -fsSL -o ~/.config/omarchy/backgrounds/everforest/firewatch.png \
-	https://mrchantey-os.s3.us-west-2.amazonaws.com/assets/firewatch.png
+	https://mrchantey-os.s3.us-west-2.amazonaws.com/pictures/firewatch.png
 	cp ~/.config/omarchy/backgrounds/everforest/firewatch.png \
 	~/.config/omarchy/backgrounds/solarized-light/firewatch.png
 	@echo "INIT stow-files"
@@ -639,17 +640,29 @@ remove-infra:
 # upload a file to the s3 bucket
 upload-file src dst:
 	aws s3 cp {{ src }} s3://mrchantey-os/{{ dst }} --region us-west-2
-
-# push local ./assets up to the s3 bucket (local -> remote, mirrors deletes)
-push-assets:
-	aws s3 sync ./assets s3://mrchantey-os/assets --region us-west-2 --delete
-	@echo "PASS - push-assets"
-
-# pull ./assets down from the s3 bucket (remote -> local)
-pull-assets:
-	aws s3 sync s3://mrchantey-os/assets ./assets --region us-west-2
-	@echo "PASS - pull-assets"
 	@echo "PASS - upload-file"
+
+# ~/Pictures/shared mirrors the bucket's pictures/ prefix: wallpapers, headshots,
+# the omarchy-logo template. Shared across machines, tracked in no repo.
+# The bucket policy makes GetObject public but not ListBucket, so a sync cannot
+# run unsigned and needs `aws configure` (README, Additional Steps). init-user
+# calls this on a fresh install; when aws is not configured yet it skips with a
+# note instead of failing the whole init, so rerun it after `aws configure`.
+#
+# pull the bucket's pictures/ down to ~/Pictures/shared (remote -> local)
+pull-pictures:
+	@aws sts get-caller-identity >/dev/null 2>&1 || { \
+		echo "SKIP pull-pictures: aws not configured, run 'aws configure' then 'just pull-pictures'"; \
+		exit 0; \
+	}; \
+	mkdir -p ~/Pictures/shared && \
+	aws s3 sync s3://mrchantey-os/pictures ~/Pictures/shared --region us-west-2 && \
+	echo "PASS - pull-pictures"
+
+# the reverse: push ~/Pictures/shared up to the bucket (local -> remote, mirrors deletes)
+push-pictures:
+	aws s3 sync ~/Pictures/shared s3://mrchantey-os/pictures --region us-west-2 --delete
+	@echo "PASS - push-pictures"
 
 pre-reset:
 	@set -e
@@ -659,6 +672,7 @@ pre-reset:
 	@echo "PASS pre-reset"
 	@echo "You are almost ready to reset your machine: \
 	- ensure assets directories have been pushed: beet, beetmash \
+	- ensure ~/Pictures/shared has been pushed: just push-pictures \
 	- your age identity ~/.config/beet/age/keys.txt is in NO repo: confirm the USB backup restores (just setup-age-identity <backup> on another machine) before wiping \
 	"
 

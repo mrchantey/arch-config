@@ -29,21 +29,21 @@ image-generation models.
 The white-glyphs-on-transparent template lives at:
 
 ```
-assets/omarchy-logo/template.png
+~/Pictures/shared/omarchy-logo/template.png
 ```
 
 It is also mirrored on S3 and auto-downloaded by `generate.sh` if the local file
 is missing:
 
 ```
-https://mrchantey-os.s3.us-west-2.amazonaws.com/assets/omarchy-logo/template.png
+https://mrchantey-os.s3.us-west-2.amazonaws.com/pictures/omarchy-logo/template.png
 ```
 
-The whole `assets/` tree syncs with the bucket via `just push-assets` /
-`just pull-assets`, so publishing a changed template is just:
+The whole `~/Pictures/shared` tree syncs with the bucket's `pictures/` prefix via
+`just push-pictures` / `just pull-pictures`, so publishing a changed template is just:
 
 ```
-just push-assets
+just push-pictures
 ```
 
 ## Defining a colorway set
@@ -73,7 +73,7 @@ Fewer than eight variants leaves the remaining grid cells empty. See
 e.g. `generate.sh rainbows` reads `rainbows.json` and writes:
 
 ```
-assets/omarchy-logo/<name>.png
+~/Pictures/shared/omarchy-logo/<name>.png
 ```
 
 ## How it works (for edits)
