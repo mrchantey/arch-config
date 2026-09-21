@@ -3,11 +3,12 @@
 # Put this person's age identity in place at ~/.config/beet/age/keys.txt, either
 # restored from a passphrase-encrypted backup or freshly generated.
 #
-# The identity is PER PERSON, not per device: it is the one key that decrypts
-# every beet vault (the committed `.env.age` files, the exported stack secrets),
-# so a new machine RESTORES it from the backup rather than generating a second
-# one that can read nothing. Generate only on the very first machine, then
-# `beet secrets/backup` it onto a USB stick before anything depends on it.
+# The identity is PER PERSON, not per device: it is the one key that opens every
+# beet secrets document (a repo's committed `secrets.toml`, the exported stack
+# secrets) whose groups list its public half, so a new machine RESTORES it from
+# the backup rather than generating a second one that can read nothing. Generate
+# only on the very first machine, then `beet vault/backup --qr` it onto a USB
+# stick before anything depends on it.
 # ~/.config/beet is deliberately NOT stowed: a private key never enters a repo.
 #
 # usage: just setup-age-identity [backup.age]
@@ -35,12 +36,14 @@ fi
 chmod 600 "$KEYS"
 
 echo
-echo "== public key (recipient): add this to the vault declarations, ie <Vault recipients={[..]}/>"
+echo "== public key (recipient): add it to the \`recipients\` list of every group"
+echo "   you should read in a secrets document ([groups.<name>] in secrets.toml),"
+echo "   then \`beet secrets/rekey\` and \`beet secrets/check\`"
 echo
 age-keygen -y "$KEYS"
 echo
 if [[ -z "$BACKUP" ]]; then
   echo "== back it up before anything depends on it:"
-  echo "   beet secrets/backup   (a passphrase-encrypted copy for a USB stick and a printout)"
-  echo "   or, before beet is built:  age -p -o keys.txt.age $KEYS"
+  echo "   beet vault/backup --qr   (a passphrase-encrypted copy for a USB stick, and a QR code for paper)"
+  echo "   or, before beet is built:  age -p -a -o beet-identity.age $KEYS"
 fi

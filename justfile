@@ -159,7 +159,8 @@ setup-ssh-key host="tangled.org":
 
 # put this person's age identity at ~/.config/beet/age/keys.txt: restored from a
 # passphrase-encrypted backup (every machine after the first), else generated.
-# It is per PERSON not per device, decrypts every beet vault, and is never stowed.
+# It is per PERSON not per device, opens every beet secrets document it is
+# listed in, and is never stowed.
 # Idempotent. See scripts/setup-age-identity.sh.
 setup-age-identity backup="":
 	bash scripts/setup-age-identity.sh {{backup}}
