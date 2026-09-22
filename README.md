@@ -47,7 +47,7 @@ Haven't yet found a way to automate these, to be executed post install.
 	- `Access Key Secret Key: ^`
 	- `Default region name: us-west-2`
 	- `Default output format: None`
-	- `just pull-pictures` (init skips it while aws is unconfigured; this fills `~/Pictures/shared`)
+	- needed by `just push-assets` and `just assets ..` only; `just pull-assets` runs unsigned and init already ran it, filling `~/Pictures/assets`
 
 
 ## Optional Steps

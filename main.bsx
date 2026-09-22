@@ -1,0 +1,53 @@
+<!--
+# arch-config assets
+
+The shared assets bucket, `arch-config--shared--assets`: the source of record
+for files shared across machines but too large or too personal for git
+(wallpapers, headshots, the omarchy-logo template). `assets/` is a manifest of
+symlinks, one per noun, each pointing at where that noun lives on the machine
+(`assets/pictures -> ~/Pictures/assets`), and a push materializes the tree
+under the same prefixes in the bucket.
+
+    just assets validate   # resolve the config without touching the cloud
+    just assets plan       # eyeball the plan
+    just assets deploy     # provision the bucket
+    just assets push       # mirror assets/ up, pruning what was removed locally
+    just assets destroy    # tear the stack down (refused while the bucket holds objects)
+
+There is no beet `pull`: hydrating is `just pull-assets`, a credential-free
+`aws s3 sync` that `init-user` runs on a fresh machine before any Rust
+toolchain exists, which is what the bucket's public read is for.
+-->
+<CliServer always=true {CallOnReady}>
+<Router {HelpHandler}>
+	<!-- the stock beet binary built with `infra,extra`, which `just assets` does;
+	     a lean beet resolves none of the tags below -->
+	<RequireCfg cfg="feature:infra && feature:extra"/>
+	<!-- `app_name` composes the bucket name and the tofu state key, so renaming
+	     it would orphan the bucket -->
+	<PackageConfig title="Arch Config" app_name="arch-config" description="Shared assets for the omarchy config"/>
+	<!-- `shared`: a source synced between machines is owned by no deploy stage.
+	     The region is pinned because the unsigned urls in the justfile and the
+	     omarchy-logo skill name it. -->
+	<Stack stage="shared" region="us-west-2">
+		<!-- public read (GetObject + ListBucket) so a fresh machine hydrates
+		     unsigned; never force-destroyed; versioned so a bad mirror push is
+		     recoverable for 90 days -->
+		<S3BucketBlock label="assets" deploy_versioned=false public_read=true force_destroy=false object_versioning=true/>
+		<Group bx:ref="deploy_up">
+			<TofuApply/>
+		</Group>
+		<Group bx:ref="deploy_down">
+			<StackTeardown/>
+			<TofuDestroy/>
+		</Group>
+		<DeployRoutes deploy={$deploy_up} destroy={$deploy_down}/>
+		<!-- a mirror: what was removed locally is removed from the bucket.
+		     `follow_symlinks` materializes each noun's link, and the push refuses
+		     an empty or unhydrated one, which is what makes the delete safe -->
+		<Route path="push" {ExchangeSequence}>
+			<DirSync bucket="assets" local_dir="assets" {SyncS3Bucket{delete:true, follow_symlinks:true}}/>
+		</Route>
+	</Stack>
+</Router>
+</CliServer>

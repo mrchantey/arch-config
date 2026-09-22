@@ -187,7 +187,7 @@ init-user:
 	just setup-editor
 	just install-user-apps-init
 	just pull-repos
-	just pull-pictures
+	just pull-assets
 
 install-apps-init:
 	sudo pacman -Rns --noconfirm spotify 				|| true
@@ -561,7 +561,7 @@ stow-files-init:
 	# is auto-selected on every switch to either theme (see setup-theme).
 	mkdir -p ~/.config/omarchy/backgrounds/everforest ~/.config/omarchy/backgrounds/solarized-light
 	curl -fsSL -o ~/.config/omarchy/backgrounds/everforest/firewatch.png \
-	https://mrchantey-os.s3.us-west-2.amazonaws.com/pictures/firewatch.png
+	https://arch-config--shared--assets.s3.us-west-2.amazonaws.com/pictures/firewatch.png
 	cp ~/.config/omarchy/backgrounds/everforest/firewatch.png \
 	~/.config/omarchy/backgrounds/solarized-light/firewatch.png
 	@echo "INIT stow-files"
@@ -593,8 +593,14 @@ pull-files:
 #   basecamp/omarchy     -> moved to omacom/omarchy
 #   badlogic/pi-mono     -> moved to earendil-works/pi
 # Re-verify with: gh api repos/<owner>/<name> -q .full_name
+#
+# beet_atproto sits beside beet because beet-cli's manifest names it as an
+# optional path dependency: cargo refuses to load the workspace without it,
+# so `just assets` (which builds beet-cli) needs the checkout even though the
+# `atproto` feature is never enabled here.
 write_repositories := "
 mrchantey/beet
+mrchantey/beet_atproto
 mrchantey/beetmash
 mrchantey/arch-config
 mrchantey/personal
@@ -626,44 +632,43 @@ pull-repo repo *args:
 	mkdir -p ~/me
 	cd ~/me && git clone https://github.com/{{ repo }} {{args}} || true
 
-init-infra:
-	cd infra && npm install
-	@echo "PASS init-infra"
-
-deploy-infra:
-	cd infra && npx sst deploy --stage prod
-	@echo "PASS - deploy-infra"
-
-remove-infra:
-	cd infra && npx sst remove --stage prod
-	@echo "PASS - remove-infra"
-
-# upload a file to the s3 bucket
-upload-file src dst:
-	aws s3 cp {{ src }} s3://mrchantey-os/{{ dst }} --region us-west-2
-	@echo "PASS - upload-file"
-
-# ~/Pictures/shared mirrors the bucket's pictures/ prefix: wallpapers, headshots,
-# the omarchy-logo template. Shared across machines, tracked in no repo.
-# The bucket policy makes GetObject public but not ListBucket, so a sync cannot
-# run unsigned and needs `aws configure` (README, Additional Steps). init-user
-# calls this on a fresh install; when aws is not configured yet it skips with a
-# note instead of failing the whole init, so rerun it after `aws configure`.
+# The shared assets bucket, `arch-config--shared--assets`, declared in main.bsx and
+# driven by the stock beet binary built from ~/me/beet (pull-repos clones it):
+#   just assets validate | plan | deploy | push | destroy
+# cargo runs from beet's checkout so it reads beet's .cargo/config.toml
+# (RUST_MIN_STACK for the deep type graph); WORKSPACE_ROOT points beet back here
+# so `assets/` and the tofu work dir (target/infra/arch-config) resolve against
+# this repo rather than beet's.
 #
-# pull the bucket's pictures/ down to ~/Pictures/shared (remote -> local)
-pull-pictures:
-	@aws sts get-caller-identity >/dev/null 2>&1 || { \
-		echo "SKIP pull-pictures: aws not configured, run 'aws configure' then 'just pull-pictures'"; \
-		exit 0; \
-	}; \
-	mkdir -p ~/Pictures/shared && \
-	aws s3 sync s3://mrchantey-os/pictures ~/Pictures/shared --region us-west-2 && \
-	echo "PASS - pull-pictures"
+# the assets bucket through beet: just assets validate | plan | deploy | push | destroy
+assets *args:
+	cd ~/me/beet && WORKSPACE_ROOT={{ justfile_directory() }} \
+	cargo run -p beet-cli --features infra,extra -- --main={{ justfile_directory() }}/main.bsx {{ args }}
 
-# the reverse: push ~/Pictures/shared up to the bucket (local -> remote, mirrors deletes)
-push-pictures:
-	aws s3 sync ~/Pictures/shared s3://mrchantey-os/pictures --region us-west-2 --delete
-	@echo "PASS - push-pictures"
+# assets/ is a manifest of symlinks, one per noun, each pointing at where that noun
+# lives on the machine (assets/pictures -> ~/Pictures/assets: wallpapers, headshots,
+# the omarchy-logo template). It mirrors the bucket under the same prefixes, shared
+# across machines and tracked in no repo (AGENTS.md, Shared assets).
+#
+# Hydrate assets/ from the bucket (remote -> local, additive). Deliberately not
+# beet: init-user runs this on a fresh machine before any Rust toolchain or AWS
+# credentials exist, and the bucket's public read (GetObject + ListBucket) is
+# what lets an unsigned sync work. Each link target is created first, since the
+# aws cli cannot write through a dangling symlink.
+#
+# hydrate assets/ from the bucket (remote -> local, additive, no credentials)
+pull-assets:
+	mkdir -p ~/Pictures/assets
+	aws s3 sync s3://arch-config--shared--assets assets --region us-west-2 --no-sign-request
+	@echo "PASS - pull-assets"
+
+# beet refuses to push an empty or unhydrated link, which is what makes the
+# delete below safe.
+#
+# the reverse: mirror assets/ up to the bucket (local -> remote, mirrors deletes)
+push-assets:
+	just assets push
+	@echo "PASS - push-assets"
 
 pre-reset:
 	@set -e
@@ -673,7 +678,7 @@ pre-reset:
 	@echo "PASS pre-reset"
 	@echo "You are almost ready to reset your machine: \
 	- ensure assets directories have been pushed: beet, beetmash \
-	- ensure ~/Pictures/shared has been pushed: just push-pictures \
+	- ensure assets/ has been pushed: just push-assets \
 	- your age identity ~/.config/beet/age/keys.txt is in NO repo: confirm the USB backup restores (just setup-age-identity <backup> on another machine) before wiping \
 	"
 

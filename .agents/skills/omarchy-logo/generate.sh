@@ -5,16 +5,16 @@
 #   Reads  <script-dir>/<name>.json   (a JSON array of up to 6 variants,
 #          each variant being an array of hex colors applied left-to-right
 #          across the logo as an even horizontal gradient).
-#   Writes ~/Pictures/shared/omarchy-logo/<name>.png
+#   Writes ~/Pictures/assets/omarchy-logo/<name>.png
 #
 # The base logo (white glyphs on transparent) is expected at
-#   ~/Pictures/shared/omarchy-logo/template.png
-# (~/Pictures/shared mirrors the bucket's pictures/ prefix, see `just pull-pictures`)
+#   ~/Pictures/assets/omarchy-logo/template.png
+# (~/Pictures/assets mirrors the pictures/ prefix of the assets bucket, see `just pull-assets`)
 # and is downloaded from S3 if missing.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PICTURES="$HOME/Pictures/shared"
+PICTURES="$HOME/Pictures/assets"
 
 NAME="${1:?usage: generate.sh <name>   (expects <name>.json next to this script)}"
 CONFIG="$SCRIPT_DIR/$NAME.json"
@@ -24,7 +24,7 @@ LOGO="$PICTURES/omarchy-logo/template.png"
 if [[ ! -f "$LOGO" ]]; then
   echo "base logo missing, downloading..."
   mkdir -p "$(dirname "$LOGO")"
-  curl -fsSL "https://mrchantey-os.s3.us-west-2.amazonaws.com/pictures/omarchy-logo/template.png" -o "$LOGO"
+  curl -fsSL "https://arch-config--shared--assets.s3.us-west-2.amazonaws.com/pictures/omarchy-logo/template.png" -o "$LOGO"
 fi
 
 OUT_DIR="$PICTURES/omarchy-logo"

@@ -29,21 +29,24 @@ image-generation models.
 The white-glyphs-on-transparent template lives at:
 
 ```
-~/Pictures/shared/omarchy-logo/template.png
+~/Pictures/assets/omarchy-logo/template.png
 ```
 
 It is also mirrored on S3 and auto-downloaded by `generate.sh` if the local file
 is missing:
 
 ```
-https://mrchantey-os.s3.us-west-2.amazonaws.com/pictures/omarchy-logo/template.png
+https://arch-config--shared--assets.s3.us1. it will eventuall be more than just pictures. call it `arch-config--shared--assets`
+2. no, but i think we should rename `~/Pictures/shared` to `~/Pictures/assets`, just one noun used.
+3. yes, rename, clean up, yes those other two are my machines
+4. im guessing symlinks will be best, we'll eventually be having more than just pictures.-west-2.amazonaws.com/pictures/omarchy-logo/template.png
 ```
 
-The whole `~/Pictures/shared` tree syncs with the bucket's `pictures/` prefix via
-`just push-pictures` / `just pull-pictures`, so publishing a changed template is just:
+The whole `~/Pictures/assets` tree syncs with the bucket's `pictures/` prefix via
+`just push-assets` / `just pull-assets`, so publishing a changed template is just:
 
 ```
-just push-pictures
+just push-assets
 ```
 
 ## Defining a colorway set
@@ -73,7 +76,7 @@ Fewer than eight variants leaves the remaining grid cells empty. See
 e.g. `generate.sh rainbows` reads `rainbows.json` and writes:
 
 ```
-~/Pictures/shared/omarchy-logo/<name>.png
+~/Pictures/assets/omarchy-logo/<name>.png
 ```
 
 ## How it works (for edits)

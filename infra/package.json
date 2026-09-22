@@ -1,7 +1,0 @@
-{
-  "name": "mrchantey-os",
-  "private": true,
-  "dependencies": {
-    "sst": "^3.13.17"
-  }
-}
