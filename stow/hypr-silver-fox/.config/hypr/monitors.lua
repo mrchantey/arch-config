@@ -9,8 +9,11 @@
 -- The GPUs are an Intel TigerLake-H iGPU (drives the compositor on eDP-1) and an
 -- NVIDIA RTX A2000 Mobile for CUDA + per-app PRIME render offload, e.g.
 --   __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia <app>
--- LIBVA_DRIVER_NAME must NOT be forced to nvidia. Quattro's nvidia.lua detects
--- the hybrid setup and picks the right vars itself, so there is nothing to set.
+-- LIBVA_DRIVER_NAME must NOT be nvidia here. Quattro's nvidia.lua does NOT
+-- detect hybrids: it only checks that an NVIDIA GPU exists and then forces the
+-- nvidia VA-API driver session-wide, which broke Chrome video (every decoded
+-- frame failed to import into Chrome's Intel GL context and the window went
+-- blank). envs-device.lua overrides it to iHD; the full story is in there.
 --
 -- One real difference from the retired XPS, whose dGPU drove no displays at all:
 -- here the external ports are SPLIT across the two GPUs. From /sys/class/drm --

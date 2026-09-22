@@ -57,9 +57,7 @@ PRIME offload:
 __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia <app>
 ```
 
-Never force `LIBVA_DRIVER_NAME=nvidia`. Quattro's `default/hypr/nvidia.lua`
-detects the hybrid setup and sets the render env itself, so there is no
-`envs-device.lua` and there should not be one.
+Quattro's `default/hypr/nvidia.lua` does **not** detect the hybrid setup. It only checks that an NVIDIA GPU exists and then exports `NVD_BACKEND=direct`, `LIBVA_DRIVER_NAME=nvidia` and `__GLX_VENDOR_LIBRARY_NAME=nvidia` to the whole session. `stow/hypr-silver-fox/.config/hypr/envs-device.lua` overrides `LIBVA_DRIVER_NAME` to `iHD` (intel-media-driver), because Chrome's GL context lives on the iGPU and cannot import NVDEC-decoded frames. See the Chrome entry under Traps.
 
 ## Disks
 
@@ -78,7 +76,7 @@ The alternative that was built and then abandoned (unstaged, never applied) kept
 
 ## Per-device config, and why
 
-`stow/hypr-silver-fox/` holds three modules, stowed by `just stow-device silver-fox`.
+`stow/hypr-silver-fox/` holds four modules, stowed by `just stow-device silver-fox`.
 
 **`monitors.lua`** pins eDP-1 to `1920x1080@60` at **`scale = 1`**, with
 `GDK_SCALE=1`. Omarchy's `scale = "auto"` picks **1.5** on this panel, which
@@ -98,6 +96,8 @@ trackpoint and needs no configuration.
 **`layout-device.lua`** sets the master layout, `new_status = "master"`. New windows fill
 the screen. On one 1080p panel there is no room to give away, which is why this
 differs from rainbow-cat's centered column.
+
+**`envs-device.lua`** sets `LIBVA_DRIVER_NAME=iHD`, overriding the session-wide `nvidia` value that Omarchy's nvidia.lua exports whenever any Turing-or-newer NVIDIA GPU is present. Required from the shared `hyprland.lua` right after `hypr.envs`. The header comment carries the measurements. `__GLX_VENDOR_LIBRARY_NAME=nvidia` is deliberately left alone for now: measured with a GLX probe on Xwayland, it makes every X11 GL app render on the A2000 with direct rendering, which works but wakes the dGPU; set it to `mesa` in the same file if X11 apps should default to the iGPU.
 
 ### Deleted with the XPS
 
@@ -205,3 +205,4 @@ run, so it asks once at the start and never again. `just init`,
 - **Long installs need `scripts/sudo-keepalive.sh`.** A bare `sudo -v` lapses
   after five minutes and the run dies mid-way once nobody is at the keyboard.
 - **Never address a disk by node.** `nvme0n1` and `nvme1n1` swap between boots. Match on serial or `/dev/disk/by-id/`: the system KIOXIA is `X93ZZ00TK84L`, the spare SK hynix is `CY12N087910403351`.
+- **Chrome flickered and blanked on video calls (Blackboard Collaborate, any WebRTC or hardware-decoded video).** Cause: `LIBVA_DRIVER_NAME=nvidia` from Omarchy's nvidia.lua. Chrome 153 has hardware decode on by default, decoded on the A2000, and its Intel-side GL context failed `eglCreateImage` with EGL_BAD_MATCH on every frame (about 1000 failures in 17 s of a WebRTC loopback) until the window stopped painting. Fixed 2026-09-22 by `envs-device.lua` forcing `iHD`. If it comes back after an Omarchy update, check that `systemctl --user show-environment | grep LIBVA` reads `iHD` and that `hyprland.lua` still requires `hypr.envs-device` after `hypr.envs`. Upstream: omacom/omarchy#12704.

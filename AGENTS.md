@@ -26,7 +26,7 @@ Only `hyprsunset.conf` and `xdph.conf` are still `.conf`: they are read by separ
 ## Per-device config
 
 Most config is common, stowed by the `hypr` package and shared `just` recipes.
-Naming convention: `*.lua` is shared (common `hypr` package); `*-device.lua` and `monitors.lua` are per-device and live in a stow package named after the machine (`stow/hypr-rainbow-cat`, `stow/hypr-silver-fox`), stowed by `stow-device <name>` and selected via `init-<name>`. The per-device files are `monitors.lua`, `input-device.lua`, `layout-device.lua`.
+Naming convention: `*.lua` is shared (common `hypr` package); `*-device.lua` and `monitors.lua` are per-device and live in a stow package named after the machine (`stow/hypr-rainbow-cat`, `stow/hypr-silver-fox`), stowed by `stow-device <name>` and selected via `init-<name>`. The per-device files are `monitors.lua`, `input-device.lua`, `layout-device.lua`, `envs-device.lua`.
 
 Device modules are loaded with `require_optional` so a machine whose device package isn't stowed still boots.
 
@@ -34,7 +34,7 @@ Input is split: shared settings (keyboard, scroll speed, trackball) live in the 
 
 `layout-device.lua` holds the master-layout `master` block (required after the shared `looknfeel.lua` so it overrides it): rainbow-cat opens a centered master column for its ultrawide; silver-fox opens windows full-screen.
 
-`monitors.lua` also owns `GDK_SCALE` and workspace-to-monitor pinning (`hl.workspace_rule`). There is no `envs-device.lua`: Omarchy detects the NVIDIA GPU and sets `NVD_BACKEND` / `LIBVA_DRIVER_NAME` / `__GLX_VENDOR_LIBRARY_NAME` itself (see `default/hypr/nvidia.lua`).
+`monitors.lua` also owns `GDK_SCALE` and workspace-to-monitor pinning (`hl.workspace_rule`). `envs-device.lua` holds per-device environment overrides and is required right after the shared `envs.lua`; only silver-fox has one. It exists because Omarchy's `default/hypr/nvidia.lua` does not detect hybrid laptops: it only checks that an NVIDIA GPU is present and then sets `NVD_BACKEND` / `LIBVA_DRIVER_NAME=nvidia` / `__GLX_VENDOR_LIBRARY_NAME=nvidia` for the whole session. On silver-fox (Intel iGPU composites, NVIDIA is for CUDA) that made Chrome decode video on the dGPU and fail to import every frame, so the window blanked and flickered on video calls. silver-fox overrides `LIBVA_DRIVER_NAME` to `iHD` there; rainbow-cat (NVIDIA is the compositing GPU) needs no override. Upstream: omacom/omarchy#12704.
 
 ## Dev tooling goes through mise
 

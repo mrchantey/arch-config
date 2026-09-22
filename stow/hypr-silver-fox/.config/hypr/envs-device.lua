@@ -1,0 +1,36 @@
+-- silver-fox (Dell Precision 7560): per-device environment overrides.
+-- Required from hyprland.lua right after the shared hypr/envs.lua, so it lands
+-- on top of Omarchy's defaults, including default/hypr/nvidia.lua.
+--
+-- Omarchy's nvidia.lua only asks "is there an NVIDIA GPU?" (omarchy-hw-nvidia
+-- reads PCI vendor IDs from sysfs) and, for a Turing-or-newer card, exports
+-- LIBVA_DRIVER_NAME=nvidia to the whole session. It never checks which GPU
+-- drives the display. Here that is the Intel iGPU: Hyprland composites on it
+-- and Chrome renders on it (ANGLE on Mesa iris, verified in chrome://gpu).
+-- Chrome 153 has hardware video decode on by default, so with the nvidia value
+-- every decode went to NVDEC on the A2000 and came back as NVIDIA buffers that
+-- Chrome's Intel GL context cannot import: eglCreateImage EGL_BAD_MATCH on
+-- every frame, about 1000 failures in 17 s of a WebRTC loopback, and the Chrome
+-- window stopped painting entirely (the wallpaper showed through). On a live
+-- Blackboard Collaborate class, where streams start and stop constantly, that
+-- looked like the whole window flickering. Measured 2026-09-22.
+--
+-- iHD is intel-media-driver, the VA-API driver for the GPU that actually holds
+-- Chrome's GL context. With it the same loopback ran with zero errors. It is
+-- set rather than unset because hl.env cannot unset a variable and nvidia.lua
+-- has already run by the time this file does. NVD_BACKEND=direct is left
+-- behind by nvidia.lua too; it only matters to the nvidia VA-API driver, which
+-- no longer loads, so it is harmless.
+-- Upstream: https://github.com/omacom/omarchy/issues/12704 (open, 2026-09-22).
+--
+-- rainbow-cat needs none of this: NVIDIA is its compositing GPU, so decode and
+-- display are on the same card and Omarchy's defaults are correct there.
+--
+-- __GLX_VENDOR_LIBRARY_NAME=nvidia is left as Omarchy sets it, on purpose.
+-- Measured with a small GLX probe on Xwayland (2026-09-22): with it every X11
+-- GL app renders on the A2000 with direct rendering (works, but wakes and
+-- holds the dGPU); with "mesa" or unset they render on the iGPU, and the
+-- per-app PRIME pair (__NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia)
+-- still selects NVIDIA. Add hl.env("__GLX_VENDOR_LIBRARY_NAME", "mesa") here
+-- if X11 apps should default to the iGPU for battery and dGPU suspend.
+hl.env("LIBVA_DRIVER_NAME", "iHD")

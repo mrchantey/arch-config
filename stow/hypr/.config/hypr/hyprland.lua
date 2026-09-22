@@ -22,6 +22,10 @@ local require_optional = require("default.hypr.require_optional")
 
 -- Cursor theme/size, shared across devices.
 require("hypr.envs")
+-- Per-device env overrides. silver-fox forces the Intel VA-API driver on top of
+-- Omarchy's nvidia.lua, which only checks that an NVIDIA GPU exists and would
+-- otherwise send Chrome's video decode to the dGPU (see envs-device.lua).
+require_optional.module("hypr.envs-device")
 
 -- Monitors, GDK_SCALE, and workspace pinning are entirely per-device.
 require_optional.module("hypr.monitors")

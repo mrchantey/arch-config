@@ -172,7 +172,8 @@ stow-device device:
 	rm -f 														\
 	~/.config/hypr/monitors.lua 					\
 	~/.config/hypr/input-device.lua 			\
-	~/.config/hypr/layout-device.lua
+	~/.config/hypr/layout-device.lua 			\
+	~/.config/hypr/envs-device.lua
 	cd stow && stow -vt ~ hypr-{{device}}
 	@echo "PASS stow-device {{device}}"
 
