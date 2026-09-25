@@ -117,6 +117,16 @@ Idle timings (`idle.screensaver`, `idle.lock`, in seconds) live there too, repla
 
 To customize a built-in widget, never edit `/usr/share/omarchy/shell/plugins/`; clone it with `omarchy plugin clone omarchy.<widget>`, which switches the bar to `<username>.<widget>` under `~/.config/omarchy/plugins/`.
 
+### Locking a laptop used to suspend it
+
+Diagnosed on silver-fox on 2026-09-25, where locking the screen slept the machine and an unattended agent run died 11 minutes after the last keypress. Nothing in Omarchy suspends on idle (`IdleAction` is `ignore`, and the only `systemctl suspend` in the tree is the power menu entry), so the cause is worth knowing before chasing the shell again.
+
+It is logind's lid handling, arriving late. logind suppresses the lid-close action while an external display is attached, because `HandleLidSwitchDocked` defaults to `ignore`, but it does not then forget the closed lid: it installs a repeating re-check timer (`button_recheck`) and re-asks "still docked?" roughly every 30 seconds for as long as the lid stays shut. `omarchy-system-lock` turns the display off as part of locking, the monitor drops HDMI hot-plug detect a few seconds later, and the next re-check finds no external display, falls through to `HandleLidSwitch` (stock default `suspend`) and sleeps a working machine. In the journal it reads as a bare `systemd-logind: Suspending...` five or six seconds after `omarchy lock ... lock-requested`, with no lid event anywhere near it, and `drm: Connector HDMI-A-1 disconnected` in the Hyprland log just before.
+
+`files/systemd/logind.conf.d/30-lid-external-power.conf` fixes it by setting `HandleLidSwitchExternalPower=ignore`, which logind ignores entirely unless it is set, and which is exactly why the fall-through reached `HandleLidSwitch`. That splits the two cases the machine has: clamshelled at a desk on mains, where nothing should sleep on its own, and unplugged, where a closed lid still means "in a bag" and suspend is right. `just install-logind` copies it into `/etc/systemd/logind.conf.d/` and reloads logind (it is `Type=notify-reload`, so no restart). It runs from `init-sudo`, so both devices get it, and it exits early on rainbow-cat, which has no lid and so no lid action to override. The one edge it leaves: unplugging the charger while clamshelled hands the decision back to `HandleLidSwitch`, so the next re-check suspends within ~30s.
+
+The same display loss also breaks locking outright. Quickshell cannot create a lock surface with zero outputs, so it answers `lock-pending: no-real-screen`, never reports secure, and `omarchy-system-sleep-lock` gives up after its 12 second budget and fires the "Screen did not lock before suspend" notification, leaving the session exposed. Omarchy self-heals that (the clamshell watcher re-enables the laptop panel when no external display is active, retrying at 1s/3s/7s), but only if the internal panel is free to come back. **Never leave the laptop display turned off through the manual toggle** (Menu > Display, `~/.local/state/omarchy/toggles/hypr/internal-monitor-disable.lua`): with the lid shut Omarchy disables `eDP-1` by itself through `internal-monitor-clamshell.lua`, which the watcher knows how to undo, so the manual flag buys nothing and only widens the window where there is no screen to lock onto.
+
 ### Devices
 
 `silver-fox`

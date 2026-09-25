@@ -82,6 +82,13 @@ init-rainbow-cat:
 	install-extras					\
 	install-rainbow-cat
 
+# Stop a closed lid from suspending the machine while it is on mains power.
+# Laptop-only and a no-op on rainbow-cat, so it lives here rather than in a
+# device script: the bug is generic to any laptop, not to the Precision.
+# files/systemd/logind.conf.d/30-lid-external-power.conf has the whole story.
+install-logind:
+	bash scripts/install-logind.sh
+
 # rainbow-cat system-level tweaks that need root (e.g. Lightspeed receiver drag fix)
 install-rainbow-cat:
 	bash scripts/rainbow-cat/install.sh
@@ -120,6 +127,7 @@ install-silver-fox:
 init-silver-fox-sudo:
 	bash scripts/sudo-keepalive.sh just \
 	install-apps-init	\
+	install-logind		\
 	install-user-apps	\
 	setup-voxtype		\
 	install-rust		\
@@ -179,6 +187,7 @@ stow-device device:
 
 init-sudo:
 	just install-apps-init
+	just install-logind
 
 # Run commands that must not be done as sudo
 init-user:

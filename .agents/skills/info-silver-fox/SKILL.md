@@ -115,9 +115,31 @@ Both of its root-level fixes are inert on this hardware, and both are kept anywa
   backlight is EC-owned. Change the timeout in the BIOS under
   System Configuration > Keyboard Backlight.
 - **S3 deep sleep.** `/sys/power/mem_sleep` reads `[s2idle]` with no `deep`.
-  Kept because suspend/resume is **untested** here and the fix is one BIOS
-  setting away. If this machine starts hard-resetting on resume, look for
-  Power Management > Sleep Mode in the BIOS, then re-run the script.
+  No longer untested: s2idle suspend and resume were exercised twice on
+  2026-09-25 (a 92 second sleep and a 3h22m one) and both came back clean, with
+  no hard reset and no unclean shutdown on the next boot. The XPS failure this
+  block was written for does **not** reproduce here, so the block stays purely
+  as a one-BIOS-setting-away fix if that ever changes. The only resume noise is
+  a pair of harmless `NVRM: RmHandleDNotifierEvent ... status=0x11` lines.
+
+### A closed lid suspends the machine when the external monitor sleeps
+
+Fixed on 2026-09-25, recorded because the symptom points nowhere near the cause.
+This is the only laptop, so it is the only machine that can hit it.
+
+logind keeps re-asking whether a closed lid is still docked, roughly every 30
+seconds, for as long as the lid is shut. The Samsung Odyssey G5 drops HDMI
+hot-plug detect a few seconds after it powers down, which `omarchy-system-lock`
+makes it do on every lock, so the next re-check sees no external display and
+applies `HandleLidSwitch` (stock default `suspend`). Locking the screen
+therefore slept the machine, and an overnight agent run died at the idle lock.
+`just install-logind` installs the `HandleLidSwitchExternalPower=ignore` drop-in
+that settles it. Full writeup in `AGENTS.md`, under "Locking a laptop used to
+suspend it".
+
+Two tells that identify it in the journal: `systemd-logind: Suspending...` with
+no lid event anywhere near it, and `drm: Connector HDMI-A-1 disconnected` in the
+Hyprland log five or so seconds earlier.
 
 ### There is no working internal microphone
 
