@@ -22,6 +22,18 @@
 -- so plugging into the HDMI/mDP side wakes the dGPU and keeps it awake, which
 -- matters for battery and for the on-battery dGPU-suspend behaviour that voxtype
 -- and the TTS server both key off. Prefer USB-C for a projector when on battery.
+--
+-- There is a second, sharper reason to prefer the Intel side, found on
+-- 2026-09-25. An output on the NVIDIA card is not rendered there: Hyprland
+-- composites on the Intel iGPU and then BLITS every frame across to the dGPU for
+-- scanout, because that is the card the connector is wired to. That blit path is
+-- rebuilt from scratch whenever the monitor sleeps and wakes (the log says
+-- "Deinitializing secondary renderer on /dev/dri/card1"), and it can come back
+-- broken: `EGL (blit): glCheckFramebufferStatus failed: 1282` on every cursor
+-- move, with stale unrepainted regions left on screen until something forces
+-- full damage. A monitor on DP-4/DP-5 (USB-C DP-alt, Intel side) has no blit at
+-- all. See the "rendering corrupts after the monitor sleeps" trap in the
+-- info-silver-fox skill.
 
 -- scale 1, NOT omarchy's "auto". On this panel auto picks 1.5, which leaves a
 -- 1280x720 logical desktop -- unusably cramped. At scale 1 the logical desktop is
@@ -77,10 +89,20 @@ hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1, mirr
 -- external is connected, and omarchy-hyprland-monitor-watch clears it when the
 -- monitor is unplugged. Refusing to disable the only active display is built in.
 --
--- Closing the lid needs nothing configured either. logind reports Docked while
--- any external display is connected, and HandleLidSwitchDocked defaults to
--- ignore, so a docked lid close does not suspend; omarchy-system-lid-close
--- checks the same condition and skips the lock. Hyprland's own
--- switch:on:Lid Switch bind then runs omarchy-hyprland-monitor-clamshell, which
--- disables eDP-1 for as long as the lid is shut. Undocked, the lid still
--- suspends, which is the behaviour you want for a laptop going into a bag.
+-- Closing the lid DOES need something configured, contrary to what this comment
+-- claimed until 2026-09-25. logind reports Docked while an external display is
+-- connected and HandleLidSwitchDocked defaults to ignore, so the lid close
+-- itself is harmless -- but logind does not then forget the closed lid. It
+-- installs a repeating re-check timer and re-asks "still docked?" roughly every
+-- 30s for as long as the lid stays shut. Locking the screen turns the display
+-- off, this monitor drops HDMI hot-plug detect a few seconds later, and the next
+-- re-check finds no external display and applies HandleLidSwitch (stock default:
+-- suspend). So locking the machine slept it, and an unattended agent run died at
+-- the idle lock. files/systemd/logind.conf.d/30-lid-external-power.conf fixes it
+-- with HandleLidSwitchExternalPower=ignore, installed by `just install-logind`.
+-- Undocked and on battery the lid still suspends, which is what you want for a
+-- laptop going into a bag.
+--
+-- The rest still holds: omarchy-system-lid-close skips the lock while docked,
+-- and Hyprland's switch:on:Lid Switch bind runs omarchy-hyprland-monitor-clamshell,
+-- which disables eDP-1 for as long as the lid is shut.
