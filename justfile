@@ -214,11 +214,14 @@ install-apps-init:
 # espeak-ng (phonemizer), jq (json) for kokoro tts (see setup-tts)
 # python, uv, pip and pipx are deliberately NOT here: they come from install-mise-tools
 # the omarchy way. pip and pipx were never used by anything in this repo anyway.
+# chromium ships chromedriver, which beet's webdriver drives (google-chrome does not)
+# age is the identity and file cipher behind beet's secrets, the no-beet escape hatch
 install-apps:
 	sudo pacman -S --noconfirm --needed 	\
 	age															\
 	aws-cli-v2														\
 	caligula															\
+	chromium														\
 	element-desktop												\
 	espeak-ng															\
 	gtk4-layer-shell											\
@@ -232,7 +235,8 @@ install-apps:
 	thunderbird														\
 	udiskie																\
 	wl-clipboard													\
-	wtype
+	wtype																	\
+	zip
 	curl -f https://zed.dev/install.sh | sh
 	@echo "PASS install-apps"
 
