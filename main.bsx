@@ -13,10 +13,20 @@ under the same prefixes in the bucket.
     just assets deploy     # provision the bucket
     just assets push       # mirror assets/ up, pruning what was removed locally
     just assets destroy    # tear the stack down (refused while the bucket holds objects)
+    just assets secrets ls # the age-sealed records of secrets.toml
+    just assets secrets check  # whether this machine's age identity opens them
 
 There is no beet `pull`: hydrating is `just pull-assets`, a credential-free
 `aws s3 sync` that `init-user` runs on a fresh machine before any Rust
 toolchain exists, which is what the bucket's public read is for.
+
+The deploy verbs need the aws deployer pair and this stack's tofu state
+passphrase, both `env_var` records of the committed `secrets.toml`, age-sealed
+and loaded into the process environment by the launch before the entry builds;
+nothing reads `~/.aws`. The state passphrase is this repo's own, minted here
+and shared with no other repo, so losing it costs this stack's state and
+nothing else. Reading the document needs this machine's age identity
+(`~/.config/beet/age/keys.txt`).
 -->
 <CliServer always=true {CallOnReady}>
 <Router {HelpHandler}>
@@ -26,10 +36,17 @@ toolchain exists, which is what the bucket's public read is for.
 	<!-- `app_name` composes the bucket name and the tofu state key, so renaming
 	     it would orphan the bucket -->
 	<PackageConfig title="Arch Config" app_name="arch-config" description="Shared assets for the omarchy config"/>
+	<!-- this repo's credentials (the aws deployer pair, its own tofu state
+	     passphrase), age-sealed in `secrets.toml` and loaded into the process
+	     environment by the launch before this entry builds; no `bx:cfg`, since
+	     the prescan reads the declaration ahead of the build walk -->
+	<Secrets/>
+	<Route path="secrets" bx:cfg="feature:vault"><SecretsRoutes/></Route>
 	<!-- `shared`: a source synced between machines is owned by no deploy stage.
 	     The region is pinned because the unsigned urls in the justfile and the
-	     omarchy-logo skill name it. -->
-	<Stack stage="shared" region="us-west-2">
+	     omarchy-logo skill name it, and a provider address is a spread resolved
+	     by ancestry rather than a field on the stack. -->
+	<Stack stage="shared" {AwsRegion("us-west-2")}>
 		<!-- public read (GetObject + ListBucket) so a fresh machine hydrates
 		     unsigned; never force-destroyed; versioned so a bad mirror push is
 		     recoverable for 90 days -->

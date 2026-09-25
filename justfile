@@ -212,6 +212,7 @@ install-apps-init:
 
 # libnotify, gtk4-layer-shell,wl-clipboard, wtype dependencies of voxtype
 # espeak-ng (phonemizer), jq (json) for kokoro tts (see setup-tts)
+# ffmpeg is the gain stage in scripts/tts.sh -- only a transitive dep of omarchy base
 # python, uv, pip and pipx are deliberately NOT here: they come from install-mise-tools
 # the omarchy way. pip and pipx were never used by anything in this repo anyway.
 # chromium ships chromedriver, which beet's webdriver drives (google-chrome does not)
@@ -224,6 +225,7 @@ install-apps:
 	chromium														\
 	element-desktop												\
 	espeak-ng															\
+	ffmpeg																\
 	gtk4-layer-shell											\
 	helix																	\
 	jq																		\
