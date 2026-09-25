@@ -12,8 +12,17 @@ modifiers = []
 
 [audio]
 
-# Pause MPRIS media players during recording
-pause_media = true
+# Duck media instead of pausing it: `duck_media` scales every active PulseAudio/
+# PipeWire sink-input to `duck_media_volume_percent` of its *current* level while the
+# mic is open and restores it on release, so music keeps playing quietly under
+# dictation instead of stopping dead. `pause_media` (MPRIS play/pause over D-Bus) is
+# the other half of the pair — enable one or the other, not both.
+pause_media = false
+duck_media = true
+duck_media_volume_percent = 20
+# Ease down/up rather than jump; the fade runs alongside capture so it never delays
+# the mic. 0 is the old instant behaviour.
+duck_media_fade_ms = 100
 device = "default"
 sample_rate = 16000
 max_duration_secs = 60

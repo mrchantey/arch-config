@@ -253,12 +253,14 @@ install-rust:
 	rustup default nightly
 	# cargo install cargo-binstall
 	rustup target add wasm32-unknown-unknown
+	# cargo-zigbuild links against the zig that install-mise-tools puts on PATH
 	cargo binstall --no-confirm \
 	cargo-edit 									\
 	cargo-expand 								\
 	cargo-generate							\
 	cargo-lambda 								\
 	cargo-watch 								\
+	cargo-zigbuild							\
 	sccache											\
 	worker-build								\
 	wasm-opt
