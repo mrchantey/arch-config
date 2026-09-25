@@ -37,13 +37,19 @@ hl.monitor({ output = "eDP-1", mode = "1920x1080@60", position = "auto", scale =
 
 -- The desk monitor, matched by description rather than port so it does not
 -- matter which cable or which GPU it lands on (today it enumerates as HDMI-A-1,
--- which is on the NVIDIA card). 2560x1440@144 is its top mode; 16:9 at ~109 DPI,
--- so scale 1, same as the panel.
+-- which is on the NVIDIA card). 2560x1440@144 is its top mode, 16:9 at ~108 DPI.
+--
+-- scale 1.25 (125% zoom) -> a 2048x1152 logical desktop. Both axes divide
+-- exactly at 1.25, so this is a clean fractional scale: no half-pixel logical
+-- size for Hyprland to round, which is what makes some fractional scales blur
+-- or leave a seam. It matches rainbow-cat's ultrawide, so text is the same
+-- physical size on both desks. 2048x1152 is still wider than the laptop panel's
+-- 1920x1080, so nothing on screen gets smaller than it was undocked.
 --
 -- Naming it explicitly is what opts it OUT of the mirror fallback below: this is
 -- a second desktop, not a duplicate of the laptop panel. A monitor with its own
 -- rule never falls through to the empty-output rule, whatever the order here.
-hl.monitor({ output = desk, mode = "2560x1440@144", position = "auto", scale = 1 })
+hl.monitor({ output = desk, mode = "2560x1440@144", position = "auto", scale = 1.25 })
 
 -- Fallback auto-mirror: any UNKNOWN external plugged in mirrors the internal
 -- panel, which is what you want from a projector in a meeting room. The
