@@ -195,9 +195,35 @@ init-user:
 	just stow-symlinks-init
 	just setup-theme
 	just setup-editor
+	just disable-crash-capture
 	just install-user-apps-init
 	just pull-repos
 	just pull-assets
+
+# Silence the "Process crashed: X / Click to diagnose with AI" toast that
+# omarchy-crash-watch.service fires on every core dump under this UID. It is
+# noise on both machines: voxtype's Vulkan backend segfaults routinely and
+# costs nothing, so the toast arrives several times a day for a crash there is
+# no action to take on. `coredumpctl list` still records every dump and the
+# diagnose-crash skill still reads them, so nothing is lost but the interrupt.
+#
+# The flag file is the whole mechanism: the unit carries
+# ConditionPathExists=!%h/.local/state/omarchy/toggles/crash-capture-off, so it
+# refuses to start while the flag is there. That is what makes this outlast a
+# login and an `omarchy update` -- the crash-watch migration re-enables and
+# re-starts the unit, and the condition turns that start into a skip. Disabling
+# the unit instead would be undone by exactly that migration.
+#
+# Set the flag directly rather than calling omarchy-toggle-crash-capture, which
+# FLIPS it: a second run of `just init` on a configured machine would switch the
+# toasts back on. `omarchy-toggle <flag> on` is idempotent (see also
+# scripts/presentation-mode.sh, same reasoning for the bar-off flag).
+# Menu > Toggle > Crash Capture is the by-hand switch, and flips it either way.
+disable-crash-capture:
+	omarchy-toggle crash-capture-off on
+	# no user manager during an ISO chroot, and nothing to stop there either
+	systemctl --user stop omarchy-crash-watch.service || true
+	@echo "PASS disable-crash-capture"
 
 install-apps-init:
 	sudo pacman -Rns --noconfirm spotify 				|| true
