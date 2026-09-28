@@ -15,7 +15,7 @@
 			"default_config_options": {
 				"fast": false,
     "effort": "xhigh",
-				"model": "opus[1m]",
+				"model": "claude-fable-5-1[1m]",
 				"mode": "bypassPermissions",
 			},
 			"favorite_config_option_values": {
@@ -62,36 +62,33 @@
 		"dock": "right",
 		"default_profile": "write",
 		// The openai key lives in the system keychain; Zed has no api_key setting.
-		// Price per Mtok in/out: gpt-6-astra $10/$50, gpt-6-sol $2/$10,
-		// gpt-6-luna $0.10/$0.50.
+		// gpt-5-mini is the model the picker itself wrote here, so it is known to
+		// resolve; the gpt-6 ids exist in the binary but the inline assistant
+		// rejected gpt-6-luna with "does not support the configured model".
 		"default_model": {
 			"provider": "openai",
-			"model": "gpt-6-sol",
+			"model": "gpt-5-mini",
 			"enable_thinking": true,
-			"effort": "medium",
 		},
-		// ctrl-enter. Cheap and fast with thinking off, like the gemini-3.5-flash
-		// this slot used to hold.
+		// ctrl-enter. Thinking off, like the gemini-3.5-flash this slot used to hold.
 		"inline_assistant_model": {
 			"provider": "openai",
-			"model": "gpt-6-luna",
+			"model": "gpt-5-mini",
 			"enable_thinking": false,
-			"effort": "low",
 		},
 		"subagent_model": {
 			"provider": "openai",
-			"model": "gpt-6-sol",
+			"model": "gpt-5-mini",
 			"enable_thinking": false,
-			"effort": "low",
 		},
 		"commit_message_model": {
 			"provider": "openai",
-			"model": "gpt-6-luna",
+			"model": "gpt-5-mini",
 			"enable_thinking": false,
 		},
 		"thread_summary_model": {
 			"provider": "openai",
-			"model": "gpt-6-luna",
+			"model": "gpt-5-mini",
 			"enable_thinking": false,
 		},
 
@@ -103,19 +100,16 @@
 				"provider": "openai",
 				"model": "gpt-6-astra",
 				"enable_thinking": true,
-				"effort": "high",
 			},
 			{
 				"provider": "openai",
 				"model": "gpt-6-sol",
 				"enable_thinking": true,
-				"effort": "medium",
 			},
 			{
 				"provider": "openai",
 				"model": "gpt-6-luna",
 				"enable_thinking": false,
-				"effort": "low",
 			},
 		],
 		"model_parameters": [],
