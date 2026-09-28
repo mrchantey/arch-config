@@ -487,6 +487,7 @@ stow-symlinks-init:
 	~/.config/autostart							\
 	~/.bashrc												\
 	~/.cargo												\
+	~/.config/electron-flags.conf		\
 	~/.config/ghostty								\
 	~/.config/mimeapps.list 				\
 	~/.config/obs-studio						\
@@ -572,6 +573,7 @@ stow-symlinks:
 	bashrc 								\
 	cargo 								\
 	claude								\
+	electron							\
 	fcitx5								\
 	ghostty								\
 	git									\
