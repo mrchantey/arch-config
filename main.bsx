@@ -15,6 +15,8 @@ under the same prefixes in the bucket.
     just assets destroy    # tear the stack down (refused while the bucket holds objects)
     just assets secrets ls # the age-sealed records of secrets.toml
     just assets secrets check  # whether this machine's age identity opens them
+    just assets deployer/mint --dry-run  # the deployer's policy, nothing touched
+    just assets deployer/mint  # converge the deployer user, policy and key (needs an admin pair)
 
 There is no beet `pull`: hydrating is `just pull-assets`, a credential-free
 `aws s3 sync` that `init-user` runs on a fresh machine before any Rust
@@ -23,7 +25,12 @@ toolchain exists, which is what the bucket's public read is for.
 The deploy verbs need the aws deployer pair and this stack's tofu state
 passphrase, both `env_var` records of the committed `secrets.toml`, age-sealed
 and loaded into the process environment by the launch before the entry builds;
-nothing reads `~/.aws`. The state passphrase is this repo's own, minted here
+nothing reads `~/.aws`. The pair is this repo's own IAM user,
+`arch-config-deployer`, which reaches this stack's bucket namespace and state
+key and nothing else; `just assets deployer/mint` converges the user, its
+`arch-config--deploy` policy and its key, and is the one verb that needs an
+admin pair in the environment, since a deployer holds no `iam:` action over
+itself. The state passphrase is this repo's own, minted here
 and shared with no other repo, so losing it costs this stack's state and
 nothing else. Reading the document needs this machine's age identity
 (`~/.config/beet/age/keys.txt`).
@@ -42,6 +49,11 @@ nothing else. Reading the document needs this machine's age identity
 	     the prescan reads the declaration ahead of the build walk -->
 	<Secrets/>
 	<Route path="secrets" bx:cfg="feature:vault"><SecretsRoutes/></Route>
+	<!-- the aws identity this repo deploys as: one iam user for this document
+	     and one managed policy per app it declares, lowered from what the stack
+	     below renders. An administrator's verb, since the scoped pair it seals
+	     cannot mint itself -->
+	<DeployerMint/>
 	<!-- `shared`: a source synced between machines is owned by no deploy stage.
 	     The region is pinned because the unsigned urls in the justfile and the
 	     omarchy-logo skill name it, and a provider address is a spread resolved

@@ -61,50 +61,63 @@
   "sidebar_side": "right",
 		"dock": "right",
 		"default_profile": "write",
+		// The openai key lives in the system keychain; Zed has no api_key setting.
+		// Price per Mtok in/out: gpt-6-astra $10/$50, gpt-6-sol $2/$10,
+		// gpt-6-luna $0.10/$0.50.
+		"default_model": {
+			"provider": "openai",
+			"model": "gpt-6-sol",
+			"enable_thinking": true,
+			"effort": "medium",
+		},
+		// ctrl-enter. Cheap and fast with thinking off, like the gemini-3.5-flash
+		// this slot used to hold.
 		"inline_assistant_model": {
-			"provider": "google",
-			"model": "gemini-3.5-flash",
+			"provider": "openai",
+			"model": "gpt-6-luna",
+			"enable_thinking": false,
+			"effort": "low",
+		},
+		"subagent_model": {
+			"provider": "openai",
+			"model": "gpt-6-sol",
+			"enable_thinking": false,
+			"effort": "low",
+		},
+		"commit_message_model": {
+			"provider": "openai",
+			"model": "gpt-6-luna",
 			"enable_thinking": false,
 		},
-		"default_model": {
-			"effort": "medium",
-			"provider": "google",
-			"model": "gemini-3.7-flash",
-			"enable_thinking": true,
+		"thread_summary_model": {
+			"provider": "openai",
+			"model": "gpt-6-luna",
+			"enable_thinking": false,
 		},
 
+		// Zed rewrites this list when you star or unstar a model. The entries it
+		// held before were on openai-subscribed, copilot_chat and anthropic,
+		// none of which are authenticated here.
 		"favorite_models": [
-   {
-    "provider": "copilot_chat",
-    "model": "claude-sonnet-4.6",
-    "enable_thinking": true,
-    "effort": "high"
-   },
-   {
-    "provider": "anthropic",
-    "model": "claude-opus-4.6",
-    "enable_thinking": true,
-    "effort": "high"
-   },
-   {
-    "provider": "openai-subscribed",
-    "model": "gpt-5.6-sol",
-    "enable_thinking": true,
-    "effort": "high"
-   },
-   {
-    "provider": "openai-subscribed",
-    "model": "gpt-6-astra",
-    "enable_thinking": true,
-    "effort": "high"
-   },
-   {
-    "provider": "openai-subscribed",
-    "model": "gpt-5.6-terra",
-    "enable_thinking": true,
-    "effort": "medium"
-   }
-  ],
+			{
+				"provider": "openai",
+				"model": "gpt-6-astra",
+				"enable_thinking": true,
+				"effort": "high",
+			},
+			{
+				"provider": "openai",
+				"model": "gpt-6-sol",
+				"enable_thinking": true,
+				"effort": "medium",
+			},
+			{
+				"provider": "openai",
+				"model": "gpt-6-luna",
+				"enable_thinking": false,
+				"effort": "low",
+			},
+		],
 		"model_parameters": [],
 		"tool_permissions": {
 			"default": "allow",
@@ -117,7 +130,7 @@
 		"copilot": {
 			"enable_next_edit_suggestions": true,
 		},
-		"provider": "copilot",
+		"provider": "zed",
 		"mode": "subtle",
 	},
 	//
@@ -156,6 +169,12 @@
 	"buffer_font_size": 20.0,
 	"colorize_brackets": true,
 	"language_models": {
+		// api_url is already the default; the block is here as the place to hang
+		// an "available_models" array if you ever need a model this build's enum
+		// does not list. The key is keychain-only, see the note above.
+		"openai": {
+			"api_url": "https://api.openai.com/v1",
+		},
 		// "bedrock": {
 		// 	"authentication_method": "named_profile",
 		// 	"region": "us-east-1",
