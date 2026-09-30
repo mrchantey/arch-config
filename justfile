@@ -551,6 +551,13 @@ stow-symlinks:
 	# write a PRIVATE KEY into version control. Only config is ever stowed.
 	mkdir -p ~/.ssh
 	chmod 700 ~/.ssh
+	# ~/.config/beet is the SAME hazard, and worse. Folded, the next
+	# `beet vault/keygen` writes the age identity -- the one key that opens
+	# every sealed document in every repo -- into version control, and
+	# `admin.env` would follow it. Only secrets.toml is ever stowed, and that
+	# one is safe to commit because it is age-sealed.
+	mkdir -p ~/.config/beet
+	chmod 700 ~/.config/beet
 	# omarchy's installer pre-creates ~/.agents/skills as a REAL dir (and drops an
 	# `omarchy` skill symlink in it), which blocks stow from folding skills/ -- so
 	# new skills created under ~/.agents/skills would be untracked real dirs. Fold
@@ -571,6 +578,7 @@ stow-symlinks:
 	alacritty 						\
 	autostart							\
 	bashrc 								\
+	beet									\
 	cargo 								\
 	claude								\
 	electron							\
