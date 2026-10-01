@@ -159,6 +159,26 @@ setup-editor:
 	mkdir -p ~/.local/state/omarchy/defaults
 	printf 'zed\n' > ~/.local/state/omarchy/defaults/editor
 
+# Gate omarchy's state directory to this user, because the clipboard manager
+# keeps a VERBATIM history of everything ever copied and creates it 0644. On
+# this machine that file held an AWS admin access key and its secret half, a
+# second dead AWS pair, and a live `sk-proj-` OpenAI key -- every one of them
+# pasted once and then kept forever, world-readable.
+#
+# The DIRECTORY is what gets fixed rather than the file: omarchy owns the file
+# and recreates it, so a `chmod` on it is undone by the next clipboard write,
+# while 0700 on the directory holds whatever mode the file is given. Also
+# covers `clipboard-images/`, which cannot be grepped and so cannot be audited.
+#
+# This does not scrub what is already in there. `omarchy-clipboard-clear`, or
+# deleting the file, is the operator's call -- it is their history.
+secure-clipboard-history:
+	mkdir -p ~/.local/state/omarchy
+	chmod 700 ~/.local/state/omarchy
+	test ! -f ~/.local/state/omarchy/clipboard-history.json || \
+	chmod 600 ~/.local/state/omarchy/clipboard-history.json
+	@echo "PASS secure-clipboard-history"
+
 # generate this device's SSH key for a git host (default tangled.org) and print
 # the public half to paste into that host's account settings. Run once per
 # device per host; the private key never leaves the machine. Idempotent.
@@ -195,6 +215,7 @@ init-user:
 	just stow-symlinks-init
 	just setup-theme
 	just setup-editor
+	just secure-clipboard-history
 	just disable-crash-capture
 	just install-user-apps-init
 	just pull-repos
@@ -690,13 +711,13 @@ pull-repo repo *args:
 # driven by the stock beet binary built from ~/me/beet (pull-repos clones it):
 #   just assets validate | plan | deploy | push | destroy
 # cargo runs from beet's checkout so it reads beet's .cargo/config.toml
-# (RUST_MIN_STACK for the deep type graph); WORKSPACE_ROOT points beet back here
+# (RUST_MIN_STACK for the deep type graph); BEET_WORKSPACE_ROOT points beet back here
 # so `assets/` and the tofu work dir (target/infra/arch-config) resolve against
 # this repo rather than beet's.
 #
 # the assets bucket through beet: just assets validate | plan | deploy | push | destroy
 assets *args:
-	cd ~/me/beet && WORKSPACE_ROOT={{ justfile_directory() }} \
+	cd ~/me/beet && BEET_WORKSPACE_ROOT={{ justfile_directory() }} \
 	cargo run -p beet-cli --features infra,extra -- --main={{ justfile_directory() }}/main.bsx {{ args }}
 
 # assets/ is a manifest of symlinks, one per noun, each pointing at where that noun
