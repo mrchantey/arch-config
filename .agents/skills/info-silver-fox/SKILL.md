@@ -224,6 +224,7 @@ run, so it asks once at the start and never again. `just init`,
 - **`hyprctl devices` shows two mice for one touchpad.** Not a trackpoint.
 - **The internal capture source is not a microphone.** Don't take the presence of `alsa_input...analog-stereo`, an unmuted `Internal Mic` control, or a running `voxtype.service` as evidence that dictation can work without the Brio 100 plugged in.
 - **The Brio 100 mic clips at its power-on gain.** If dictation goes to garbage after a fresh install or a wiped `~/.local/state/wireplumber`, check `wpctl get-volume` on the Brio source reads 0.40, not 1.00.
+- **Dictation goes silent (indicator shows, no text) when the 4 GB card is full.** voxtype segfaults on a VRAM out-of-memory and crash-loops. Budget, cause and fix are under Transcription in `AGENTS.md`; `nvidia-smi` shows who holds the card, and `systemctl --user restart kokoro-tts.service` is the immediate cure if kokoro has grown past ~750 MiB.
 - **Long installs need `scripts/sudo-keepalive.sh`.** A bare `sudo -v` lapses
   after five minutes and the run dies mid-way once nobody is at the keyboard.
 - **Never address a disk by node.** `nvme0n1` and `nvme1n1` swap between boots. Match on serial or `/dev/disk/by-id/`: the system KIOXIA is `X93ZZ00TK84L`, the spare SK hynix is `CY12N087910403351`.

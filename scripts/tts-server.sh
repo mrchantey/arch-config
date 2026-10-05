@@ -33,6 +33,9 @@ if [ "$on_battery" = "1" ]; then
 	export USE_GPU=false
 else
 	export USE_GPU=true
+	# free VRAM as soon as each tensor dies: torch's caching allocator otherwise holds the
+	# peak of the longest read forever and starves voxtype's transcribe buffers (AGENTS.md)
+	export PYTORCH_NO_CUDA_MEMORY_CACHING=1
 fi
 
 exec uv run --no-sync uvicorn api.src.main:app --host 127.0.0.1 --port 9000
