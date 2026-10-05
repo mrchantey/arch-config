@@ -1,6 +1,3 @@
-- Start every chat with 'evnin partner'
-
-
 # Editing OS Config
 
 This is my omarchy config, located at `~/me/arch-config`.

@@ -10,7 +10,7 @@
 		"stow/cargo/.cargo/config.toml",
 	],
 	"file_scan_exclusions": [
-		"CLAUDE.md",
+		// "CLAUDE.md",
 		"stow/cargo/.cargo/registry",
 		"stow/cargo/.cargo/bin",
 		"stow/cargo/.cargo/binstall",

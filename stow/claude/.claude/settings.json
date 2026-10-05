@@ -18,5 +18,8 @@
   "skipDangerousModePermissionPrompt": true,
   "theme": "dark",
   "agentPushNotifEnabled": true,
-  "switchModelsOnFlag": true
+  "switchModelsOnFlag": true,
+  "enabledPlugins": {
+    "agents-md@builtin": true
+  }
 }
