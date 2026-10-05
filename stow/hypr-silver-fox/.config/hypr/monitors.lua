@@ -43,13 +43,21 @@
 -- accept. Bump to 1.25 if the text is too small; do not go back to "auto".
 hl.env("GDK_SCALE", "1")
 
-local desk = "desc:Samsung Electric Company Odyssey G5"
+local desk_description = "Samsung Electric Company Odyssey G5"
+local desk = "desc:" .. desk_description
 
 hl.monitor({ output = "eDP-1", mode = "1920x1080@60", position = "auto", scale = 1 })
 
 -- The desk monitor, matched by description rather than port so it does not
--- matter which cable or which GPU it lands on (today it enumerates as HDMI-A-1,
--- which is on the NVIDIA card). 2560x1440@144 is its top mode, 16:9 at ~108 DPI.
+-- matter which cable or which GPU it lands on: HDMI-A-1 on the NVIDIA card over
+-- a plain HDMI cable, DP-4 on the Intel side through a USB-C dongle. 16:9 at
+-- ~108 DPI. Its fastest 1440p mode depends on the route: @144 over direct
+-- HDMI, @180 over USB-C to DisplayPort, @59.95 through the USB-C to HDMI dongle.
+-- "highres" takes the largest advertised mode and the fastest refresh at it, so
+-- every route gets its best. A fixed "2560x1440@144" is not safe: where @144 is
+-- not advertised, Hyprland fell back to @59.95 at boot but synthesised a custom
+-- @144 mode when the output was re-enabled, past the limit that kept the dongle
+-- from advertising it.
 --
 -- scale 1.25 (125% zoom) -> a 2048x1152 logical desktop. Both axes divide
 -- exactly at 1.25, so this is a clean fractional scale: no half-pixel logical
@@ -61,7 +69,7 @@ hl.monitor({ output = "eDP-1", mode = "1920x1080@60", position = "auto", scale =
 -- Naming it explicitly is what opts it OUT of the mirror fallback below: this is
 -- a second desktop, not a duplicate of the laptop panel. A monitor with its own
 -- rule never falls through to the empty-output rule, whatever the order here.
-hl.monitor({ output = desk, mode = "2560x1440@144", position = "auto", scale = 1.25 })
+hl.monitor({ output = desk, mode = "highres", position = "auto", scale = 1.25 })
 
 -- Fallback auto-mirror: any UNKNOWN external plugged in mirrors the internal
 -- panel, which is what you want from a projector in a meeting room. The
@@ -78,17 +86,41 @@ hl.monitor({ output = desk, mode = "2560x1440@144", position = "auto", scale = 1
 -- 1:1 image on any 16:9 projector or TV; the script was deleted with the XPS.
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1, mirror = "eDP-1" })
 
--- Turning the laptop panel off while docked is NOT done here. A `disabled = true`
--- on eDP-1 would leave this machine with no display at all when it is unplugged,
--- so it is a runtime toggle instead: `omarchy hyprland monitor internal off`
--- (Super+Ctrl+Delete), which writes hl.monitor({ output = "eDP-1", disabled =
--- true }) into ~/.local/state/omarchy/toggles/hypr/internal-monitor-disable.lua.
--- default.hypr.toggles loads that directory last, so it lands on top of this
--- file. The state survives reboots, and two things undo it automatically:
--- omarchy-recover-internal-monitor.service clears the flag at login when no
--- external is connected, and omarchy-hyprland-monitor-watch clears it when the
--- monitor is unplugged. Refusing to disable the only active display is built in.
+-- The desk monitor is the main screen: workspaces 1-6 live on it and 7-10 on the
+-- laptop panel, as on rainbow-cat. Undocked, every workspace falls back to the
+-- panel.
+hl.workspace_rule({ workspace = "1", monitor = desk, default = true })
+for workspace = 2, 6 do
+  hl.workspace_rule({ workspace = tostring(workspace), monitor = desk })
+end
+hl.workspace_rule({ workspace = "7", monitor = "eDP-1", default = true })
+for workspace = 8, 10 do
+  hl.workspace_rule({ workspace = tostring(workspace), monitor = "eDP-1" })
+end
+
+-- Docking turns the laptop panel off, lid open or shut. Super+Ctrl+Delete brings
+-- it back for a two-screen session, until the desk monitor next reconnects.
 --
+-- A `disabled = true` on eDP-1 here would leave no display at all once
+-- unplugged, and omarchy-hyprland-monitor-clamshell re-enables any panel it
+-- finds disabled without one of its own flags. So this goes through Omarchy's
+-- manual toggle, `omarchy hyprland monitor internal off`, which writes
+-- hl.monitor({ output = "eDP-1", disabled = true }) into
+-- ~/.local/state/omarchy/toggles/hypr/internal-monitor-disable.lua.
+-- default.hypr.toggles loads that directory last, so it lands on top of this
+-- file, and the clamshell script leaves the panel alone while that flag and an
+-- external monitor are both present. Two things undo it automatically:
+-- omarchy-recover-internal-monitor.service clears the flag at login when no
+-- external is connected, and omarchy-hyprland-monitor-watch clears it the
+-- moment the external goes away, including when the G5 drops off in standby.
+-- Refusing to disable the only active display is built in. Unknown externals do
+-- not trigger it, so a projector still mirrors the panel.
+hl.on("monitor.added", function(monitor)
+  if monitor.description:sub(1, #desk_description) == desk_description then
+    hl.exec_cmd("omarchy-hyprland-monitor-internal off")
+  end
+end)
+
 -- Closing the lid DOES need something configured, contrary to what this comment
 -- claimed until 2026-09-25. logind reports Docked while an external display is
 -- connected and HandleLidSwitchDocked defaults to ignore, so the lid close
