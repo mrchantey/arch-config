@@ -126,16 +126,6 @@ Idle timings (`idle.screensaver`, `idle.lock`, in seconds) live there too, repla
 
 To customize a built-in widget, never edit `/usr/share/omarchy/shell/plugins/`; clone it with `omarchy plugin clone omarchy.<widget>`, which switches the bar to `<username>.<widget>` under `~/.config/omarchy/plugins/`.
 
-### Crash notifications are off
-
-Quattro added `omarchy-crash-watch.service`, a user unit that tails the journal for systemd-coredump's `MESSAGE_ID=fc2e22bc...`, and fires a critical "Process crashed: X / Click to diagnose with AI" toast for every dump under our UID, wired to `omarchy-agent-crash` and the `diagnose-crash` skill. `just disable-crash-capture` turns it off, and `init-user` runs it so a fresh install never sees the toast. Reason: voxtype segfaulted several times a day, an interrupt that looked like noise. It was not: on silver-fox every one of those dumps (11 of 11 in the 30 days to 2026-10-05) followed a VRAM out-of-memory caused by kokoro's allocator, fixed since (see Transcription). Nothing is actually lost, `coredumpctl list` still holds every dump and the skill still reads them on request.
-
-The flag file is the entire mechanism. The unit carries `ConditionPathExists=!%h/.local/state/omarchy/toggles/crash-capture-off`, so while that file exists systemd turns any start into `skipped, unmet condition check`. That is what makes it outlast both a login and an `omarchy update`: the crash-watch migration re-enables the unit and starts it on every update, and the condition no-ops that start. **Disabling the unit is the wrong lever**, the migration would just re-enable it.
-
-The recipe sets the flag with `omarchy-toggle crash-capture-off on` rather than calling `omarchy-toggle-crash-capture`, which flips it, so a re-run of `just init` on a configured machine would switch the toasts back on. Same reasoning as `scripts/presentation-mode.sh` with the `bar-off` flag. By hand it is Menu > Toggle > Crash Capture, which flips either way.
-
-To keep genuine crash toasts and mute only the known-noisy one, the alternative is a drop-in setting `OMARCHY_CRASH_IGNORE`, an extended regex matched against the executable's basename that `omarchy-crash-watch` reads from the environment (`OMARCHY_CRASH_DEDUPE_SECONDS` widens its 60 second per-program window the same way). That trades a tracked one-line recipe for a tracked unit drop-in, and was not worth it while voxtype was the only repeat offender.
-
 ### Locking a laptop used to suspend it
 
 Diagnosed on silver-fox on 2026-09-25, where locking the screen slept the machine and an unattended agent run died 11 minutes after the last keypress. Nothing in Omarchy suspends on idle (`IdleAction` is `ignore`, and the only `systemctl suspend` in the tree is the power menu entry), so the cause is worth knowing before chasing the shell again.
