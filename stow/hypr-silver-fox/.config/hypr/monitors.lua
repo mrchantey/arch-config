@@ -100,6 +100,8 @@ end
 
 -- Docking turns the laptop panel off, lid open or shut. Super+Ctrl+Delete brings
 -- it back for a two-screen session, until the desk monitor next reconnects.
+-- Suspend needs the panel on, so sleep-panel.service
+-- (scripts/silver-fox/sleep-panel.sh) clears this toggle before every sleep.
 --
 -- A `disabled = true` on eDP-1 here would leave no display at all once
 -- unplugged, and omarchy-hyprland-monitor-clamshell re-enables any panel it
@@ -109,15 +111,30 @@ end
 -- ~/.local/state/omarchy/toggles/hypr/internal-monitor-disable.lua.
 -- default.hypr.toggles loads that directory last, so it lands on top of this
 -- file, and the clamshell script leaves the panel alone while that flag and an
--- external monitor are both present. Two things undo it automatically:
--- omarchy-recover-internal-monitor.service clears the flag at login when no
--- external is connected, and omarchy-hyprland-monitor-watch clears it the
--- moment the external goes away, including when the G5 drops off in standby.
--- Refusing to disable the only active display is built in. Unknown externals do
--- not trigger it, so a projector still mirrors the panel.
+-- external monitor are both present. Refusing to disable the only active
+-- display is built in. Unknown externals do not trigger it, so a projector
+-- still mirrors the panel.
+--
+-- Undoing it cannot be left to Omarchy. Its recovery clears the flag only once
+-- omarchy-hyprland-monitor-external-active reports no external, and that check
+-- counts Hyprland's FALLBACK placeholder, which appears the moment the last real
+-- output goes. Unplugging the G5, or the G5 dropping off in standby, therefore
+-- left no screen at all. So the removal of the desk monitor turns the panel back
+-- on here, only when the flag is set: an unconditional `on` also wakes every
+-- output, which would undo a lock's blanking.
+local function is_desk(monitor)
+  return monitor.description:sub(1, #desk_description) == desk_description
+end
+
 hl.on("monitor.added", function(monitor)
-  if monitor.description:sub(1, #desk_description) == desk_description then
+  if is_desk(monitor) then
     hl.exec_cmd("omarchy-hyprland-monitor-internal off")
+  end
+end)
+
+hl.on("monitor.removed", function(monitor)
+  if is_desk(monitor) then
+    hl.exec_cmd("omarchy-hyprland-toggle-enabled internal-monitor-disable && omarchy-hyprland-monitor-internal on")
   end
 end)
 

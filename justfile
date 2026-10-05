@@ -98,12 +98,23 @@ init-silver-fox:
 	bash scripts/sudo-keepalive.sh just \
 	init											\
 	stow-device silver-fox	\
+	setup-sleep-panel			\
 	install-extras				\
 	install-silver-fox
 
 # silver-fox system-level tweaks that need root (e.g. keyboard backlight timeout)
 install-silver-fox:
 	bash scripts/silver-fox/install.sh
+
+# silver-fox: turn the laptop panel back on before suspend while docking has it off,
+# since resuming with the desk monitor as the only output leaves both screens blank
+# (see scripts/silver-fox/sleep-panel.sh). Same lifecycle as omarchy-sleep-lock.service.
+setup-sleep-panel:
+	mkdir -p ~/.config/systemd/user
+	printf '[Unit]\nDescription=Re-enable the laptop panel before suspend\nAfter=dbus.socket wayland-session-waitenv.service\nRequires=dbus.socket\nPartOf=graphical-session.target\nConditionEnvironment=HYPRLAND_INSTANCE_SIGNATURE\n\n[Service]\nType=simple\nExecStart=%%h/me/arch-config/scripts/silver-fox/sleep-panel.sh\nRestart=always\nRestartSec=2\n\n[Install]\nWantedBy=graphical-session.target\n' > ~/.config/systemd/user/sleep-panel.service
+	systemctl --user daemon-reload || true
+	systemctl --user enable --now sleep-panel.service || true
+	echo "PASS setup-sleep-panel"
 
 # Every root-requiring step of `init-silver-fox`, in the same order, and nothing
 # else -- the sudo-free half (stow, mise, theme, tts, cursor, repos) is skipped
