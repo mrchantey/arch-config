@@ -40,11 +40,15 @@ Never use `.claude/projects/../memory`, all content related to this project must
 
 ## Responses
 
-The final response after a workload should follow the following format.
+Use the following format for responses larger than a few hundred words.
 
 ```md
+<!-- include this header if this is the last in a string of workload responses -->
 # Summary
-<!-- Respond to the user with a single numbered sequence, strictly one point per number, subheadings as required (unnumbered). Open questions list their options alphabetically, a) selected by default if no answer: -->
+<!-- 
+Use a single numbered sequence, strictly one point per number, subheadings as required. 
+Open questions list their options alphabetically, a) selected by default if no answer: 
+-->
 ## Subheading foo
 1. some info about this point...
 ## Subheading bar
@@ -52,9 +56,14 @@ The final response after a workload should follow the following format.
 	- a) do foo
 	- b) do bar
 
+<!--
+end report style responses with a tldr
+-->
 ## TLDR
 
-<!--Each section here should have a single sentence. -->
+<!--
+Each section here should have a single sentence. 
+-->
 ### Purpose
 
 ### Approach
