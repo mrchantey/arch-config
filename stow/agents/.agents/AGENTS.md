@@ -28,15 +28,6 @@ Never use `.claude/projects/../memory`, all content related to this project must
 ## Conventions
 
 - A rust module reads like a good book: public high level structs at the top, implementation details below. Mod files are just reexports; prefer splitting into specific sub files, but dont 'create a fresh file' because the one you're working on is messy.
-- Respond to the user with a single numbered sequence, strictly one point per number, subheadings as required (unnumbered). Open questions list their options alphabetically, a) selected by default if no answer:
-```md
-## Subheading foo
-1. some info about this point...
-## Subheading bar
-2. a point that needs a decision..
-	- a) do foo
-	- b) do bar
-```
 - Functions longer than ~20 lines may have brief comments describing each step.
 - Never insert arbitrary ie 80 col manual reflow newlines in markdown documents.
 - all shared dependencies are declared in the workspace Cargo.toml; if one needs no-default-features, disable that at the workspace level and reenable as required
@@ -47,9 +38,41 @@ Never use `.claude/projects/../memory`, all content related to this project must
 - Never mention agent plans, steps or temporary tasks in code docs.
 - Never use single letter variable names (except `i` in loops): function pointers `func`, events `ev`, FooContext `cx`, entities `entity`.
 
+## Responses
+
+The final response after a workload should follow the following format.
+
+```md
+# Summary
+<!-- Respond to the user with a single numbered sequence, strictly one point per number, subheadings as required (unnumbered). Open questions list their options alphabetically, a) selected by default if no answer: -->
+## Subheading foo
+1. some info about this point...
+## Subheading bar
+2. a point that needs a decision..
+	- a) do foo
+	- b) do bar
+
+## TLDR
+
+<!--Each section here should have a single sentence. -->
+### Purpose
+
+### Approach
+
+### Challenges (this section optional)
+
+### Next steps
+```
+
 ## Documentation
 
-- Quality over quantity, documentation and comments as short as possible: `// run launch step if no match`, never `// if there is not a match for the hash then we should run the launch step`.
+- Quality over quantity, documentation and comments as concise as possible 
+```rs
+// good
+/// runs the launch step if no match
+// bad
+/// if there is not a match for the hash then this function will run the launch step
+```
 - doctests: `ignore` is an absolute last resort (macros); prefer helper methods that let a doctest run over `no_run`, though `no_run` is sometimes required, ie network requests.
 - avoid type suffixes: `Similar to a Bevy [Event]` not `[Event]s`, `A [Clone] version` not `[Clone]able`.
 - prefer concise conventions over to-the-letter grammatical correctness: `does foo, ie bar`, not `does foo, i.e., bar`.
