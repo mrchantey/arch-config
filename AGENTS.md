@@ -56,6 +56,14 @@ PATH is assembled by `/usr/share/omarchy/default/bash/env-bootstrap`, which appe
 
 Updates flow through `omarchy update`, which calls `omarchy-update-mise` (`MISE_MINIMUM_RELEASE_AGE=0 mise up`). The `mup` alias is the same thing by hand.
 
+## Agent skills live in `.agents/skills`
+
+User skills live in `stow/agents/.agents/skills`, which `just stow-symlinks` links to `~/.agents/skills` by hand, since omarchy pre-creates that path as a real dir and stow cannot fold it. Zed's own agent reads `~/.agents/skills`; Claude Code reads only `~/.claude/skills`, so the `agents` package also stows `.claude/skills -> ../.agents/skills`, the same link a project uses. That covers both the `claude` CLI and Zed's Claude agent, whose ACP adapter bundles its own Claude Code. Omarchy pre-creates `~/.claude/skills` as a real dir too, so the recipe clears it first: stow cannot replace a real dir with a link, and one conflict aborts every package.
+
+Omarchy's migrations `ln -sfn` their skills (`omarchy`, `diagnose-crash`) into both dirs. With the links in place those writes land in the repo, so they are gitignored and re-dropped by `stow-symlinks` from `$OMARCHY_PATH/default/agents/skills/*`. Claude Code also writes its claude.ai skill sync to `~/.claude/skills/synced/`, which likewise lands in the repo, is gitignored, and is visible to every other agent reading the dir.
+
+Project skills follow the same pattern: they live in `.agents/skills`, with a `.claude/skills -> ../.agents/skills` link beside it.
+
 ## Transcription
 
 Three tools, all on PATH from `scripts/` via `just install-transcribe` and `just install-transcribe-file`, and all sharing one 4 GB GPU with the voxtype and kokoro daemons:

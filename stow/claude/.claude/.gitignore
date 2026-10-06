@@ -5,5 +5,3 @@
 !.gitignore
 !CLAUDE.md
 !settings.json
-!skills/
-!skills/**

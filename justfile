@@ -564,16 +564,24 @@ stow-symlinks:
 	# one is safe to commit because it is age-sealed.
 	mkdir -p ~/.config/beet
 	chmod 700 ~/.config/beet
-	# omarchy's installer pre-creates ~/.agents/skills as a REAL dir (and drops an
-	# `omarchy` skill symlink in it), which blocks stow from folding skills/ -- so
-	# new skills created under ~/.agents/skills would be untracked real dirs. Fold
-	# it ourselves: replace the dir with the symlink stow would create (safe -- the
-	# only contents are stow-owned skill links plus the recreatable omarchy link),
-	# then re-drop omarchy's link (it now lands in the repo via the fold; gitignored).
+	# omarchy's installer pre-creates ~/.agents/skills as a REAL dir (and drops its
+	# skill symlinks in it), which blocks stow from folding skills/ -- so new skills
+	# created under ~/.agents/skills would be untracked real dirs. Fold it ourselves:
+	# replace the dir with the symlink stow would create (safe -- the only contents
+	# are stow-owned skills plus omarchy's recreatable links), then re-drop omarchy's
+	# links (they now land in the repo via the fold; gitignored).
 	mkdir -p ~/.agents
 	rm -rf ~/.agents/skills
 	ln -sfn ../me/arch-config/stow/agents/.agents/skills ~/.agents/skills
-	ln -sfn "${OMARCHY_PATH:-/usr/share/omarchy}/default/omarchy-skill" ~/.agents/skills/omarchy
+	for skill in "${OMARCHY_PATH:-/usr/share/omarchy}"/default/agents/skills/*/; do skill="${skill%/}"; ln -sfn "$skill" ~/.agents/skills/"${skill##*/}"; done
+	# ~/.claude/skills is the same story (omarchy pre-creates it), and the agents
+	# package stows it as a link to ~/.agents/skills, since Claude Code reads only
+	# its own dir. Stow cannot replace a real dir and one conflict aborts every
+	# package, so clear it, carrying over synced/ (Claude's claude.ai skill sync).
+	if [ -d ~/.claude/skills ] && [ ! -L ~/.claude/skills ]; then \
+		if [ -d ~/.claude/skills/synced ]; then rm -rf ~/.agents/skills/synced && mv ~/.claude/skills/synced ~/.agents/skills/; fi; \
+		rm -rf ~/.claude/skills; \
+	fi
 	# NOTE: the walker + elephant + waybar packages are gone with quattro. walker
 	# (launcher) and elephant (its providers) were replaced by the Quickshell menu,
 	# and waybar by the Quickshell bar -- all three packages are uninstalled, so

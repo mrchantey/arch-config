@@ -6,7 +6,10 @@
 !AGENTS.md
 !skills/
 !skills/**
-# omarchy drops its own skill symlink here once ~/.agents/skills is folded into
-# this package; it points at the omarchy install and is recreated by init, not
+# omarchy drops its own skill symlinks here once ~/.agents/skills is folded into
+# this package; they point at the omarchy install and are recreated by init, not
 # tracked.
 skills/omarchy
+skills/diagnose-crash
+# Claude Code's claude.ai skill sync, written through the ~/.claude/skills link.
+skills/synced/
