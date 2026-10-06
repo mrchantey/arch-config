@@ -661,6 +661,10 @@ pull-files:
 write_repositories := "
 mrchantey/beet
 mrchantey/beet_atproto
+mrchantey/beet_connect
+mrchantey/beet_egress
+mrchantey/beet_esp
+mrchantey/beet_eval
 mrchantey/beetmash
 mrchantey/arch-config
 mrchantey/personal
@@ -670,7 +674,6 @@ bevyengine/bevy
 read_repositories := "
 alexjg/samod
 omacom/omarchy
-ratatui/bevy_ratatui
 openclaw/openclaw
 earendil-works/pi
 "

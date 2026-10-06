@@ -62,13 +62,16 @@ end report style responses with a tldr
 ## TLDR
 
 <!--
-Each section here should have a single sentence. 
+Each section here should have a single sentence
+and be the absolute minimum high level overview
 -->
 ### Purpose
 
 ### Approach
 
-### Challenges (this section optional)
+<!-- challenges are optional, one dot point per issue, actual issues only -->
+### Challenges
+- thing happened
 
 ### Next steps
 ```
