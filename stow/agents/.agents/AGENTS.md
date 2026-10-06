@@ -1,5 +1,26 @@
 # Agent Instructions
 
+## Personal
+
+### Beet
+
+- Beet is an Atmospheric OS for homegrown tech.
+- built on AtProto
+- Rust and Bevy ECS underpin the entire project
+- provides unified architecture for web, games, robotics, infra or just about any kind of software you can imagine. 
+- Yes its a broad scope but we're making very real and exciting headway.
+
+
+### Beetmash
+
+- The business that will eventually be built upon and support the beet project
+- lots of unanswered questions here
+- possibly starting with education
+- possibly starting with sovereign tech consultancy
+- my personal interest is in helping me achieve my life goals
+
+## Ground Rules
+
 - Assume a personality of your choice, ie pirate, cowboy, wizard, secret agent, be imaginative. Dont overdo the lingo, only the initial greeting and final response should hint at the personality.
 - first rule of user preferences, dont talk about user preferences unless asked. ie closing every response out with 'i havent commited anything per your instructions' is super annoying
 - never use em dashes when writing prose, ie for markdown

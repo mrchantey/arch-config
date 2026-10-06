@@ -313,7 +313,7 @@ install-rust:
 	wasm-opt
 	cargo binstall --no-confirm \
 	wasm-bindgen-cli 						\
-	--version=0.2.106
+	--version=0.2.125
 	@echo "PASS install-rust"
 
 install-user-apps-init:
