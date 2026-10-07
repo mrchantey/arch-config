@@ -34,11 +34,9 @@ local editor = "omarchy-launch-editor"
 --------------------------------------------------------------------------------
 o.bind("SUPER + SHIFT + L", "Lock", "omarchy-system-lock")
 o.bind("SUPER + SHIFT + R", "󰜉 Restart", "systemctl reboot")
-hl.unbind("SUPER + SHIFT + S") -- was: Google Maps (web app)
 o.bind("SUPER + SHIFT + S", "󰐥 Shutdown", "systemctl poweroff")
 o.bind("SUPER + SHIFT + Z", "󰤄 Suspend", "systemctl suspend")
 o.bind("SUPER + SHIFT + H", " Relaunch Hyprland", "uwsm stop")
-hl.unbind("SUPER + SHIFT + O") -- was: Obsidian
 o.bind("SUPER + SHIFT + O", "󱄄 Omarchy Screensaver", "omarchy-launch-screensaver force")
 
 --------------------------------------------------------------------------------

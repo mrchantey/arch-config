@@ -1,0 +1,12 @@
+#!/bin/bash
+# Re-apply the preinstall opt-out after `omarchy update`.
+#
+# omarchy-refresh-applications copies every shipped launcher and rewrites every agent
+# wrapper without reading ~/.local/state/omarchy/preinstalls-removed, and migrations
+# have called it (1786183928) and omarchy-pkg-add'ed new preinstalls unguarded
+# (omacalc). omacom/omarchy#7107 tracks it and #9703 would fix it; neither is closed.
+# Hooks run after migrations and before omarchy-update-mise, so whatever an update laid
+# back down is gone, and unused from mise, before anything downloads it. A machine that
+# never opted out is untouched.
+[[ -f ~/.local/state/omarchy/preinstalls-removed ]] || exit 0
+bash ~/me/arch-config/scripts/remove-preinstalls.sh

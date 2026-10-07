@@ -231,23 +231,10 @@ init-user:
 	just pull-repos
 	just pull-assets
 
+# omarchy's preinstalled apps, launchers and agent wrappers go first, so nothing below
+# installs on top of them. The lists live in the script; see AGENTS.md "Preinstalls".
 install-apps-init:
-	sudo pacman -Rns --noconfirm spotify 				|| true
-	sudo pacman -Rns --noconfirm obsidian 			|| true
-	sudo pacman -Rns --noconfirm typora 				|| true
-	sudo pacman -Rns --noconfirm 1password-cli	|| true
-	sudo pacman -Rns --noconfirm 1password-beta	|| true
-	rm -rf ~/.local/share/applications/Basecamp.desktop
-	rm -rf ~/.local/share/applications/dropbox.desktop
-	rm -rf ~/.local/share/applications/Figma.desktop
-	rm -rf ~/.local/share/applications/Google\ Contacts.desktop
-	rm -rf ~/.local/share/applications/Google\ Messages.desktop
-	rm -rf ~/.local/share/applications/Google\ Photos.desktop
-	rm -rf ~/.local/share/applications/HEY.desktop
-	rm -rf ~/.local/share/applications/typora.desktop
-	rm -rf ~/.local/share/applications/WhatsApp.desktop
-	rm -rf ~/.local/share/applications/X.desktop
-	rm -rf ~/.local/share/applications/Zoom.desktop
+	bash scripts/remove-preinstalls.sh
 	@echo "INIT install-apps"
 	just install-apps
 
@@ -445,9 +432,9 @@ install-user-apps:
 	@echo "PASS install-user-apps"
 
 # Dev runtimes and global CLIs, all via mise -- the omarchy quattro model (see AGENTS.md).
-# Omarchy's own installer already covers node plus the agent CLIs (claude, codex, gh,
-# opencode, playwright, ...) in install/user/mise.sh, so this only adds what it does not
-# ship. Idempotent; `omarchy update` (or the `mup` alias) upgrades everything here.
+# Omarchy writes its own agent fleet in install/user/mise.sh, but remove-preinstalls
+# deletes every wrapper not written below, so the two we keep (claude, gh) are installed
+# here on purpose. Idempotent; `omarchy update` (or the `mup` alias) upgrades everything.
 install-mise-tools:
 	mkdir -p ~/.local/bin
 	# Vite+ used to own node/npm/npx and shadowed mise's node from every terminal that
@@ -469,10 +456,12 @@ install-mise-tools:
 	# our STOWED .bashrc, i.e. editing a tracked file on every run. That line only
 	# prepends ~/.local/bin, which .bashrc already does for itself.
 	UV_NO_MODIFY_PATH=1 omarchy-install-dev-env python
-	# Self-updating ~/.local/bin wrappers, the same mechanism omarchy uses for claude and
-	# codex: each run does `mise use -g` then `mise x`, so the tool upgrades itself.
+	# Self-updating ~/.local/bin wrappers: each run does `mise use -g` then `mise x`, so
+	# the tool upgrades itself. These four names are remove-preinstalls' allowlist.
 	# `cf` must be spelled `npm:cf` -- mise's bare `cf` in the registry is Cloud Foundry,
 	# not Cloudflare.
+	omarchy-mise-install claude
+	omarchy-mise-install gh
 	omarchy-mise-install npm:wrangler wrangler
 	omarchy-mise-install npm:cf cf
 	# ACP adapter for the Zed agent panel. Zed can install this itself, but only for a
