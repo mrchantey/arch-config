@@ -38,3 +38,12 @@ Codex's `/voice` dropped most of the mic audio whenever the PipeWire graph ran a
 - [ ] `just stow-symlinks`, links `~/.config/pipewire` to the new package
 
 Verify: start `codex`, run `/voice`, and while it listens `pw-top -b -n 3 | grep codex-voice-host` shows quantum 1024 (not 2048 or 2400). Then say something and confirm it transcribes and answers. This machine's mic differs from silver-fox's Brio, so the end-to-end check is the real test here.
+
+## 2026-10-07 restore LibreOffice (from silver-fox)
+
+The shared preinstall cleanup no longer removes LibreOffice, and fresh installs explicitly install it. Existing machines need to restore it if a previous cleanup removed it, see "Preinstalls are removed, by one flag" in AGENTS.md.
+
+- [ ] (ask first) `just install-libreoffice`, installs `libreoffice-fresh` and its dependencies if missing; may require a sudo password
+- [ ] `pacman -Q libreoffice-fresh && libreoffice --headless --version`, confirms the package is installed and the executable starts
+
+Verify: LibreOffice appears in the launcher and opens normally. Future runs of the repo's preinstall cleanup leave it installed.

@@ -61,7 +61,8 @@ Never use `.claude/projects/../memory`, all content related to this project must
 
 ## Responses
 
-Use the following format for responses larger than a few hundred words.
+- Do not assume I'm across the plan, you can reference item and phase numbers but in context, otherwise I would need to go look them up to know what they mean
+- Use the following format for responses larger than a few hundred words.
 
 ```md
 <!-- include this header if this is the last in a string of workload responses -->

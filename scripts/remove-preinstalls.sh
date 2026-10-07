@@ -31,9 +31,10 @@ KEEP_LAUNCHERS=("Discord" "Google Maps" "YouTube" "Disk Usage")
 KEEP_WRAPPERS=(claude codex gh wrangler cf)
 
 # omarchy's own preinstall package set (bin/omarchy-remove-preinstalls), unioned across
-# the installed release and upstream master. omarchy-pkg-drop skips what isn't installed.
+# the installed release and upstream master, except LibreOffice, which we keep.
+# omarchy-pkg-drop skips what isn't installed.
 PACKAGES=(
-	aether cliamp libreoffice-fresh xournalpp pinta obsidian obs-studio kdenlive
+	aether cliamp xournalpp pinta obsidian obs-studio kdenlive
 	moonlight-qt lazydocker omacut omacalc omawrite monologue hype
 )
 

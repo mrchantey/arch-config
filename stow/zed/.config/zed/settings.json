@@ -19,7 +19,11 @@
 				"mode": "bypassPermissions",
 			},
 			"favorite_config_option_values": {
-				"mode": ["auto", "bypassPermissions"],
+				"model": [
+     "claude-fable-5-1",
+     "opus"
+    ],
+    "mode": ["auto", "bypassPermissions"],
 			},
 			"type": "custom",
 			"command": "/home/pete/me/arch-config/scripts/acp-tee.sh",
@@ -72,7 +76,7 @@
 		// resolve; the gpt-6 ids exist in the binary but the inline assistant
 		// rejected gpt-6-luna with "does not support the configured model".
 		"default_model": {
-			"effort": "low",
+			"effort": "xhigh",
    "provider": "openai-subscribed",
 			"model": "gpt-6.1-sol",
 			"enable_thinking": true,
@@ -107,7 +111,7 @@
     "provider": "openai-subscribed",
     "model": "gpt-6.1-sol",
     "enable_thinking": true,
-    "effort": "low"
+    "effort": "xhigh"
    },
    {
     "provider": "openai-subscribed",

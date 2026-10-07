@@ -246,6 +246,7 @@ install-apps-init:
 # chromium ships chromedriver, which beet's webdriver drives (google-chrome does not)
 # age is the identity and file cipher behind beet's secrets, the no-beet escape hatch
 install-apps:
+	just install-libreoffice
 	sudo pacman -S --noconfirm --needed 	\
 	age															\
 	aws-cli-v2														\
@@ -269,6 +270,10 @@ install-apps:
 	zip
 	curl -f https://zed.dev/install.sh | sh
 	@echo "PASS install-apps"
+
+# Keep LibreOffice independently of the preinstall cleanup; also restores existing machines.
+install-libreoffice:
+	omarchy pkg add libreoffice-fresh
 
 # Rust is the one runtime omarchy does NOT put behind mise -- its Menu > Install >
 # Development > Rust runs the rustup.rs installer and guards on ~/.rustup. We use the
