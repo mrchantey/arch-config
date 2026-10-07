@@ -35,18 +35,39 @@
 -- all. See the "rendering corrupts after the monitor sleeps" trap in the
 -- info-silver-fox skill.
 
--- scale 1, NOT omarchy's "auto". On this panel auto picks 1.5, which leaves a
--- 1280x720 logical desktop -- unusably cramped. At scale 1 the logical desktop is
--- 1920x1080, near-identical to what the retired XPS gave (4K panel at scale 2 =
--- 1920x1200), so the workspace stays the size it has always been. This is a
--- 1080p panel, so there is no HiDPI to serve and no fractional-scaling blur to
--- accept. Bump to 1.25 if the text is too small; do not go back to "auto".
+-- Keep GTK's global scale at 1; the panel's output scale is 1 undocked and 2
+-- with an external display. Do not use "auto", which picks 1.5 on this panel.
 hl.env("GDK_SCALE", "1")
 
 local desk_description = "Samsung Electric Company Odyssey G5"
 local desk = "desc:" .. desk_description
 
-hl.monitor({ output = "eDP-1", mode = "1920x1080@60", position = "auto", scale = 1 })
+-- Keep the scale expression dynamic: Omarchy's clamshell watcher parses scalar
+-- assignments in this file and would otherwise keep restoring the initial 1.
+local function update_panel_scale(removed_name, added_name)
+  local panel_scale = (added_name and added_name ~= "eDP-1" and added_name ~= "FALLBACK") and 2 or 1
+  for _, monitor in ipairs(hl.get_monitors()) do
+    if monitor.name ~= "eDP-1" and monitor.name ~= "FALLBACK" and monitor.name ~= removed_name then
+      panel_scale = 2
+      break
+    end
+  end
+
+  hl.monitor({ output = "eDP-1", mode = "1920x1080@60", position = "auto", scale = panel_scale })
+end
+
+update_panel_scale()
+
+-- Lua monitor rules need an explicit output refresh when changed outside reload.
+-- Queue it after the event, rather than doing synchronous IPC inside Hyprland.
+hl.on("monitor.added", function(monitor)
+  update_panel_scale(nil, monitor.name)
+  hl.exec_cmd("hyprctl -r eval 'do end'")
+end)
+hl.on("monitor.removed", function(monitor)
+  update_panel_scale(monitor.name)
+  hl.exec_cmd("hyprctl -r eval 'do end'")
+end)
 
 -- The desk monitor, matched by description rather than port so it does not
 -- matter which cable or which GPU it lands on: HDMI-A-1 on the NVIDIA card over

@@ -114,11 +114,27 @@
     "model": "gpt-6-astra",
     "enable_thinking": true,
     "effort": "xhigh"
+   },
+   {
+    "provider": "openai-subscribed",
+    "model": "gpt-6-luna",
+    "enable_thinking": true,
+    "effort": "medium"
+   },
+   {
+    "provider": "openai",
+    "model": "gpt-4o-mini",
+    "enable_thinking": false
    }
   ],
 		"model_parameters": [],
 		"tool_permissions": {
 			"default": "allow",
+			"tools": {
+				"skill": {
+					"default": "allow",
+				},
+			},
 		},
 	},
 	// "completions": {

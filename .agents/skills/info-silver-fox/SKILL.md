@@ -78,12 +78,17 @@ The alternative that was built and then abandoned (unstaged, never applied) kept
 
 `stow/hypr-silver-fox/` holds four modules, stowed by `just stow-device silver-fox`.
 
-**`monitors.lua`** pins eDP-1 to `1920x1080@60` at **`scale = 1`**, with
-`GDK_SCALE=1`. Omarchy's `scale = "auto"` picks **1.5** on this panel, which
-leaves a 1280x720 logical desktop; scale 1 gives 1920x1080 logical, near-identical
-to the effective 1920x1200 the XPS's 4K panel gave at scale 2. It is a 1080p
-panel, so there is no HiDPI to serve and no fractional-scaling blur to accept.
-Bump to 1.25 if text is too small; do not go back to `"auto"`.
+**`monitors.lua`** pins eDP-1 to `1920x1080@60` at `scale = 1` when undocked,
+and uses **`scale = 2` whenever another real display is active**. Hotplug add/remove
+events adjust the panel only; the external display's scale is unchanged. `GDK_SCALE=1`
+remains set. Omarchy's `scale = "auto"` picks **1.5** on this panel, which leaves
+a 1280x720 logical desktop; scale 1 gives 1920x1080 logical, near-identical to
+the effective 1920x1200 the XPS's 4K panel gave at scale 2. The 200% docked mode
+is an intentional accessibility/size preference, despite reducing the panel's
+logical desktop to 960x540. Runtime monitor-rule changes need an output refresh
+(`hyprctl -r eval`). The scale initializer must stay an expression, not a scalar
+`local panel_scale = 1`: Omarchy's clamshell watcher statically parses that
+assignment and would continuously restore 1 instead of respecting the dynamic rule.
 
 Also holds the fallback auto-mirror rule (`output = ""`), which catches whatever
 an external cable enumerates as, and the desk monitor setup: the Odyssey G5 at `mode = "highres"`, scale 1.25 and pinned to `0x0` so it stays leftmost and so the primary for synced workspaces (the shared `workspaces.lua`, see AGENTS.md; with the panel on too, the panel shows 11-20), and a `monitor.removed` hook that clears a manual panel-disable toggle when the G5 disconnects. Connecting the G5 leaves the panel enabled, including on resume; Super+Ctrl+Delete still toggles it manually. The removal hook cannot be left to Omarchy's own recovery, which mistakes Hyprland's FALLBACK placeholder for an external monitor.
