@@ -79,13 +79,11 @@ The alternative that was built and then abandoned (unstaged, never applied) kept
 `stow/hypr-silver-fox/` holds four modules, stowed by `just stow-device silver-fox`.
 
 **`monitors.lua`** pins eDP-1 to `1920x1080@60` at `scale = 1` when undocked,
-and uses **`scale = 2` whenever another real display is active**. Hotplug add/remove
+and uses **`scale = 1.5` whenever another real display is active**. Hotplug add/remove
 events adjust the panel only; the external display's scale is unchanged. `GDK_SCALE=1`
 remains set. Omarchy's `scale = "auto"` picks **1.5** on this panel, which leaves
 a 1280x720 logical desktop; scale 1 gives 1920x1080 logical, near-identical to
-the effective 1920x1200 the XPS's 4K panel gave at scale 2. The 200% docked mode
-is an intentional accessibility/size preference, despite reducing the panel's
-logical desktop to 960x540. Runtime monitor-rule changes need an output refresh
+the effective 1920x1200 the XPS's 4K panel gave at scale 2. The 150% docked mode gives a 1280x720 logical desktop. Runtime monitor-rule changes need an output refresh
 (`hyprctl -r eval`). The scale initializer must stay an expression, not a scalar
 `local panel_scale = 1`: Omarchy's clamshell watcher statically parses that
 assignment and would continuously restore 1 instead of respecting the dynamic rule.

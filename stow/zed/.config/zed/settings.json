@@ -184,7 +184,7 @@
 	},
 	"ui_font_size": 24.0,
 	"agent_ui_font_size": 23.0,
-	"buffer_font_size": 20.0,
+	"buffer_font_size": 19.0,
 	"colorize_brackets": true,
 	"language_models": {
 		// api_url is already the default; the block is here as the place to hang

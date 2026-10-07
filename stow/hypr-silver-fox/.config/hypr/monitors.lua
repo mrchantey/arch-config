@@ -35,7 +35,7 @@
 -- all. See the "rendering corrupts after the monitor sleeps" trap in the
 -- info-silver-fox skill.
 
--- Keep GTK's global scale at 1; the panel's output scale is 1 undocked and 2
+-- Keep GTK's global scale at 1; the panel's output scale is 1 undocked and 1.5
 -- with an external display. Do not use "auto", which picks 1.5 on this panel.
 hl.env("GDK_SCALE", "1")
 
@@ -45,10 +45,10 @@ local desk = "desc:" .. desk_description
 -- Keep the scale expression dynamic: Omarchy's clamshell watcher parses scalar
 -- assignments in this file and would otherwise keep restoring the initial 1.
 local function update_panel_scale(removed_name, added_name)
-  local panel_scale = (added_name and added_name ~= "eDP-1" and added_name ~= "FALLBACK") and 2 or 1
+  local panel_scale = (added_name and added_name ~= "eDP-1" and added_name ~= "FALLBACK") and 1.5 or 1
   for _, monitor in ipairs(hl.get_monitors()) do
     if monitor.name ~= "eDP-1" and monitor.name ~= "FALLBACK" and monitor.name ~= removed_name then
-      panel_scale = 2
+      panel_scale = 1.5
       break
     end
   end
