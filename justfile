@@ -467,19 +467,22 @@ install-mise-tools:
 	# prepends ~/.local/bin, which .bashrc already does for itself.
 	UV_NO_MODIFY_PATH=1 omarchy-install-dev-env python
 	# Self-updating ~/.local/bin wrappers: each run does `mise use -g` then `mise x`, so
-	# the tool upgrades itself. These four names are remove-preinstalls' allowlist.
+	# the tool upgrades itself. These names are remove-preinstalls' allowlist.
 	# `cf` must be spelled `npm:cf` -- mise's bare `cf` in the registry is Cloud Foundry,
-	# not Cloudflare.
+	# not Cloudflare. `codex` resolves to aqua:openai/codex, the CLI's standalone release
+	# binary; the desktop app is the separate `openai-codex-desktop` package, never installed.
 	omarchy-mise-install claude
+	omarchy-mise-install codex
 	omarchy-mise-install gh
 	omarchy-mise-install npm:wrangler wrangler
 	omarchy-mise-install npm:cf cf
 	# ACP adapter for the Zed agent panel. Zed can install this itself, but only for a
 	# "type": "registry" agent — we run it as "type": "custom" behind scripts/acp-tee.sh
 	# so the reply stream can be tapped for read-aloud, which means we own the install.
-	# NOT omarchy-mise-install: its wrapper leaks a "mise ... tools:" line onto stdout on
-	# every run, and here stdout is Zed's JSON-RPC channel. scripts/claude-agent-acp.sh is
-	# the same wrapper with that line redirected to stderr; it explains itself in full.
+	# NOT omarchy-mise-install: its wrapper used to leak a "mise ... tools:" line onto
+	# stdout on every run, and here stdout is Zed's JSON-RPC channel. Upstream now passes
+	# --quiet, so scripts/claude-agent-acp.sh (the same wrapper with that line sent to
+	# stderr) is belt-and-braces; it explains itself in full.
 	chmod +x scripts/claude-agent-acp.sh
 	ln -sf ~/me/arch-config/scripts/claude-agent-acp.sh ~/.local/bin/claude-agent-acp
 	@echo "PASS install-mise-tools"

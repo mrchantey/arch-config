@@ -28,7 +28,7 @@ STATE_DIR="$HOME/.local/state/omarchy"
 KEEP_LAUNCHERS=("Discord" "Google Maps" "YouTube" "Disk Usage")
 
 # mise wrappers written by `just install-mise-tools`; every other wrapper is omarchy's.
-KEEP_WRAPPERS=(claude gh wrangler cf)
+KEEP_WRAPPERS=(claude codex gh wrangler cf)
 
 # omarchy's own preinstall package set (bin/omarchy-remove-preinstalls), unioned across
 # the installed release and upstream master. omarchy-pkg-drop skips what isn't installed.
