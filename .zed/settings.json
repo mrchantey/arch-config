@@ -9,7 +9,10 @@
 		"stow/cargo/.cargo/config.toml",
 	],
 	"file_scan_exclusions": [
-		"CLAUDE.md",
+		// symlinks
+		".codex/AGENTS.md",
+		".config/zed/AGENTS.md",
+		".claude/CLAUDE.md",
 		"stow/cargo/.cargo/registry",
 		"stow/cargo/.cargo/bin",
 		"stow/cargo/.cargo/binstall",

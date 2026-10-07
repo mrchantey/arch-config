@@ -45,6 +45,9 @@
 	},
 	"disable_ai": false,
 	"diff_view_style": "unified",
+	"toolbar": {
+		"agent_review": false,
+	},
 	"agent_buffer_font_size": 19.0,
 	"project_panel": {
 		"dock": "left",
@@ -55,6 +58,7 @@
 	},
 	// AGENTS
 	"agent": {
+		"single_file_review": false,
 		"threads_sidebar": {
    "position": "right"
   },
