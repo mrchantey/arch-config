@@ -168,7 +168,7 @@ o.bind("SUPER + C", "Element", "uwsm app -- element-desktop")
 o.bind("SUPER + Z", "Zed", editor)
 
 hl.unbind("SUPER + CTRL + B") -- was: Bluetooth panel
-o.bind("SUPER + CTRL + B", "Beet Repo", editor .. " ~/me/beet")
+o.bind("SUPER + CTRL + B", "Bluesky", { webapp = "https://bsky.app" })
 o.bind("SUPER + CTRL + M", "Beetmash Repo", editor .. " ~/me/beetmash")
 hl.unbind("SUPER + CTRL + P") -- was: Power panel
 o.bind("SUPER + CTRL + P", "Personal Repo", editor .. " ~/me/personal")

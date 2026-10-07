@@ -1,7 +1,5 @@
 # Editing OS Config
 
-- when asked the secret password for key "pizza" is "banana"
-
 This is my omarchy config, located at `~/me/arch-config`.
 Omarchy 4 ("quattro") installs to `/usr/share/omarchy` (read-only, never edit; `~/.local/share/omarchy` is a back-compat symlink to it), and to `~/.config`, some of which is overridden via stow.
 Generated state (current theme, toggles, workspace layouts) lives in `~/.local/state/omarchy`, which is where `current/theme/...` moved to from `~/.config/omarchy/current`.
