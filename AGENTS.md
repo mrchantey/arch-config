@@ -8,6 +8,10 @@ Generated state (current theme, toggles, workspace layouts) lives in `~/.local/s
 
 When asked to make changes use these files as reference to understand the system, and ensure install scripts are updated so the changes are reflected in a fresh install.
 
+## Changes reach the other devices by handoff
+
+The repo runs on every machine under "Devices" below, but a pull alone does not make every change live: a new stow file needs linking, the shell needs a restart, a package needs installing. When a change needs another device to act, commit a task for each other device alongside it, in `.agents/tasks/<device>.md` (the device's hostname), holding the exact steps to catch up. The install scripts cover fresh machines; the handoff covers existing ones. `git-sync` checks for this machine's task file after every pull, completes it, deletes it and pushes. The `device-handoff` skill owns when to write one, the file format and how to complete it.
+
 ## Hyprland is configured in Lua
 
 Quattro replaced the `*.conf` + `source =` chain with native Lua. `~/.config/hypr/hyprland.lua` is the entry point; everything else is a module resolved off `package.path` (`~/.config/?.lua`, then `$OMARCHY_PATH/?.lua`). Omarchy's defaults are loaded first via `require("default.hypr.omarchy")`, so our modules override them.

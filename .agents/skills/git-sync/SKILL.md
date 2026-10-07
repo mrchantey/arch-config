@@ -1,17 +1,18 @@
 ---
 name: git-sync
 description: >
-  Use to synchronize this machine with the ~/me/arch-config dotfiles repo: commit and push local changes ("our own") and pull the latest from origin, then patch the live OS so it actually matches the repo. Triggers: "sync the arch-config repo", "git sync", "/git-sync", "pull and push my dotfiles", "update this machine from the repo", "bring this box up to date". Covers committing local work, rebasing onto origin, and re-applying stow/services/hyprland after the pull.
+  Use to synchronize this machine with the ~/me/arch-config dotfiles repo: commit and push local changes ("our own") and pull the latest from origin, then patch the live OS so it actually matches the repo. Triggers: "sync the arch-config repo", "git sync", "/git-sync", "pull and push my dotfiles", "update this machine from the repo", "bring this box up to date". Covers committing local work, rebasing onto origin, re-applying stow/services/hyprland after the pull, and completing the device-handoff tasks other machines left for this one.
 ---
 
 # Git Sync
 
-Synchronize `~/me/arch-config` (the omarchy dotfiles repo) in both directions and then **make the running OS match the repo**.
+Synchronize `~/me/arch-config` (the omarchy dotfiles repo) in both directions, **make the running OS match the repo**, then complete any handoff another device left for this one.
 
 The repo is just config — the box only changes when something re-reads that config. Most of the time that's automatic, but not always, so a sync is two jobs:
 
 1. **Git**: commit + push local work, pull origin, end on a clean linear tree.
 2. **Patch**: re-apply only the things the pull changed that aren't picked up for free.
+3. **Handoff**: run the task file other devices committed for this one, if any (`device-handoff` skill).
 
 ## The mental model (why "patch" is needed at all)
 
@@ -52,6 +53,8 @@ Then stage and commit. Match the repo's terse convention — short lowercase `pa
 git add -A
 git commit -m "patch: <one line on what changed>"
 ```
+
+If the work needs the other devices to act before it is live there (a new stow file, a shell restart, an install, a migration), write their handoffs into `.agents/tasks/<device>.md` as part of this commit, following the `device-handoff` skill.
 
 If the tree is already clean, skip to the pull.
 
@@ -98,7 +101,7 @@ git diff --name-only "$before" HEAD
 
 | Changed paths | Why it needs a patch | Action |
 | --- | --- | --- |
-| **New/removed `stow/<mod>/`**, or `justfile` stow lists | new module has no symlink yet | `just stow-symlinks` (idempotent relink) |
+| **New/removed `stow/<mod>/`**, a new file inside an existing module, or `justfile` stow lists | nothing links the new path yet (only a dir stow *folded* into one symlink picks new files up for free; `~/.config/hypr` is a real dir of per-file links, so a new `hypr/*.lua` is not live) | `just stow-symlinks` (idempotent relink) |
 | `stow/hypr-<host>/` (device files) | device overrides re-stowed | `just stow-device "$(hostname)"` then `omarchy-restart-hyprctl` |
 | `stow/hypr/` (common hypr) | Hyprland holds config in memory | `omarchy-restart-hyprctl` (`hyprctl reload`) |
 | `files/omarchy/shell.json` | **copied, not stowed** — the repo edit is not live at all until it is copied into `~/.config/omarchy/` | `just stow-files` (it hot-reloads on write, so no restart). If the change was made in the GUI instead, capture it the other way with `just pull-files` |
@@ -116,13 +119,21 @@ host=$(hostname)
 [ -d "stow/hypr-$host" ] && just stow-device "$host"
 ```
 
-### 6. Confirm
+### 6. Complete handoffs for this device
+
+```sh
+ls .agents/tasks/"$(hostname)".md 2>/dev/null
+```
+
+If it exists, follow the receiving steps in the `device-handoff` skill: run its sections oldest first, delete each one as it completes and verifies, delete the file once empty, then commit and push that. Leave every other device's task file alone.
+
+### 7. Confirm
 
 ```sh
 git status -sb        # clean, up to date with origin/main
 ```
 
-Report what you pushed, what you pulled, and which patches you ran (or that none were needed).
+Report what you pushed, what you pulled, which patches you ran (or that none were needed), and which handoff sections you completed or left pending.
 
 ## Gotchas
 
