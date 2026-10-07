@@ -55,10 +55,12 @@
 	},
 	// AGENTS
 	"agent": {
-		"sandbox_permissions": {
+		"threads_sidebar": {
+   "position": "right"
+  },
+  "sandbox_permissions": {
    "allow_unsandboxed": true
   },
-  "sidebar_side": "right",
 		"dock": "right",
 		"default_profile": "write",
 		// The openai key lives in the system keychain; Zed has no api_key setting.
@@ -66,8 +68,9 @@
 		// resolve; the gpt-6 ids exist in the binary but the inline assistant
 		// rejected gpt-6-luna with "does not support the configured model".
 		"default_model": {
-			"provider": "openai",
-			"model": "gpt-5-mini",
+			"effort": "low",
+   "provider": "openai-subscribed",
+			"model": "gpt-6.1-sol",
 			"enable_thinking": true,
 		},
 		// ctrl-enter. Thinking off, like the gemini-3.5-flash this slot used to hold.
@@ -96,22 +99,19 @@
 		// held before were on openai-subscribed, copilot_chat and anthropic,
 		// none of which are authenticated here.
 		"favorite_models": [
-			{
-				"provider": "openai",
-				"model": "gpt-6-astra",
-				"enable_thinking": true,
-			},
-			{
-				"provider": "openai",
-				"model": "gpt-6-sol",
-				"enable_thinking": true,
-			},
-			{
-				"provider": "openai",
-				"model": "gpt-6-luna",
-				"enable_thinking": false,
-			},
-		],
+   {
+    "provider": "openai-subscribed",
+    "model": "gpt-6.1-sol",
+    "enable_thinking": true,
+    "effort": "low"
+   },
+   {
+    "provider": "openai-subscribed",
+    "model": "gpt-6-astra",
+    "enable_thinking": true,
+    "effort": "xhigh"
+   }
+  ],
 		"model_parameters": [],
 		"tool_permissions": {
 			"default": "allow",

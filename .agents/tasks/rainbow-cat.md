@@ -29,3 +29,12 @@ Verify:
 - `codex --version` prints `codex-cli <version>`, and `pacman -Q openai-codex-desktop` reports it is not installed.
 - `readlink ~/.codex/AGENTS.md ~/.claude/CLAUDE.md` shows both under `stow/agents/`, and `cmp ~/.codex/AGENTS.md ~/.agents/AGENTS.md` is silent.
 - `cd /tmp && codex debug prompt-input hi | grep -c 'Beet is an Atmospheric'` prints at least 1, ie Codex loads the global instructions.
+
+## 2026-10-07 codex voice capture fix (from silver-fox)
+
+Codex's `/voice` dropped most of the mic audio whenever the PipeWire graph ran above a 1024 quantum, so the model never answered. A new `pipewire` stow package caps Codex's voice host at 1024-frame periods. See "Codex voice needs small capture chunks" in AGENTS.md.
+
+- [ ] `ls -la ~/.config/pipewire`, expect it missing; if it is a real dir, check nothing in it clashes with `stow/pipewire/.config/pipewire/client.conf.d/codex-voice.conf` before the next step, since one stow conflict aborts every package
+- [ ] `just stow-symlinks`, links `~/.config/pipewire` to the new package
+
+Verify: start `codex`, run `/voice`, and while it listens `pw-top -b -n 3 | grep codex-voice-host` shows quantum 1024 (not 2048 or 2400). Then say something and confirm it transcribes and answers. This machine's mic differs from silver-fox's Brio, so the end-to-end check is the real test here.

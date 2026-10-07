@@ -614,6 +614,7 @@ stow-symlinks:
 	obs										\
 	omarchy 							\
 	opencode							\
+	pipewire							\
 	ssh									\
 	starship 							\
 	uwsm 									\
