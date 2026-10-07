@@ -5,9 +5,9 @@
 # back: on resume the kernel refuses every frame Hyprland sends to HDMI-A-1
 # ("atomic drm request: failed to commit: Invalid argument") and both screens
 # stay blank. With eDP-1 enabled at suspend time the same resume is clean (both
-# tested 2026-10-06). monitors.lua turns the panel off whenever the desk monitor
-# connects, through Omarchy's manual toggle, so this clears that toggle for the
-# sleep; the monitor reconnecting on resume turns the panel off again.
+# tested 2026-10-06). If the panel was disabled manually, clear that toggle for
+# sleep and leave it enabled on resume. monitors.lua does not disable it when
+# the desk monitor reconnects.
 #
 # Same shape as Omarchy's omarchy-system-sleep-monitor: hold a delay inhibitor,
 # act on PrepareForSleep, then exit to release it and let systemd restart us.

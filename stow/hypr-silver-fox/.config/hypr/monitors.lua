@@ -91,10 +91,10 @@ hl.monitor({ output = desk, mode = "highres", position = "0x0", scale = 1.25 })
 -- 1:1 image on any 16:9 projector or TV; the script was deleted with the XPS.
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1, mirror = "eDP-1" })
 
--- Docking turns the laptop panel off, lid open or shut. Super+Ctrl+Delete brings
--- it back for a two-screen session, until the desk monitor next reconnects.
--- Suspend needs the panel on, so sleep-panel.service
--- (scripts/silver-fox/sleep-panel.sh) clears this toggle before every sleep.
+-- Keep the panel enabled when the desk monitor connects, including on resume.
+-- Super+Ctrl+Delete can still disable it manually. Suspend needs the panel on,
+-- so sleep-panel.service (scripts/silver-fox/sleep-panel.sh) clears the manual
+-- toggle before sleep and leaves it enabled afterwards.
 --
 -- A `disabled = true` on eDP-1 here would leave no display at all once
 -- unplugged, and omarchy-hyprland-monitor-clamshell re-enables any panel it
@@ -105,8 +105,7 @@ hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1, mirr
 -- default.hypr.toggles loads that directory last, so it lands on top of this
 -- file, and the clamshell script leaves the panel alone while that flag and an
 -- external monitor are both present. Refusing to disable the only active
--- display is built in. Unknown externals do not trigger it, so a projector
--- still mirrors the panel.
+-- display is built in. A projector still mirrors the panel.
 --
 -- Undoing it cannot be left to Omarchy. Its recovery clears the flag only once
 -- omarchy-hyprland-monitor-external-active reports no external, and that check
@@ -119,11 +118,6 @@ local function is_desk(monitor)
   return monitor.description:sub(1, #desk_description) == desk_description
 end
 
-hl.on("monitor.added", function(monitor)
-  if is_desk(monitor) then
-    hl.exec_cmd("omarchy-hyprland-monitor-internal off")
-  end
-end)
 
 hl.on("monitor.removed", function(monitor)
   if is_desk(monitor) then
