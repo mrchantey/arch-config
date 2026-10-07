@@ -69,7 +69,12 @@ hl.monitor({ output = "eDP-1", mode = "1920x1080@60", position = "auto", scale =
 -- Naming it explicitly is what opts it OUT of the mirror fallback below: this is
 -- a second desktop, not a duplicate of the laptop panel. A monitor with its own
 -- rule never falls through to the empty-output rule, whatever the order here.
-hl.monitor({ output = desk, mode = "highres", position = "auto", scale = 1.25 })
+--
+-- Pinned to 0x0 because the leftmost monitor is the primary for synced
+-- workspaces (workspaces.lua). Hyprland places explicitly positioned monitors
+-- before "auto" ones, so the panel always lands to its right when both are on,
+-- and still sits at 0x0 on its own.
+hl.monitor({ output = desk, mode = "highres", position = "0x0", scale = 1.25 })
 
 -- Fallback auto-mirror: any UNKNOWN external plugged in mirrors the internal
 -- panel, which is what you want from a projector in a meeting room. The
@@ -85,18 +90,6 @@ hl.monitor({ output = desk, mode = "highres", position = "auto", scale = 1.25 })
 -- This panel is natively 16:9 1080p, so the plain rule below already produces a
 -- 1:1 image on any 16:9 projector or TV; the script was deleted with the XPS.
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1, mirror = "eDP-1" })
-
--- The desk monitor is the main screen: workspaces 1-6 live on it and 7-10 on the
--- laptop panel, as on rainbow-cat. Undocked, every workspace falls back to the
--- panel.
-hl.workspace_rule({ workspace = "1", monitor = desk, default = true })
-for workspace = 2, 6 do
-  hl.workspace_rule({ workspace = tostring(workspace), monitor = desk })
-end
-hl.workspace_rule({ workspace = "7", monitor = "eDP-1", default = true })
-for workspace = 8, 10 do
-  hl.workspace_rule({ workspace = tostring(workspace), monitor = "eDP-1" })
-end
 
 -- Docking turns the laptop panel off, lid open or shut. Super+Ctrl+Delete brings
 -- it back for a two-screen session, until the desk monitor next reconnects.

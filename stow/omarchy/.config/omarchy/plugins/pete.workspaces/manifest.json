@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "pete.workspaces",
+  "name": "Synced Workspaces",
+  "version": "1.0.0",
+  "author": "Omarchy",
+  "description": "Workspace numbers shared by every monitor",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Workspaces.qml"
+  },
+  "barWidget": {
+    "displayName": "Synced Workspaces",
+    "description": "Workspace numbers shared by every monitor",
+    "category": "Compositor",
+    "allowMultiple": false
+  },
+  "omarchy": {
+    "clonedFrom": "omarchy.workspaces"
+  }
+}

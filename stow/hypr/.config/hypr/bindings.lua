@@ -29,6 +29,8 @@ local browser = "uwsm app -- google-chrome-stable --new-window"
 -- ~/.local/state/omarchy/defaults/editor, written by `just setup-editor`.
 local editor = "omarchy-launch-editor"
 
+local workspaces = require("hypr.workspaces")
+
 --------------------------------------------------------------------------------
 -- OS (SUPER SHIFT)
 --------------------------------------------------------------------------------
@@ -67,26 +69,71 @@ for _, orientation in ipairs({
   )
 end
 
--- Move-to-workspace lives on SUPER ALT, not the Omarchy default SUPER SHIFT.
+--------------------------------------------------------------------------------
+-- WORKSPACES (every monitor switches together, see workspaces.lua)
+--------------------------------------------------------------------------------
+-- Workspace N is a different real workspace on each monitor (N, N + 10, ...), so
+-- every Omarchy bind that names a workspace by number or by order is replaced
+-- with one that resolves it per monitor. Move-to-workspace lives on SUPER ALT,
+-- not the Omarchy default SUPER SHIFT.
 for workspace = 1, 10 do
   local key = "code:" .. tostring(workspace + 9)
 
+  hl.unbind("SUPER + " .. key) -- was: Switch to workspace N
   hl.unbind("SUPER + SHIFT + " .. key) -- was: Move window to workspace N
+  hl.unbind("SUPER + SHIFT + ALT + " .. key) -- was: Move window silently to workspace N
   if workspace <= 5 then
     hl.unbind("SUPER + ALT + " .. key) -- was: Switch to group window N
   end
 
-  o.bind(
-    "SUPER + ALT + " .. key,
-    "Move window to workspace " .. workspace,
-    hl.dsp.window.move({ workspace = tostring(workspace) })
-  )
+  o.bind("SUPER + " .. key, "Switch to workspace " .. workspace, function()
+    workspaces.show(workspace)
+  end)
+  o.bind("SUPER + ALT + " .. key, "Move window to workspace " .. workspace, function()
+    workspaces.move(workspace)
+  end)
+  o.bind("SUPER + SHIFT + ALT + " .. key, "Move window silently to workspace " .. workspace, function()
+    workspaces.move(workspace, false)
+  end)
 end
 
+-- Omarchy's versions step through workspace ids, which would wander onto
+-- another monitor's range; these step through workspace numbers.
 -- xkbcommon names these Page_Up/Page_Down; the old .conf spelling PAGEUP/PAGEDOWN
 -- silently worked but the Lua binder rejects it (same trap as COMMA vs comma).
-o.bind("SUPER + Page_Up", "Next Workspace", hl.dsp.focus({ workspace = "e+1" }))
-o.bind("SUPER + Page_Down", "Previous workspace", hl.dsp.focus({ workspace = "e-1" }))
+local function cycle(step)
+  return function()
+    workspaces.cycle(step)
+  end
+end
+hl.unbind("SUPER + TAB") -- was: Next workspace
+hl.unbind("SUPER + SHIFT + TAB") -- was: Previous workspace
+hl.unbind("SUPER + mouse_down") -- was: Scroll active workspace forward
+hl.unbind("SUPER + mouse_up") -- was: Scroll active workspace backward
+o.bind("SUPER + TAB", "Next workspace", cycle(1))
+o.bind("SUPER + SHIFT + TAB", "Previous workspace", cycle(-1))
+o.bind("SUPER + Page_Up", "Next workspace", cycle(1))
+o.bind("SUPER + Page_Down", "Previous workspace", cycle(-1))
+o.bind("SUPER + mouse_down", "Scroll active workspace forward", cycle(1))
+o.bind("SUPER + mouse_up", "Scroll active workspace backward", cycle(-1))
+
+-- Hyprland's own history would count the other monitors' catch-up switches.
+hl.unbind("SUPER + CTRL + TAB") -- was: Former workspace
+o.bind("SUPER + CTRL + TAB", "Former workspace", workspaces.previous)
+
+-- Moving a whole workspace to another monitor would put it out of step with
+-- the rest, so trade this monitor's windows with that one's instead.
+for _, direction in ipairs({
+  { key = "LEFT", name = "left", selector = "l" },
+  { key = "RIGHT", name = "right", selector = "r" },
+  { key = "UP", name = "up", selector = "u" },
+  { key = "DOWN", name = "down", selector = "d" },
+}) do
+  hl.unbind("SUPER + SHIFT + ALT + " .. direction.key) -- was: Move workspace to <direction> monitor
+  o.bind("SUPER + SHIFT + ALT + " .. direction.key, "Swap windows with " .. direction.name .. " monitor", function()
+    workspaces.swap(direction.selector)
+  end)
+end
 
 --------------------------------------------------------------------------------
 -- APPLICATIONS (SUPER CTRL)

@@ -1,4 +1,4 @@
--- rainbow-cat (desktop) — C49RG9x ultrawide + C24F390 side, workspaces pinned.
+-- rainbow-cat (desktop) — C49RG9x ultrawide + C24F390 side.
 -- Monitors are matched by description, not port, so replugging cables to
 -- different DP/HDMI ports (or motherboard vs GPU) does not break the config.
 -- See https://wiki.hypr.land/Configuring/Basics/Monitors/
@@ -39,16 +39,10 @@ hl.monitor({
   transform = 0,
 })
 
--- Workspaces 1-6 live on the ultrawide (1 is named "beet"), 7-10 on the side
--- monitor, which is narrow enough to want a left-oriented master column.
-hl.workspace_rule({ workspace = "1", default_name = "beet", monitor = ultrawide })
-for workspace = 2, 6 do
-  hl.workspace_rule({ workspace = tostring(workspace), monitor = ultrawide })
-end
-for workspace = 7, 10 do
-  hl.workspace_rule({
-    workspace = tostring(workspace),
-    monitor = side,
-    layout_opts = { orientation = "left" },
-  })
-end
+-- Workspaces switch on both monitors together (see workspaces.lua): the
+-- ultrawide is leftmost, so it is the primary and shows 1-10, while the side
+-- monitor shows 11-20. Workspace 1 is named "beet". The side monitor is narrow
+-- enough to want a left-oriented master column, so that rule matches whatever
+-- workspace it is showing rather than a range of ids.
+hl.workspace_rule({ workspace = "1", default_name = "beet" })
+hl.workspace_rule({ workspace = "m[" .. side .. "]", layout_opts = { orientation = "left" } })

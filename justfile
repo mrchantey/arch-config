@@ -301,6 +301,16 @@ install-rust:
 	cargo binstall --no-confirm \
 	wasm-bindgen-cli 						\
 	--version=0.2.125
+	# beet_esp's Xtensa toolchain: espup installs the `esp` rustup toolchain and
+	# writes ~/export-esp.sh, probe-rs flashes and runs its on-device tests
+	cargo binstall --no-confirm \
+	espup 											\
+	probe-rs-tools
+	espup install --targets esp32s3
+	# probe-rs reaches the ESP32-S3's USB-JTAG without root through its udev rules
+	curl -fsSL https://probe.rs/files/69-probe-rs.rules | sudo tee /etc/udev/rules.d/69-probe-rs.rules > /dev/null
+	sudo udevadm control --reload
+	sudo udevadm trigger
 	@echo "PASS install-rust"
 
 install-user-apps-init:
@@ -541,6 +551,10 @@ stow-symlinks:
 	# and again: post-update.d already holds omarchy's own hooks, so it must stay a real
 	# dir and take only our uv-self-update link rather than being folded wholesale
 	mkdir -p ~/.config/omarchy/hooks/post-update.d
+	# likewise plugins/: the omarchy package links each of our shell plugins into it
+	# (pete.workspaces, the bar's synced-workspaces widget), so it stays a real dir
+	# that `omarchy plugin clone` can keep writing its own clones into
+	mkdir -p ~/.config/omarchy/plugins
 	# ~/.ssh must already exist as a REAL dir, else stow folds the whole thing
 	# into a symlink pointing at this repo -- and the next ssh-keygen would
 	# write a PRIVATE KEY into version control. Only config is ever stowed.

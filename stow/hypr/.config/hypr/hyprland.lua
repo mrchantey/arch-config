@@ -33,8 +33,12 @@ require("hypr.envs")
 -- otherwise send Chrome's video decode to the dGPU (see envs-device.lua).
 require_optional.module("hypr.envs-device")
 
--- Monitors, GDK_SCALE, and workspace pinning are entirely per-device.
+-- Monitors and GDK_SCALE are entirely per-device.
 require_optional.module("hypr.monitors")
+
+-- Workspaces switch on every monitor together, ranked by position, so nothing
+-- about them is per-device. bindings.lua drives it.
+require("hypr.workspaces")
 
 -- Shared input (keyboard, trackball), then this device's overrides.
 require("hypr.input")

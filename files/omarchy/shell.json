@@ -11,7 +11,7 @@
     "layout": {
       "left": [
         { "id": "omarchy.menu" },
-        { "id": "omarchy.workspaces" }
+        { "id": "pete.workspaces" }
       ],
       "center": [
         { "id": "omarchy.indicators" },

@@ -86,7 +86,7 @@ panel, so there is no HiDPI to serve and no fractional-scaling blur to accept.
 Bump to 1.25 if text is too small; do not go back to `"auto"`.
 
 Also holds the fallback auto-mirror rule (`output = ""`), which catches whatever
-an external cable enumerates as, and the desk monitor setup: the Odyssey G5 at `mode = "highres"` and scale 1.25, workspaces 1-6 on it and 7-10 on the panel, and `monitor.added` / `monitor.removed` hooks that turn the panel off whenever the G5 connects and back on when it goes (Super+Ctrl+Delete brings it back by hand). The file's comments explain why the hooks go through Omarchy's manual toggle and why the removal hook cannot be left to Omarchy's own recovery.
+an external cable enumerates as, and the desk monitor setup: the Odyssey G5 at `mode = "highres"`, scale 1.25 and pinned to `0x0` so it stays leftmost and so the primary for synced workspaces (the shared `workspaces.lua`, see AGENTS.md; with the panel on too, the panel shows 11-20), and `monitor.added` / `monitor.removed` hooks that turn the panel off whenever the G5 connects and back on when it goes (Super+Ctrl+Delete brings it back by hand). The file's comments explain why the hooks go through Omarchy's manual toggle and why the removal hook cannot be left to Omarchy's own recovery.
 
 **`input-device.lua`** sets touchpad `natural_scroll` and `clickfinger_behavior`.
 Note the two libinput nodes, `dell0a69:00-0488:120a-touchpad` and
