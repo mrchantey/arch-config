@@ -44,6 +44,7 @@ o.bind("SUPER + SHIFT + O", "󱄄 Omarchy Screensaver", "omarchy-launch-screensa
 --------------------------------------------------------------------------------
 hl.unbind("SUPER + W") -- was: Close window (moved to SUPER + Q, which frees SUPER + W for the work browser)
 o.bind("SUPER + Q", "Close active window", hl.dsp.window.close())
+hl.unbind("CTRL + ALT + DELETE") -- was: Close all windows (too easy to hit by accident)
 
 o.bind("SUPER + ALT + M", "Adds a master to the master side", hl.dsp.layout("addmaster"))
 hl.unbind("SUPER + BACKSPACE") -- was: Toggle window transparency
