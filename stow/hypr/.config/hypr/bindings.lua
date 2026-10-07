@@ -54,18 +54,30 @@ hl.unbind("SUPER + BACKSPACE") -- was: Toggle window transparency
 o.bind("SUPER + BACKSPACE", "Swaps the current window with master", hl.dsp.layout("swapwithmaster"))
 o.bind("SUPER + BACKSLASH", "Sets the orientation for the current workspace to center", hl.dsp.layout("orientationcenter"))
 
--- Master-layout orientation. Each of these displaces "Move window to group on <dir>".
+-- Master-layout orientation on up/down, push the window to the next monitor on
+-- left/right. Each of these displaces "Move window to group on <dir>". The other
+-- monitor already shows this workspace number (see workspaces.lua), so the window
+-- lands on the same workspace there, and focus follows it.
 for _, orientation in ipairs({
   { key = "UP", name = "top" },
-  { key = "RIGHT", name = "right" },
   { key = "DOWN", name = "bottom" },
-  { key = "LEFT", name = "left" },
 }) do
   hl.unbind("SUPER + ALT + " .. orientation.key) -- was: Move window to group on <direction>
   o.bind(
     "SUPER + ALT + " .. orientation.key,
     "Sets the orientation for the current workspace to " .. orientation.name,
     hl.dsp.layout("orientation" .. orientation.name)
+  )
+end
+for _, direction in ipairs({
+  { key = "LEFT", name = "left", selector = "l" },
+  { key = "RIGHT", name = "right", selector = "r" },
+}) do
+  hl.unbind("SUPER + ALT + " .. direction.key) -- was: Move window to group on <direction>
+  o.bind(
+    "SUPER + ALT + " .. direction.key,
+    "Move window to " .. direction.name .. " monitor",
+    hl.dsp.window.move({ monitor = direction.selector })
   )
 end
 
