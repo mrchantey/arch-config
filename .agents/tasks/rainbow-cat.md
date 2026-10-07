@@ -18,9 +18,14 @@ Verify:
 
 ## 2026-10-07 codex CLI (from silver-fox)
 
-The Codex CLI is now kept alongside claude and gh rather than stripped as a preinstall, see "Dev tooling goes through mise" in AGENTS.md. The desktop app (`openai-codex-desktop`) stays uninstalled.
+The Codex CLI is now kept alongside claude and gh rather than stripped as a preinstall, see "Dev tooling goes through mise" in AGENTS.md. The desktop app (`openai-codex-desktop`) stays uninstalled. Codex and Claude Code now both read the shared global instructions through links in the `agents` package, see "Agent instructions and skills live in `.agents`" in AGENTS.md.
 
 - [ ] `just install-mise-tools`, rewrites the mise wrappers, now including `~/.local/bin/codex`
 - [ ] `codex --version`, first run installs the binary through mise
+- [ ] `just stow-symlinks`, links `~/.codex/AGENTS.md` and moves `~/.claude/CLAUDE.md` from the `claude` package to the `agents` package (stow unlinks the old, now dangling, link itself)
 
-Verify: `codex --version` prints `codex-cli <version>`, `grep codex ~/.config/mise/config.toml` shows `codex = "latest"`, and `pacman -Q openai-codex-desktop` reports it is not installed.
+Verify:
+
+- `codex --version` prints `codex-cli <version>`, and `pacman -Q openai-codex-desktop` reports it is not installed.
+- `readlink ~/.codex/AGENTS.md ~/.claude/CLAUDE.md` shows both under `stow/agents/`, and `cmp ~/.codex/AGENTS.md ~/.agents/AGENTS.md` is silent.
+- `cd /tmp && codex debug prompt-input hi | grep -c 'Beet is an Atmospheric'` prints at least 1, ie Codex loads the global instructions.

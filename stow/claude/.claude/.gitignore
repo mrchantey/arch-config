@@ -3,5 +3,4 @@
 # credentials, shell snapshots, telemetry, etc.) — none of which belongs in git.
 *
 !.gitignore
-!CLAUDE.md
 !settings.json

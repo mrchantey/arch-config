@@ -570,6 +570,9 @@ stow-symlinks:
 	# one is safe to commit because it is age-sealed.
 	mkdir -p ~/.config/beet
 	chmod 700 ~/.config/beet
+	# and ~/.codex: the agents package stows only AGENTS.md into it, so folded,
+	# `codex login` would write its auth.json, and every session, into the repo
+	mkdir -p ~/.codex
 	# omarchy's installer pre-creates ~/.agents/skills as a REAL dir (and drops its
 	# skill symlinks in it), which blocks stow from folding skills/ -- so new skills
 	# created under ~/.agents/skills would be untracked real dirs. Fold it ourselves:
