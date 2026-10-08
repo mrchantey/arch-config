@@ -2,6 +2,8 @@
 
 A page is authored once as a target-agnostic scene and rendered to the web (HTML + CSS) and the terminal (charcell ANSI). The target is chosen at the edge, not in the page. Read this before editing pages, widgets, or style rules.
 
+The edge is one registry, `RenderTargets` (`crates/beet_ui/src/render/mod.rs`): every format (html, markdown, plain text, ansi, the serialized scene, a downstream crate's own like Leaflet's) is a registered target, a request negotiating one from `Accept` and a caller naming one. The `--root` render param (`?root=main|content`, `RenderRoot` in `beet_router`) chooses which part of the page any target renders: `main` is the layout's `<main>`, `content` the route's own content with no layout chrome, which is what a server island swaps in and a syndicated post carries.
+
 Style is expressed as **semantic classes + design tokens**, never raw CSS, because CSS is web-only. Anything web-only (`<head>`, `<style>`, `<script>`, `@media`, raw CSS) is silently skipped by the terminal.
 
 ## The DOM target

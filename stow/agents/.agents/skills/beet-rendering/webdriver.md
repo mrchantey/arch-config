@@ -20,7 +20,7 @@ Color schemes ride the url (`?color-scheme=light|dark`), applied server-side. `-
 
 ## Live reload
 
-Serving with `--watch` (`beet --main=site serve --server=http --watch`) makes every `SiteLayout` page reload itself on a save. Editing colours: a `<Theme>` in `main.bsx` or a `<Rule>` in `templates/Styles.bsx` is a structural edit (scene rebuild, ~2s on the site), a `Layout.bsx` or markdown edit re-fires in place (~150ms). `tests/live_reload_browser.rs` is the reference round trip: a `PageHarness::serve_app` over a fixture entry booted through the exact `--watch` path, edited on disk, asserted through `find_text` and `getComputedStyle` in a real browser. Fixtures must not live under `target/` (the `LiveReload` filter excludes it).
+Serving with `--watch` (`beet --entry=site serve --server=http --watch`) makes every `SiteLayout` page reload itself on a save. Editing colours: a `<Theme>` in `main.bsx` or a `<Rule>` in `templates/Styles.bsx` is a structural edit (scene rebuild, ~2s on the site), a `Layout.bsx` or markdown edit re-fires in place (~150ms). `tests/live_reload_browser.rs` is the reference round trip: a `PageHarness::serve_app` over a fixture entry booted through the exact `--watch` path, edited on disk, asserted through `find_text` and `getComputedStyle` in a real browser. Fixtures must not live under `target/` (the `LiveReload` filter excludes it).
 
 ## A logged-in site (sessions, cookies, secrets)
 

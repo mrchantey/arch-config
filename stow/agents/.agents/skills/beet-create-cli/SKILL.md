@@ -101,7 +101,7 @@ The body is rendered per the `--accept` header (default: ansi-term, then text, m
 
 ## 7. Shipping the CLI
 
-The `beet` binary links capabilities but ships no commands: on startup it discovers `main.bsx` by walking the cwd's ancestors (`--main=<path>` overrides), builds it, and the root's `CallOnReady` dispatches the process request. A command defined in beet itself is a tag any `beet` resolves once its plugin registers it (`CliCommandsPlugin`).
+The `beet` binary links capabilities but ships no commands: on startup it discovers `main.bsx` by walking the cwd's ancestors (`--entry=<path>` overrides), builds it, and the root's `CallOnReady` dispatches the process request. A command defined in beet itself is a tag any `beet` resolves once its plugin registers it (`CliCommandsPlugin`).
 
 A command defined in a downstream crate is a type no beet build can know, so that crate builds its own binary: a thin `main` adding `(BeetPlugins, MyCratePlugin, LaunchPlugin)`, with the same entry resolution and lifecycle (`crates/beet-cli/README.md`, Downstream binaries). Its `main.bsx` declares `<RequireCfg cfg="feature:cli"/>` so the stock `beet` refuses the load rather than running a tree with the commands missing.
 
