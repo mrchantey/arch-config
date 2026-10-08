@@ -55,6 +55,7 @@ icon_theme = "emoji"
 
 
 [text.replacements]
+"ACS" = "ECS"
 "that proto" = "ATProto"
 "without proto" = "ATProto"
 "AppRoto" = "ATProto"

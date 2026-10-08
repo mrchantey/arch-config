@@ -124,8 +124,8 @@ hl.unbind("SUPER + mouse_down") -- was: Scroll active workspace forward
 hl.unbind("SUPER + mouse_up") -- was: Scroll active workspace backward
 o.bind("SUPER + TAB", "Next workspace", cycle(1))
 o.bind("SUPER + SHIFT + TAB", "Previous workspace", cycle(-1))
-o.bind("SUPER + Page_Up", "Next workspace", cycle(1))
-o.bind("SUPER + Page_Down", "Previous workspace", cycle(-1))
+o.bind("SUPER + Page_Up", "Previous workspace", cycle(-1))
+o.bind("SUPER + Page_Down", "Next workspace", cycle(1))
 o.bind("SUPER + mouse_down", "Scroll active workspace forward", cycle(1))
 o.bind("SUPER + mouse_up", "Scroll active workspace backward", cycle(-1))
 
