@@ -47,3 +47,15 @@ The shared preinstall cleanup no longer removes LibreOffice, and fresh installs 
 - [ ] `pacman -Q libreoffice-fresh && libreoffice --headless --version`, confirms the package is installed and the executable starts
 
 Verify: LibreOffice appears in the launcher and opens normally. Future runs of the repo's preinstall cleanup leave it installed.
+
+## 2026-10-09 Beet shortcut and Bluesky launcher (from silver-fox)
+
+Super+Ctrl+B now opens the Beet repo again. Bluesky moves to the Super+Alt+Space Apps menu through a desktop launcher and icon tracked in `stow/mimeapps`, with `bsky` as a search keyword.
+
+- [ ] `rm -f ~/.local/share/applications/Bluesky.desktop ~/.local/share/icons/hicolor/256x256/apps/bluesky.png`, clears the earlier generated copies if present; preserve any local differences from the tracked files before removing them
+- [ ] `just stow-symlinks`, links the Bluesky launcher and icon and refreshes the desktop database
+- [ ] `readlink ~/.local/share/applications/Bluesky.desktop ~/.local/share/icons/hicolor/256x256/apps/bluesky.png`, both point into `stow/mimeapps`
+- [ ] `desktop-file-validate ~/.local/share/applications/Bluesky.desktop`, expect no errors
+- [ ] `hyprctl reload && hyprctl configerrors`, expect no errors
+
+Verify: Super+Ctrl+B opens `~/me/beet` in the configured editor. Super+Alt+Space finds Bluesky when searching either `bluesky` or `bsky`, and selecting it opens `https://bsky.app` as a web app.

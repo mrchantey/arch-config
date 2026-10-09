@@ -537,6 +537,8 @@ stow-symlinks-init:
 	~/.ssh/config										\
 	~/.config/omarchy/hooks/post-update.d/uv-self-update	\
 	~/.config/gtk-3.0/bookmarks			\
+	~/.local/share/applications/Bluesky.desktop	\
+	~/.local/share/icons/hicolor/256x256/apps/bluesky.png	\
 	~/.claude/settings.json
 	@echo "INIT stow-symlinks"
 	just stow-symlinks
@@ -553,6 +555,8 @@ stow-symlinks:
 	# ensure fcitx5's conf/ exists so stow links keyboard.conf into it rather than
 	# folding (symlinking) the whole dir and hiding fcitx5's app-managed state
 	mkdir -p ~/.config/fcitx5/conf
+	# keep generated desktop entries and icon caches outside the repo
+	mkdir -p ~/.local/share/applications ~/.local/share/icons/hicolor/256x256/apps
 	# same folding hazard as ~/.ssh below: keep ~/.config/git a real dir so only
 	# config+ignore are stowed, leaving room for git/gh to write their own state
 	mkdir -p ~/.config/git
@@ -626,9 +630,8 @@ stow-symlinks:
 	voxtype								\
 	xcompose								\
 	zed
-	# the mimeapps package also stows a google-chrome.desktop that shadows the
-	# packaged one (see scripts/launch-here.sh); rebuild the cache so the desktop
-	# database picks up the override rather than the /usr copy.
+	# mimeapps stows our web-app launchers and the Chrome override (see
+	# scripts/launch-here.sh); refresh the desktop database after linking them.
 	update-desktop-database ~/.local/share/applications
 	@echo "PASS stow-symlinks"
 
