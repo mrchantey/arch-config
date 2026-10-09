@@ -51,6 +51,7 @@ Never use `.claude/projects/../memory`, all content related to this project must
 - A rust module reads like a good book: public high level structs at the top, implementation details below. Mod files are just reexports; prefer splitting into specific sub files, but dont 'create a fresh file' because the one you're working on is messy.
 - Functions longer than ~20 lines may have brief comments describing each step.
 - Never insert arbitrary ie 80 col manual reflow newlines in markdown documents.
+- all diagrams should be in mermaid format unless specified
 - all shared dependencies are declared in the workspace Cargo.toml; if one needs no-default-features, disable that at the workspace level and reenable as required
 - for reserved keyword idents, use escaping `r#struct`, never misspelling `strukt`
 
