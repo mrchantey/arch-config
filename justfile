@@ -305,13 +305,16 @@ install-rust:
 	wasm-opt
 	cargo binstall --no-confirm \
 	wasm-bindgen-cli 						\
-	--version=0.2.125
+	--version=0.2.129
 	# beet_esp's Xtensa toolchain: espup installs the `esp` rustup toolchain and
-	# writes ~/export-esp.sh, probe-rs flashes and runs its on-device tests
+	# writes ~/export-esp.sh, probe-rs flashes and runs its on-device tests.
+	# Pinned because espup defaults to the newest non-prerelease build (1.97.0.0),
+	# below bevy 0.20's `rust-version = "1.97.1"`; 1.99.0.0 reorders `global_asm!`
+	# blocks, landing esp-hal 1.1's `.rwtext` literals in flash (an l32r link error)
 	cargo binstall --no-confirm \
 	espup 											\
 	probe-rs-tools
-	espup install --targets esp32s3
+	espup install --targets esp32s3 --toolchain-version 1.98.1.0
 	# probe-rs reaches the ESP32-S3's USB-JTAG without root through its udev rules
 	curl -fsSL https://probe.rs/files/69-probe-rs.rules | sudo tee /etc/udev/rules.d/69-probe-rs.rules > /dev/null
 	sudo udevadm control --reload
