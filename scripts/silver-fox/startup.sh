@@ -27,6 +27,8 @@ brightnessctl -d intel_backlight set 100% >/dev/null
 # 0.40; below that WirePlumber adds software attenuation, which scales the noise floor
 # down with the voice and buys nothing. 0.4 is the mic's minimum analog gain, a 24dB
 # cut from power-on (measured 2026-09-11; re-tune procedure in the info-silver-fox skill).
+# Browser calls raised it mid-session until their AGC was flagged off, see "Browser calls
+# must not move the mic gain" in AGENTS.md.
 #
 # Targeted by node NAME, not @DEFAULT_AUDIO_SOURCE@. The old line set the default source
 # to 0.13, the internal Realtek calibration carried over from the XPS, and with the Brio

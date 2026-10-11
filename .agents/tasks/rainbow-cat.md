@@ -59,3 +59,15 @@ Super+Ctrl+B now opens the Beet repo again. Bluesky moves to the Super+Alt+Space
 - [ ] `hyprctl reload && hyprctl configerrors`, expect no errors
 
 Verify: Super+Ctrl+B opens `~/me/beet` in the configured editor. Super+Alt+Space finds Bluesky when searching either `bluesky` or `bsky`, and selecting it opens `https://bsky.app` as a web app.
+
+## 2026-10-11 browser AGC stops moving the mic gain (from silver-fox)
+
+Chrome, Chromium and Element now run with `--disable-features=WebRtcAllowInputVolumeAdjustment`, so a call can no longer raise the OS mic gain and leave dictation clipping afterwards. See "Browser calls must not move the mic gain" in AGENTS.md. Chrome's flag is a new `chrome` stow package, Element's is a new line in the already stowed `electron-flags.conf`, and Chromium's is appended to omarchy's own copy.
+
+- [ ] `ls -la ~/.config/chrome-flags.conf`, expect it missing; if it is a real file, fold any flags it holds into `stow/chrome/.config/chrome-flags.conf` (merging any `--disable-features` into the one existing line) and remove it, since one stow conflict aborts every package
+- [ ] `just stow-symlinks`, links `~/.config/chrome-flags.conf` to the new package
+- [ ] `just stow-files`, appends the flag to `~/.config/chromium-flags.conf` if missing
+- [ ] (ask first) quit Chrome and Element completely, PWAs included, and reopen them; flags only apply when the main process starts, and a call may be in progress
+- [ ] `wpctl get-volume @DEFAULT_AUDIO_SOURCE@`, and if it reads higher than the level dictation was tuned for, set it back with `wpctl set-volume`; a past call may already have raised it
+
+Verify: `pgrep -a chrome | grep -c WebRtcAllowInputVolumeAdjustment` and `pgrep -a electron | grep -c WebRtcAllowInputVolumeAdjustment` both print more than 0 (Electron merges the feature into its own `--disable-features` list for child processes, so match the name, not the whole switch). After a real call in Chrome or Element, `wpctl get-volume @DEFAULT_AUDIO_SOURCE@` reads the same as before it.

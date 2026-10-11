@@ -503,6 +503,7 @@ stow-symlinks-init:
 	~/.config/autostart							\
 	~/.bashrc												\
 	~/.cargo												\
+	~/.config/chrome-flags.conf			\
 	~/.config/electron-flags.conf		\
 	~/.config/ghostty								\
 	~/.config/mimeapps.list 				\
@@ -615,6 +616,7 @@ stow-symlinks:
 	bashrc 								\
 	beet									\
 	cargo 								\
+	chrome							\
 	claude								\
 	electron							\
 	fcitx5								\
@@ -665,6 +667,10 @@ stow-files-init:
 stow-files:
 	mkdir -p ~/.config/omarchy
 	cp files/omarchy/shell.json ~/.config/omarchy/shell.json
+	# chromium-flags.conf is omarchy's own copy, so append the AGC flag (see
+	# stow/chrome/.config/chrome-flags.conf) the way omarchy's migrations do
+	grep -qxF -- '--disable-features=WebRtcAllowInputVolumeAdjustment' ~/.config/chromium-flags.conf 2>/dev/null || \
+	echo '--disable-features=WebRtcAllowInputVolumeAdjustment' >> ~/.config/chromium-flags.conf
 	@echo "PASS stow-files"
 
 # the reverse of stow-files: capture GUI-made changes back into the repo

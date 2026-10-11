@@ -178,6 +178,8 @@ Plugged in 2026-09-11, USB `046d:094c`, on `usb-0000:00:14.0-11`. Plain UVC plus
 
 **Its mic powers on at maximum gain and clips.** The one mixer control, `Mic Capture Volume`, runs 0..6144 raw for +6dB..+30dB and ships at 6144. Measured at +30dB, the empty room alone is -22 to -27dBFS RMS with peaks near -9dBFS, so there is no headroom left for a voice. `scripts/silver-fox/startup.sh` sets it to **wpctl 0.4** through WirePlumber, which resolves the node by name via `pw-dump` + `jq` (wpctl only takes IDs) and polls in the background so a login without the camera does not stall startup. WirePlumber then persists the value per device in `~/.local/state/wireplumber/default-routes`, so it also survives replug; the startup line is the reassert and the written record.
 
+**Browser calls used to undo it.** WebRTC's AGC in Chrome and Element raised the gain during calls, and WirePlumber persisted the raised value, which reached +22dB (wpctl 0.74) by 2026-10-11. The browsers now carry `--disable-features=WebRtcAllowInputVolumeAdjustment`; the cause, the fix and the test that proved both are under "Browser calls must not move the mic gain" in `AGENTS.md`. Note that `wpctl` reads cubic and PipeWire stores linear, so the saved route for the calibrated 0.40 reads `channelVolumes` 0.064.
+
 The mapping, verified against the mixer: total gain = 30 + 60·log10(vol) dB. 0.7 = +21dB, 0.5 = +12dB, **0.4 = +6dB, the hardware floor**. Below 0.4 WirePlumber pins the hardware at +6dB and attenuates in software, which scales the noise floor down with the voice and improves nothing, so 0.4 is the lowest value worth setting. It is a 24dB cut from power-on, picked from the ambient measurement and then confirmed clean with real voxtype dictation the same day. To re-check after a change of room, distance or unit:
 
 ```bash
@@ -226,7 +228,7 @@ run, so it asks once at the start and never again. `just init`,
   it, and do not carry its facts forward.
 - **`hyprctl devices` shows two mice for one touchpad.** Not a trackpoint.
 - **The internal capture source is not a microphone.** Don't take the presence of `alsa_input...analog-stereo`, an unmuted `Internal Mic` control, or a running `voxtype.service` as evidence that dictation can work without the Brio 100 plugged in.
-- **The Brio 100 mic clips at its power-on gain.** If dictation goes to garbage after a fresh install or a wiped `~/.local/state/wireplumber`, check `wpctl get-volume` on the Brio source reads 0.40, not 1.00.
+- **The Brio 100 mic clips at its power-on gain.** If dictation goes to garbage after a fresh install or a wiped `~/.local/state/wireplumber`, check `wpctl get-volume` on the Brio source reads 0.40, not 1.00. If it reads something in between after a call, a browser flag is missing or the browser has not been restarted since it was added, see "Browser calls must not move the mic gain" in `AGENTS.md`.
 - **Dictation goes silent (indicator shows, no text) when the 4 GB card is full.** voxtype segfaults on a VRAM out-of-memory and crash-loops. Budget, cause and fix are under Transcription in `AGENTS.md`; `nvidia-smi` shows who holds the card, and `systemctl --user restart kokoro-tts.service` is the immediate cure if kokoro has grown past ~750 MiB.
 - **Long installs need `scripts/sudo-keepalive.sh`.** A bare `sudo -v` lapses
   after five minutes and the run dies mid-way once nobody is at the keyboard.

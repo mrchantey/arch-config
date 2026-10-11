@@ -104,6 +104,20 @@ Lessons that cost time: Hugging Face downloads through `hf_xet` stall indefinite
 
 Codex's `/voice` captures through its own `codex-voice-host` process, an ALSA client of PipeWire, and that host loses most of its mic audio whenever PipeWire delivers capture in chunks above about 1024 frames: the gaps reach OpenAI as zero-filled 10ms blocks, so the model hears fragments and never answers while the mic meter still moves. The host asks for 2400-frame periods itself, which lands the graph at its 2048 max quantum. It only failed some of the time because anything else capturing the same mic at a lower latency, voxtype in particular, holds the whole graph at 1024. `stow/pipewire/.config/pipewire/client.conf.d/codex-voice.conf` caps that one binary's ALSA period at 1024 frames. The PipeWire ALSA plugin reads it when the host starts, so it applies from the next Codex launch. A `node.latency` override in the same rule does not work, the plugin derives latency from the period. Check it with `pw-top` during `/voice`: `alsa_capture.codex-voice-host` should read 1024.
 
+## Browser calls must not move the mic gain
+
+WebRTC's AGC does not stop at its own digital gain, it also turns the OS mic level. During a call it raises the source volume while it hears speech it judges too quiet and never lowers it again, and WirePlumber persists that like any user change, so the raised gain outlives the call, survives replug and reaches voxtype as clipped garbage. On silver-fox it took the Brio from its calibrated +6dB to +22dB. Chrome, Chromium and every Electron app (Element calls are WebRTC) do this through the `WebRtcAllowInputVolumeAdjustment` feature, which `--disable-features=WebRtcAllowInputVolumeAdjustment` turns off; the call keeps its digital gain, it just stops reaching outside the browser. The flag lives in three places:
+
+- `stow/chrome/.config/chrome-flags.conf`, read by `/usr/bin/google-chrome-stable`
+- `stow/electron/.config/electron-flags.conf`, read by the Arch electron wrappers, see "Electron apps need the keyring flag"
+- `~/.config/chromium-flags.conf`, which is omarchy's own copy rather than ours, so `just stow-files` appends the line if missing
+
+Flags apply only when the main process starts, so an already-running Chrome needs every window, PWAs included, closed first. Chromium keeps only the last `--disable-features` switch, so further features join the existing line comma separated, never a second line.
+
+Verified 2026-10-11 with a headless loopback call (`RTCPeerConnection` pair on `getUserMedia({ audio: true })`, scratch `--user-data-dir`) while quiet espeak speech played into the room. Unflagged Chrome raised the Brio from wpctl 0.40 to 0.47 and 0.50 in two 30 s runs, unflagged Electron to 0.45; through the flags files both held at 0.40. The AGC only moves the gain while it hears speech, so a test in a silent room, or with speech already near -20 dBFS, shows nothing.
+
+The tell is in WirePlumber's saved route. `wpctl` prints cubic volume and PipeWire stores linear, so the drift read as wpctl 0.74 beside `channelVolumes` 0.400713 in `~/.local/state/wireplumber/default-routes`. That linear value is exactly PulseAudio's raw 48316, ie `188/255 × 65536` truncated, an AGC level out of 255, which is what pointed at WebRTC rather than the bar's mic slider.
+
 ## Cursor theme
 
 The pointer is Never-Lost Rainbow, converted from the Windows `.ani` set in `neverlost/` (see its readme for what the conversion changes). `just install-cursor-theme` runs `scripts/install-cursor-theme.py`, which builds the XCursor theme into `~/.local/share/icons/Never-Lost-Rainbow`. That script also owns the Windows-role-to-X11-name mapping, so it is the file to edit to change which cursor plays which role.
