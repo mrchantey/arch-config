@@ -71,3 +71,12 @@ Chrome, Chromium and Element now run with `--disable-features=WebRtcAllowInputVo
 - [ ] `wpctl get-volume @DEFAULT_AUDIO_SOURCE@`, and if it reads higher than the level dictation was tuned for, set it back with `wpctl set-volume`; a past call may already have raised it
 
 Verify: `pgrep -a chrome | grep -c WebRtcAllowInputVolumeAdjustment` and `pgrep -a electron | grep -c WebRtcAllowInputVolumeAdjustment` both print more than 0 (Electron merges the feature into its own `--disable-features` list for child processes, so match the name, not the whole switch). After a real call in Chrome or Element, `wpctl get-volume @DEFAULT_AUDIO_SOURCE@` reads the same as before it.
+
+## 2026-10-15 caps lock compose restored (from silver-fox)
+
+`~/.XCompose` included Omarchy 3's `~/.local/share/omarchy/default/xcompose`, which no longer exists, so xkbcommon rejected the whole file and every CapsLock compose sequence was dead. The include now points at `/usr/share/omarchy/default/xcompose`. fcitx5 reads the file only at startup.
+
+- [ ] `/usr/lib/xkbcommon/xkbcli-compile-compose ~/.XCompose | grep -E '<m> <s>|<space> <n>'`, expect both sequences and no `ERROR`
+- [ ] `omarchy-restart-xcompose`, restarts fcitx5 onto the fixed file
+
+Verify: CapsLock m s types 😄 and CapsLock space n types "Peter Hayman".

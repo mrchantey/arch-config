@@ -1,8 +1,8 @@
 # to update changes run omarchy-restart-xcompose
 
-include "%H/.local/share/omarchy/default/xcompose"
+include "/usr/share/omarchy/default/xcompose"
 
 # Identification
 <Multi_key> <space> <n> : "Peter Hayman"
 <Multi_key> <space> <e> : "peteyhayman@gmail.com"
-<Multi_key> <space> <p> : "poopie"
+<Multi_key> <space> <p> : "poop"

@@ -23,7 +23,7 @@ distrust it:
 
 | Then | Now |
 | --- | --- |
-| `~/.local/share/omarchy`, a **git repo** you could `git fetch` | `/usr/share/omarchy`, a **read-only pacman package** (`omarchy-version` → e.g. `4.0.3-1`). `~/.local/share/omarchy` is a back-compat symlink. |
+| `~/.local/share/omarchy`, a **git repo** you could `git fetch` | `/usr/share/omarchy`, a **read-only pacman package** (`omarchy-version` → e.g. `4.0.3-1`). `~/.local/share/omarchy` is gone (4.0.4 no longer ships the back-compat symlink), so a stowed file still including it breaks, as `~/.XCompose` did. |
 | Hyprland `*.conf` + `source =` chain | native **Lua** modules (`hyprland.lua` and friends) |
 | waybar, walker/elephant, mako, swayosd, hypridle/hyprlock | one Quickshell process, `omarchy-shell`, configured by `~/.config/omarchy/shell.json` |
 | `omarchy-refresh-<thing>` per config | one `omarchy-refresh-config <path-relative-to-.config>` |
