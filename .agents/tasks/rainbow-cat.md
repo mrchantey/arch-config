@@ -80,3 +80,19 @@ Verify: `pgrep -a chrome | grep -c WebRtcAllowInputVolumeAdjustment` and `pgrep 
 - [ ] `omarchy-restart-xcompose`, restarts fcitx5 onto the fixed file
 
 Verify: CapsLock m s types 😄 and CapsLock space n types "Peter Hayman".
+
+## 2026-10-21 daily backup (from silver-fox)
+
+This device now backs itself up to its own prefix of the private `arch-config--shared--backup` bucket, once a day whenever it is on. See "Backups" in AGENTS.md and the `backup` skill. Claude Code now keeps transcripts for 3650 days rather than 30 (`stow/claude/.claude/settings.json`), which is live as soon as this pull lands.
+
+The bucket is created from silver-fox by `just assets deploy --elevated`, which needs the administrator's code. If the upload below fails with `NoSuchBucket` or `AccessDenied`, that has not happened yet: stop and report, leaving the remaining steps unticked.
+
+- [ ] `just backup --dry-run`, stages `target/backup/rainbow-cat` and prints a report without pushing or uploading. Check the staged tree is this machine's `~/me` and `~/Downloads`, with no `target/` or `.agents/tmp` in it.
+- [ ] `just backup --first`, the first real run: pushes branches that are ahead, ingests this machine's Claude Code sessions into beet_egress and pushes them, then uploads. `--first` is right here because rainbow-cat has never had a backup to restore.
+- [ ] `just install-backup-timer`, enables the hourly `backup.timer`, which runs a backup once it is due.
+
+Verify:
+
+- `cat ~/.local/state/backup/last-run` prints `ok`.
+- `systemctl --user list-timers backup.timer` shows the next firing within the hour.
+- Act on the report's "Needs attention" section as the `backup` skill describes.

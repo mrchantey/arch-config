@@ -211,7 +211,7 @@
 		},
 		"Rust": {
 			"colorize_brackets": true,
-			// "enable_language_server": false,
+			"enable_language_server": false,
 		},
 		"Just": {
 			// seems to completely ignore these

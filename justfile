@@ -28,7 +28,8 @@ init:
 	install-transcribe	\
 	install-transcribe-file	\
 	install-tts				\
-	install-cursor-theme
+	install-cursor-theme	\
+	install-backup-timer
 	chmod +x scripts/*/startup.sh
 
 # symlink the audio capture+transcribe helper onto PATH (~/.local/bin is on PATH).
@@ -729,18 +730,18 @@ pull-repo repo *args:
 	mkdir -p ~/me
 	cd ~/me && git clone https://github.com/{{ repo }} {{args}} || true
 
-# The shared assets bucket, `arch-config--shared--assets`, declared in main.bsx and
-# driven by the stock beet binary built from ~/me/beet (pull-repos clones it):
-#   just assets validate | plan | deploy | push | destroy
+# The shared assets and backup buckets, declared in main.bsx and driven by the
+# stock beet binary built from ~/me/beet (pull-repos clones it):
+#   just assets plan | deploy | push | destroy
 # cargo runs from beet's checkout so it reads beet's .cargo/config.toml
 # (RUST_MIN_STACK for the deep type graph); BEET_WORKSPACE_ROOT points beet back here
 # so `assets/` and the tofu work dir (target/infra/arch-config) resolve against
 # this repo rather than beet's.
 #
-# the assets bucket through beet: just assets validate | plan | deploy | push | destroy
+# this repo's buckets through beet: just assets plan | deploy | push | destroy
 assets *args:
 	cd ~/me/beet && BEET_WORKSPACE_ROOT={{ justfile_directory() }} \
-	cargo run -p beet-cli --features infra,extra -- --main={{ justfile_directory() }}/main.bsx {{ args }}
+	cargo run -p beet-cli --features infra,extra -- --entry={{ justfile_directory() }}/main.bsx {{ args }}
 
 # assets/ is a manifest of symlinks, one per noun, each pointing at where that noun
 # lives on the machine (assets/pictures -> ~/Pictures/assets: wallpapers, headshots,
@@ -767,23 +768,45 @@ push-assets:
 	just assets push
 	@echo "PASS - push-assets"
 
-pre-reset:
-	@set -e
-	@for repo in {{ replace(write_repositories, "\n", " ") }}; do \
-		just pre-reset-repo $repo || exit 1; \
-	done
-	@echo "PASS pre-reset"
-	@echo "You are almost ready to reset your machine: \
-	- ensure assets directories have been pushed: beet, beetmash \
-	- ensure assets/ has been pushed: just push-assets \
-	- your age identity ~/.config/beet/age/keys.txt is in NO repo: confirm the USB backup restores (just setup-age-identity <backup> on another machine) before wiping \
-	"
+# Push what git can, ingest Claude Code sessions and mirror everything git cannot hold
+# to this device's prefix of the private backup bucket (AGENTS.md, Backups).
+#   just backup --dry-run   # stage and report, push and upload nothing
+#   just backup --first     # the first backup on a machine with nothing to restore
+#
+# back up this device: git pushes, Claude Code sessions, and a mirror of ~/me and ~/Downloads
+backup *args:
+	scripts/backup.sh {{ args }}
 
-@pre-reset-repo repo:
-	cd ~/me/$(basename {{ repo }}) && \
-	(git diff --exit-code || (echo "Error: $(basename {{ repo }}) has uncommitted changes" && exit 1)) && \
-	(git diff --exit-code --cached || (echo "Error: $(basename {{ repo }}) has staged uncommitted changes" && exit 1)) && \
-	(test -z "$(git log @{u}..)" || (echo "Error: $(basename {{ repo }}) has unpushed commits" && exit 1))
+# Lays a device's backup over ~, filling in what is missing and never overwriting.
+# On a fresh machine, after `just init` has cloned, `just restore <device> --replace`
+# swaps each backed up checkout in whole, keeping the fresh clone as <path>.pre-restore.
+#
+# restore a device's backup into ~
+restore device=`hostname` *args:
+	scripts/backup.sh restore {{ device }} {{ args }}
+
+# An hourly check that backs up once a day, whenever the machine happens to be on:
+# `--if-due` makes it a no-op until 23h after the last run (3h after a failed one),
+# so an off night costs nothing and the first hour of the morning catches up. Niced
+# and idle-IO so a build or an upload never competes with the desktop.
+#
+# back up daily, whenever the machine is on
+install-backup-timer:
+	mkdir -p ~/.config/systemd/user
+	printf '[Unit]\nDescription=Back up this device (scripts/backup.sh)\n\n[Service]\nType=oneshot\nNice=19\nIOSchedulingClass=idle\nExecStart=%%h/me/arch-config/scripts/backup.sh --if-due\n' > ~/.config/systemd/user/backup.service
+	printf '[Unit]\nDescription=Back up this device when a backup is due\n\n[Timer]\nOnStartupSec=10min\nOnCalendar=hourly\nRandomizedDelaySec=10min\n\n[Install]\nWantedBy=timers.target\n' > ~/.config/systemd/user/backup.timer
+	systemctl --user daemon-reload
+	systemctl --user enable --now backup.timer
+	@echo "PASS install-backup-timer"
+
+# before wiping this machine: a backup, then what no backup covers
+pre-reset:
+	scripts/backup.sh
+	@echo "You are almost ready to reset your machine: \
+	- ensure the beet and beetmash asset buckets have been pushed \
+	- ensure assets/ has been pushed: just push-assets \
+	- your age identity ~/.config/beet/age/keys.txt is in NO repo or bucket: confirm the USB backup restores (just setup-age-identity <backup> on another machine) before wiping \
+	"
 
 # best-effort apply these settings for windows
 @windows-push:

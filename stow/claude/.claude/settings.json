@@ -18,6 +18,7 @@
   },
   "effortLevel": "low",
   "autoMemoryEnabled": false,
+  "cleanupPeriodDays": 3650,
   "skipDangerousModePermissionPrompt": true,
   "theme": "dark",
   "switchModelsOnFlag": true,
