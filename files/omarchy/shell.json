@@ -6,20 +6,33 @@
   },
   "bar": {
     "position": "top",
-    "transparent": false,
-    "centerAnchor": "omarchy.clock",
+    "background": "opaque",
     "layout": {
       "left": [
         { "id": "omarchy.menu" },
         { "id": "pete.workspaces" }
       ],
+      "centerBegin": [
+        { "id": "omarchy.indicators" }
+      ],
       "center": [
-        { "id": "omarchy.indicators" },
         {
           "id": "omarchy.clock",
           "format": "HH:mm · dddd 'W'ww · dd MMMM yyyy",
           "formatAlt": "dd MMMM 'W'ww yyyy",
           "verticalFormat": "HH\n—\nmm"
+        }
+      ],
+      "centerEnd": [
+        {
+          "id": "omarchy.elsewhen",
+          "cities": [
+            { "name": "Sydney", "zone": "Australia/Sydney" },
+            { "name": "Los Angeles", "zone": "America/Los_Angeles" },
+            { "name": "New York", "zone": "America/New_York" },
+            { "name": "London", "zone": "Europe/London" },
+            { "name": "Dubai", "zone": "Asia/Dubai" }
+          ]
         },
         { "id": "omarchy.system-update" }
       ],
@@ -31,8 +44,11 @@
         { "id": "omarchy.audio" },
         { "id": "omarchy.monitor" },
         { "id": "omarchy.power" }
-      ]
+      ],
+      "tray": []
     }
   },
-  "plugins": []
+  "plugins": [
+    { "id": "io.voxtype.settings" }
+  ]
 }

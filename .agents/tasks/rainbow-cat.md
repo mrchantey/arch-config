@@ -4,10 +4,12 @@
 
 Switching workspace now switches both monitors together: the ultrawide (leftmost, so primary) shows 1-10 and the side monitor 11-20. See "Workspaces switch on every monitor together" in AGENTS.md. Until step 1 runs, Hyprland's auto-reload fails on the missing `hypr.workspaces` module, which drops every bind after it in `bindings.lua`.
 
-- [ ] `just stow-symlinks`, links the new `~/.config/hypr/workspaces.lua`, creates `~/.config/omarchy/plugins` and links the `pete.workspaces` bar widget into it
-- [ ] `just stow-files`, copies `shell.json`, which now puts `pete.workspaces` on the bar in place of `omarchy.workspaces`
-- [ ] `hyprctl reload && hyprctl configerrors`, expect no errors
-- [ ] `omarchy restart shell`, the shell does not reliably hot-load a new plugin
+- [x] `just stow-symlinks`, links the new `~/.config/hypr/workspaces.lua`, creates `~/.config/omarchy/plugins` and links the `pete.workspaces` bar widget into it
+- [x] `just stow-files`, copies `shell.json`, which now puts `pete.workspaces` on the bar in place of `omarchy.workspaces`
+- [x] `hyprctl reload && hyprctl configerrors`, expect no errors
+- [x] `omarchy restart shell`, the shell does not reliably hot-load a new plugin
+
+2026-11-12: applied on Omarchy 4.5.0-3. Config errors are empty, the shell reports `pete.workspaces` loaded and visible, and switching workspace then restoring it passes. Only the C49RG9x is connected, so the two-monitor checks below remain pending.
 
 Verify:
 
@@ -22,7 +24,7 @@ The Codex CLI is now kept alongside claude and gh rather than stripped as a prei
 
 - [ ] `just install-mise-tools`, rewrites the mise wrappers, now including `~/.local/bin/codex`
 - [ ] `codex --version`, first run installs the binary through mise
-- [ ] `just stow-symlinks`, links `~/.codex/AGENTS.md` and moves `~/.claude/CLAUDE.md` from the `claude` package to the `agents` package (stow unlinks the old, now dangling, link itself)
+- [x] `just stow-symlinks`, links `~/.codex/AGENTS.md` and moves `~/.claude/CLAUDE.md` from the `claude` package to the `agents` package (stow unlinks the old, now dangling, link itself)
 
 Verify:
 
@@ -34,8 +36,8 @@ Verify:
 
 Codex's `/voice` dropped most of the mic audio whenever the PipeWire graph ran above a 1024 quantum, so the model never answered. A new `pipewire` stow package caps Codex's voice host at 1024-frame periods. See "Codex voice needs small capture chunks" in AGENTS.md.
 
-- [ ] `ls -la ~/.config/pipewire`, expect it missing; if it is a real dir, check nothing in it clashes with `stow/pipewire/.config/pipewire/client.conf.d/codex-voice.conf` before the next step, since one stow conflict aborts every package
-- [ ] `just stow-symlinks`, links `~/.config/pipewire` to the new package
+- [x] `ls -la ~/.config/pipewire`, confirmed missing before linking on 2026-11-12
+- [x] `just stow-symlinks`, links `~/.config/pipewire` to the new package
 
 Verify: start `codex`, run `/voice`, and while it listens `pw-top -b -n 3 | grep codex-voice-host` shows quantum 1024 (not 2048 or 2400). Then say something and confirm it transcribes and answers. This machine's mic differs from silver-fox's Brio, so the end-to-end check is the real test here.
 
@@ -52,11 +54,11 @@ Verify: LibreOffice appears in the launcher and opens normally. Future runs of t
 
 Super+Ctrl+B now opens the Beet repo again. Bluesky moves to the Super+Alt+Space Apps menu through a desktop launcher and icon tracked in `stow/mimeapps`, with `bsky` as a search keyword.
 
-- [ ] `rm -f ~/.local/share/applications/Bluesky.desktop ~/.local/share/icons/hicolor/256x256/apps/bluesky.png`, clears the earlier generated copies if present; preserve any local differences from the tracked files before removing them
-- [ ] `just stow-symlinks`, links the Bluesky launcher and icon and refreshes the desktop database
-- [ ] `readlink ~/.local/share/applications/Bluesky.desktop ~/.local/share/icons/hicolor/256x256/apps/bluesky.png`, both point into `stow/mimeapps`
-- [ ] `desktop-file-validate ~/.local/share/applications/Bluesky.desktop`, expect no errors
-- [ ] `hyprctl reload && hyprctl configerrors`, expect no errors
+- [x] Checked `~/.local/share/applications/Bluesky.desktop` and `~/.local/share/icons/hicolor/256x256/apps/bluesky.png` before linking on 2026-11-12; both were absent, so no generated copies needed removing
+- [x] `just stow-symlinks`, links the Bluesky launcher and icon and refreshes the desktop database
+- [x] `readlink ~/.local/share/applications/Bluesky.desktop ~/.local/share/icons/hicolor/256x256/apps/bluesky.png`, both point into `stow/mimeapps`
+- [x] `desktop-file-validate ~/.local/share/applications/Bluesky.desktop`, expect no errors
+- [x] `hyprctl reload && hyprctl configerrors`, expect no errors
 
 Verify: Super+Ctrl+B opens `~/me/beet` in the configured editor. Super+Alt+Space finds Bluesky when searching either `bluesky` or `bsky`, and selecting it opens `https://bsky.app` as a web app.
 
@@ -64,9 +66,9 @@ Verify: Super+Ctrl+B opens `~/me/beet` in the configured editor. Super+Alt+Space
 
 Chrome, Chromium and Element now run with `--disable-features=WebRtcAllowInputVolumeAdjustment`, so a call can no longer raise the OS mic gain and leave dictation clipping afterwards. See "Browser calls must not move the mic gain" in AGENTS.md. Chrome's flag is a new `chrome` stow package, Element's is a new line in the already stowed `electron-flags.conf`, and Chromium's is appended to omarchy's own copy.
 
-- [ ] `ls -la ~/.config/chrome-flags.conf`, expect it missing; if it is a real file, fold any flags it holds into `stow/chrome/.config/chrome-flags.conf` (merging any `--disable-features` into the one existing line) and remove it, since one stow conflict aborts every package
-- [ ] `just stow-symlinks`, links `~/.config/chrome-flags.conf` to the new package
-- [ ] `just stow-files`, appends the flag to `~/.config/chromium-flags.conf` if missing
+- [x] `ls -la ~/.config/chrome-flags.conf`, confirmed missing before linking on 2026-11-12
+- [x] `just stow-symlinks`, links `~/.config/chrome-flags.conf` to the new package
+- [x] `just stow-files`, appends the flag to `~/.config/chromium-flags.conf` if missing
 - [ ] (ask first) quit Chrome and Element completely, PWAs included, and reopen them; flags only apply when the main process starts, and a call may be in progress
 - [ ] `wpctl get-volume @DEFAULT_AUDIO_SOURCE@`, and if it reads higher than the level dictation was tuned for, set it back with `wpctl set-volume`; a past call may already have raised it
 
@@ -76,8 +78,10 @@ Verify: `pgrep -a chrome | grep -c WebRtcAllowInputVolumeAdjustment` and `pgrep 
 
 `~/.XCompose` included Omarchy 3's `~/.local/share/omarchy/default/xcompose`, which no longer exists, so xkbcommon rejected the whole file and every CapsLock compose sequence was dead. The include now points at `/usr/share/omarchy/default/xcompose`. fcitx5 reads the file only at startup.
 
-- [ ] `/usr/lib/xkbcommon/xkbcli-compile-compose ~/.XCompose | grep -E '<m> <s>|<space> <n>'`, expect both sequences and no `ERROR`
-- [ ] `omarchy-restart-xcompose`, restarts fcitx5 onto the fixed file
+- [x] `/usr/lib/xkbcommon/xkbcli-compile-compose ~/.XCompose | grep -E '<m> <s>|<space> <n>'`, both sequences compile without errors, checked 2026-11-12
+- [x] `omarchy-restart-xcompose`, restarts fcitx5 onto the fixed file
+
+2026-11-12: restored the detached `.XCompose` to a stow link, preserving its local `poopie` expansion in the source. `omarchy-fcitx5.service` is active. Interactive typing below remains to be checked.
 
 Verify: CapsLock m s types 😄 and CapsLock space n types "Peter Hayman".
 
