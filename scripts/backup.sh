@@ -80,7 +80,7 @@ main() {
 	for dir in "${checkouts[@]}"; do
 		stage_checkout "$dir"
 	done
-	if [[ -d $HOME/Downloads ]]; then cp -a --reflink=auto "$HOME/Downloads" "$stage/Downloads"; fi
+
 	upload
 	report
 

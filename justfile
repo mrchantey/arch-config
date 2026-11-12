@@ -773,7 +773,7 @@ push-assets:
 #   just backup --dry-run   # stage and report, push and upload nothing
 #   just backup --first     # the first backup on a machine with nothing to restore
 #
-# back up this device: git pushes, Claude Code sessions, and a mirror of ~/me and ~/Downloads
+# back up this device: git pushes, Claude Code sessions, and durable work under ~/me
 backup *args:
 	scripts/backup.sh {{ args }}
 

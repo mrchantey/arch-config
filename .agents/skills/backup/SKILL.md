@@ -1,12 +1,14 @@
 ---
 name: backup
 description: >
-  Back up this device so losing it loses nothing: push unpushed commits in the repos under ~/me, ingest Claude Code sessions through beet_egress, and mirror uncommitted work, `.agents` and ~/Downloads to the private `arch-config--shared--backup` bucket. Use when asked to "back up", "run the backup" or "make sure everything is saved", before wiping or handing in a machine, when a "Backup failed" or "Backup refused" notification appears, when adding a device, and when restoring a lost one.
+  Back up this device's durable work: push unpushed commits in the repos under ~/me, ingest Claude Code sessions through beet_egress, and mirror uncommitted work and `.agents` to the private `arch-config--shared--backup` bucket. Use when asked to "back up", "run the backup" or "make sure everything is saved", before wiping or handing in a machine, when a "Backup failed" or "Backup refused" notification appears, when adding a device, and when restoring a lost one.
 ---
 
 # Backup
 
 `just backup` does the work and prints a report; this skill runs it, acts on the report, and covers what it refuses. What is staged, why, and how the timer paces it: "Backups" in AGENTS.md. Don't restate it here.
+
+Treat `~/Downloads` as temporary. Never stage or upload its contents. After changing backup scope, use `--dry-run` and verify the staged tree excludes it before uploading.
 
 ## Running it
 
@@ -39,7 +41,7 @@ description: >
 On the replacement, after `just init` (which clones the repos and builds what the restore needs):
 
 1. `just setup-age-identity <usb backup>`, so beet can open the deployer pair in `secrets.toml`.
-2. `just restore <device> --replace`: pulls the prefix to `~/.cache/backup-restore/<device>`, swaps each backed up checkout in whole and keeps each fresh clone beside it as `<path>.pre-restore`, then fills in everything else that is missing (`~/Downloads`, other repos' `.agents`).
+2. `just restore <device> --replace`: pulls the prefix to `~/.cache/backup-restore/<device>`, swaps each backed up checkout in whole and keeps each fresh clone beside it as `<path>.pre-restore`, then fills in missing files such as other repos' `.agents`.
 3. In each restored repo, `git fetch` brings the remotes up to date, and `git status` should show only the uncommitted work that was backed up.
 4. Once satisfied, delete the `*.pre-restore` dirs and `~/.cache/backup-restore`. The next `just backup` uploads normally, since the restore cleared the first-run guard.
 
