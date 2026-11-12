@@ -311,8 +311,8 @@ run_saved() {
 	local name=$1
 	shift
 	case $name in
-		beet) BEET_WORKSPACE_ROOT="$repo_dir" RUST_MIN_STACK=1073741824 \
-			"$state/bin/beet" --entry="$repo_dir/main.bsx" "$@" ;;
+		beet) (cd "$repo_dir" && BEET_WORKSPACE_ROOT="$repo_dir" RUST_MIN_STACK=1073741824 \
+			"$state/bin/beet" --entry="$repo_dir/main.bsx" "$@") ;;
 		beet-egress) (cd "$egress_dir" && BEET_WORKSPACE_ROOT="$egress_dir" RUST_MIN_STACK=1073741824 \
 			"$state/bin/beet-egress" "$@") ;;
 	esac

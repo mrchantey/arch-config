@@ -13,3 +13,19 @@
 - [ ] `hyprctl reload && hyprctl configerrors`, expect no errors
 
 Verify: `omarchy-shell shell ping` prints `ok`; the clock is centered and the synced-workspace buttons appear. Check `omarchy-shell shell listPlugins` for enabled `pete.workspaces` and, if installed, `io.voxtype.settings`. CapsLock space p types `poopie`.
+
+## 2026-11-13 backup scope and Claude metadata (from rainbow-cat)
+
+Downloads is temporary and excluded from backups, see AGENTS.md, "Backups". The next successful mirror removes any old Downloads objects from the active device prefix; version history retains them for its existing 90-day period. `beet_egress` commit `21ccf76` preserves Claude Code's `accountUuid`, `organizationUuid` and `tools` fields without relaxing strict validation. All 44 egress tests and real ingestion passed on rainbow-cat, and its full backup succeeded.
+
+- [ ] Check `git -C ~/me/beet status --short`, `git -C ~/me/beet_atproto status --short` and `git -C ~/me/beet_egress status --short`; preserve local work before updating, never reset it
+- [ ] `git -C ~/me/beet pull --ff-only`, updates the shared dependency; stop and reconcile if it is dirty or diverged
+- [ ] `git -C ~/me/beet_atproto pull --ff-only`, updates the sibling path dependency
+- [ ] `git -C ~/me/beet_egress pull --ff-only`, picks up the parser fix
+- [ ] `rustc --version`, Bevy 0.20 requires Rust 1.97.1 or newer
+- [ ] (ask first, only if the default nightly is too old) `rustup update nightly`, preserves installed components and targets while upgrading the compiler
+- [ ] `just backup --dry-run`, verify `target/backup/silver-fox/Downloads` is absent
+- [ ] `just backup`, verify egress and upload both succeed; a failed old cached parser triggers a rebuild from the updated source
+- [ ] `just install-backup-timer`, ensures the hourly due-check timer is enabled
+
+Verify: `cat ~/.local/state/backup/last-run` prints `ok`, `systemctl --user list-timers backup.timer` shows the next firing, and the staged backup contains no Downloads. The saved stock runner now explicitly changes to the config repo, so it also works when systemd launches it from home.
