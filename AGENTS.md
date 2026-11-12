@@ -229,4 +229,5 @@ The same display loss also breaks locking outright. Quickshell cannot create a l
 
 `rainbow-cat`
 	- desktop, NVIDIA (primary GPU)
-	- Samsung C49RG9x ultrawide (5120x1440@120, scaled 1.25) + C24F390 1080p to its right
+	- Samsung C49RG9x ultrawide (5120x1440@120, scaled 1.25) is the only display in use as of 2026-11-12; no second monitor is planned in the immediate future.
+	- The C24F390 1080p side-monitor configuration remains in place for possible future use, positioned to the ultrawide's right. Its two-monitor workspace behavior is not yet hardware-verified on this machine.
