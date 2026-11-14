@@ -89,6 +89,7 @@ BarWidget {
         text: Labels.safeText(Labels.buttonLabel(modelData, project, root.vertical))
         tooltipText: Labels.safeText((modelData === 10 ? "0" : String(modelData)) + (project ? " " + project : ""))
         active: focused
+        activeColor: Color.accent
         opacity: occupied || focused ? 1 : 0.5
         horizontalMargin: 6
         verticalPadding: 6

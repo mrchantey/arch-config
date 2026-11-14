@@ -38,4 +38,4 @@ Verify: `cat ~/.local/state/backup/last-run` prints `ok`, `systemctl --user list
 - [ ] `omarchy restart shell`, clears Qt's cached workspace widget
 - [ ] `omarchy-shell shell ping`, expect `ok`
 
-Verify: the bar shows labels such as `2 arch-config`, with the active workspace colored and underlined. Changing the file within a Zed project leaves its project label stable; moving its window to another workspace transfers the label. With multiple screens, the same group shows the same label on each bar.
+Verify: the bar shows labels such as `2 arch-config`, with the active workspace text and underline using the current theme's accent color instead of urgent red. Changing the file within a Zed project leaves its project label stable; moving its window to another workspace transfers the label. With multiple screens, the same group shows the same label on each bar.
