@@ -249,6 +249,7 @@ install-apps-init:
 install-apps:
 	just install-libreoffice
 	just install-mullvad
+	just install-qbittorrent
 	sudo pacman -S --noconfirm --needed 	\
 	age															\
 	aws-cli-v2														\
@@ -281,6 +282,10 @@ install-libreoffice:
 install-mullvad:
 	omarchy pkg add mullvad-vpn
 	sudo systemctl enable --now mullvad-daemon.service
+
+# Preferences, including the download path and Mullvad binding, are in the qbittorrent stow package.
+install-qbittorrent:
+	omarchy pkg add qbittorrent
 
 # Rust is the one runtime omarchy does NOT put behind mise -- its Menu > Install >
 # Development > Rust runs the rustup.rs installer and guards on ~/.rustup. We use the
@@ -505,6 +510,12 @@ install-mise-tools:
 # required to run after fresh install or omarchy update
 # this may break hyprland, if so run Menu > System > Rel
 stow-symlinks-init:
+	# qBittorrent atomically replaces its config, so stow must fold the whole directory.
+	# Preserve an existing real directory rather than deleting its RSS and other state.
+	if [ -d ~/.config/qBittorrent ] && [ ! -L ~/.config/qBittorrent ]; then \
+		test ! -e ~/.config/qBittorrent.pre-stow && test ! -L ~/.config/qBittorrent.pre-stow && \
+		mv -T ~/.config/qBittorrent ~/.config/qBittorrent.pre-stow; \
+	fi
 	rm -rf 													\
 	~/.config/alacritty							\
 	~/.config/autostart							\
@@ -571,6 +582,7 @@ stow-symlinks:
 	# same folding hazard as ~/.ssh below: keep ~/.config/git a real dir so only
 	# config+ignore are stowed, leaving room for git/gh to write their own state
 	mkdir -p ~/.config/git
+
 	# and again: post-update.d already holds omarchy's own hooks, so it must stay a real
 	# dir and take only our uv-self-update link rather than being folded wholesale
 	mkdir -p ~/.config/omarchy/hooks/post-update.d
@@ -636,6 +648,7 @@ stow-symlinks:
 	omarchy 							\
 	opencode							\
 	pipewire							\
+	qbittorrent						\
 	ssh									\
 	starship 							\
 	uwsm 									\

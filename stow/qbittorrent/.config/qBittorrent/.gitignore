@@ -1,0 +1,4 @@
+# qBittorrent's other files are device-local state.
+*
+!.gitignore
+!qBittorrent.conf
