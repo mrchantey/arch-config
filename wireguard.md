@@ -1,28 +1,8 @@
+# Mullvad server list
 
+Historical server list from the previously downloaded WireGuard configs; filenames do not imply configs are installed. Countries and cities are inferred from their codes. Current availability is listed in the Mullvad app and on [Mullvad's server page](https://mullvad.net/en/servers).
 
-1. create wireguard config [here](https://mullvad.net/en/account/wireguard-config?platform=linux)
-```sh
-sudo pacman -S --noconfirm --needed wireguard-tools openresolv speedtest-cli
-sudo resolvconf -u
-
-sudo mv ~/Downloads/mullvad_wireguard_linux_all_all/* /etc/wireguard/
-sudo chown root:root -R /etc/wireguard && sudo chmod 600 -R /etc/wireguard
-
-speedtest-cli
-
-sudo wg-quick up /etc/wireguard/sg-sin-wg-003.conf
-curl https://am.i.mullvad.net/connected
-speedtest-cli
-
-sudo wg-quick down /etc/wireguard/sg-sin-wg-003.conf
-curl https://am.i.mullvad.net/connected
-```
-
-## Server List
-
-Countries and cities are inferred from their codes.
-
-| Country        | City               | Path `/etc/wireguard`   | Notes |
+| Country        | City               | Config filename         | Notes |
 | -------------- | ------------------ | ----------------------- | ----- |
 | Albania        | Tirana             | al-tia-wg-001.conf |       |
 | Albania        | Tirana             | al-tia-wg-002.conf |       |

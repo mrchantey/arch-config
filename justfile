@@ -248,6 +248,7 @@ install-apps-init:
 # age is the identity and file cipher behind beet's secrets, the no-beet escape hatch
 install-apps:
 	just install-libreoffice
+	just install-mullvad
 	sudo pacman -S --noconfirm --needed 	\
 	age															\
 	aws-cli-v2														\
@@ -275,6 +276,11 @@ install-apps:
 # Keep LibreOffice independently of the preinstall cleanup; also restores existing machines.
 install-libreoffice:
 	omarchy pkg add libreoffice-fresh
+
+# Arch's packaged GUI includes the daemon and CLI; account and connection settings stay local.
+install-mullvad:
+	omarchy pkg add mullvad-vpn
+	sudo systemctl enable --now mullvad-daemon.service
 
 # Rust is the one runtime omarchy does NOT put behind mise -- its Menu > Install >
 # Development > Rust runs the rustup.rs installer and guards on ~/.rustup. We use the
