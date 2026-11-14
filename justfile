@@ -250,6 +250,7 @@ install-apps:
 	just install-libreoffice
 	just install-mullvad
 	just install-qbittorrent
+	just install-dig
 	sudo pacman -S --noconfirm --needed 	\
 	age															\
 	aws-cli-v2														\
@@ -286,6 +287,10 @@ install-mullvad:
 # Preferences, including the download path and Mullvad binding, are in the qbittorrent stow package.
 install-qbittorrent:
 	omarchy pkg add qbittorrent
+
+# Arch bundles dig and the other DNS lookup utilities in bind.
+install-dig:
+	omarchy pkg add bind
 
 # Rust is the one runtime omarchy does NOT put behind mise -- its Menu > Install >
 # Development > Rust runs the rustup.rs installer and guards on ~/.rustup. We use the
