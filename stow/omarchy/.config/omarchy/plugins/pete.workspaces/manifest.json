@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "id": "pete.workspaces",
   "name": "Synced Workspaces",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": "Omarchy",
-  "description": "Live Zed project labels shared by every monitor",
+  "description": "Zed projects and fallback app labels shared by every monitor",
   "kinds": [
     "bar-widget"
   ],
@@ -13,7 +13,7 @@
   },
   "barWidget": {
     "displayName": "Synced Workspaces",
-    "description": "Live Zed project labels shared by every monitor",
+    "description": "Zed projects and fallback app labels shared by every monitor",
     "category": "Compositor",
     "allowMultiple": false
   },

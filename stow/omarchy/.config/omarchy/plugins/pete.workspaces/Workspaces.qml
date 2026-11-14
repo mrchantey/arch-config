@@ -1,11 +1,12 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import Quickshell.Hyprland
 import qs.Commons
 import qs.Ui
 import "Labels.js" as Labels
 
-// Project labels for synced workspaces (~/.config/hypr/workspaces.lua), where
+// Project/app labels for synced workspaces (~/.config/hypr/workspaces.lua), where
 // number N is workspace N on the primary monitor, N + 10 on the next and so on.
 // Each button stands for the whole group, so the bar reads the same on every
 // monitor and wherever focus is.
@@ -15,10 +16,19 @@ BarWidget {
 
   // groups per monitor, matching GROUPS in workspaces.lua
   readonly property int groupCount: 10
-  property var recentZedWindows: []
+  property var recentWindows: []
 
   function rememberFocus() {
-    recentZedWindows = Labels.rememberFocus(Hyprland.toplevels.values, recentZedWindows, Hyprland.activeToplevel)
+    recentWindows = Labels.rememberFocus(Hyprland.toplevels.values, recentWindows, Hyprland.activeToplevel)
+  }
+
+  function appName(window) {
+    var info = window.lastIpcObject || {}
+    var className = info.class || info.initialClass || ""
+    // Read the model so labels refresh when desktop entries load or change.
+    var entry = DesktopEntries.applications.values.length ? DesktopEntries.heuristicLookup(className) : null
+    if (!entry && info.initialClass) entry = DesktopEntries.heuristicLookup(info.initialClass)
+    return Labels.appName(window, entry ? entry.name : "")
   }
 
   Component.onCompleted: rememberFocus()
@@ -81,19 +91,19 @@ BarWidget {
         id: button
         required property int modelData
 
-        readonly property string project: Labels.projectForGroup(Hyprland.toplevels.values, modelData, root.groupCount, root.recentZedWindows)
+        readonly property string workspaceLabel: Labels.labelForGroup(Hyprland.toplevels.values, modelData, root.groupCount, root.recentWindows, root.appName)
         readonly property bool occupied: root.occupied(modelData)
         readonly property bool focused: Hyprland.focusedWorkspace !== null && Hyprland.focusedWorkspace.id > 0 && root.groupOf(Hyprland.focusedWorkspace.id) === modelData
 
         bar: root.bar
-        text: Labels.safeText(Labels.buttonLabel(modelData, project, root.vertical))
-        tooltipText: Labels.safeText((modelData === 10 ? "0" : String(modelData)) + (project ? " " + project : ""))
+        text: Labels.safeText(Labels.buttonLabel(modelData, workspaceLabel, root.vertical))
+        tooltipText: Labels.safeText((modelData === 10 ? "0" : String(modelData)) + (workspaceLabel ? " " + workspaceLabel : ""))
         active: focused
         activeColor: Color.accent
         opacity: occupied || focused ? 1 : 0.5
         horizontalMargin: 6
         verticalPadding: 6
-        fixedWidth: root.vertical ? root.barSize : (project ? -1 : Style.space(20))
+        fixedWidth: root.vertical ? root.barSize : (workspaceLabel ? -1 : Style.space(20))
         fixedHeight: root.barSize
         onPressed: function() { root.showGroup(modelData) }
 
