@@ -29,3 +29,13 @@ Downloads is temporary and excluded from backups, see AGENTS.md, "Backups". The 
 - [ ] `just install-backup-timer`, ensures the hourly due-check timer is enabled
 
 Verify: `cat ~/.local/state/backup/last-run` prints `ok`, `systemctl --user list-timers backup.timer` shows the next firing, and the staged backup contains no Downloads. The saved stock runner now explicitly changes to the config repo, so it also works when systemd launches it from home.
+
+## 2026-11-14 dynamic Zed workspace labels (from rainbow-cat)
+
+`pete.workspaces` now labels each workspace group with its most recently focused Zed project while retaining numeric shortcuts. See AGENTS.md, "Workspaces switch on every monitor together". The existing `omarchy` stow package includes the helper and tests, so fresh installs need no new recipe.
+
+- [ ] `stow -d stow -t /home/pete -R omarchy`, links the widget's new helper even if the plugin directory is unfolded; run from `~/me/arch-config`
+- [ ] `omarchy restart shell`, clears Qt's cached workspace widget
+- [ ] `omarchy-shell shell ping`, expect `ok`
+
+Verify: the bar shows labels such as `2 arch-config`, with the active workspace colored and underlined. Changing the file within a Zed project leaves its project label stable; moving its window to another workspace transfers the label. With multiple screens, the same group shows the same label on each bar.

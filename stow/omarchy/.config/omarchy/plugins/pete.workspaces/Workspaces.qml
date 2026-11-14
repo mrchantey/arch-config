@@ -3,8 +3,9 @@ import QtQuick.Layouts
 import Quickshell.Hyprland
 import qs.Commons
 import qs.Ui
+import "Labels.js" as Labels
 
-// Workspace numbers for synced workspaces (~/.config/hypr/workspaces.lua), where
+// Project labels for synced workspaces (~/.config/hypr/workspaces.lua), where
 // number N is workspace N on the primary monitor, N + 10 on the next and so on.
 // Each button stands for the whole group, so the bar reads the same on every
 // monitor and wherever focus is.
@@ -14,6 +15,18 @@ BarWidget {
 
   // groups per monitor, matching GROUPS in workspaces.lua
   readonly property int groupCount: 10
+  property var recentZedWindows: []
+
+  function rememberFocus() {
+    recentZedWindows = Labels.rememberFocus(Hyprland.toplevels.values, recentZedWindows, Hyprland.activeToplevel)
+  }
+
+  Component.onCompleted: rememberFocus()
+
+  Connections {
+    target: Hyprland
+    function onActiveToplevelChanged() { root.rememberFocus() }
+  }
 
   function groupOf(id) {
     return (id - 1) % groupCount + 1
@@ -65,19 +78,34 @@ BarWidget {
       model: root.groups()
 
       WidgetButton {
+        id: button
         required property int modelData
 
+        readonly property string project: Labels.projectForGroup(Hyprland.toplevels.values, modelData, root.groupCount, root.recentZedWindows)
         readonly property bool occupied: root.occupied(modelData)
         readonly property bool focused: Hyprland.focusedWorkspace !== null && Hyprland.focusedWorkspace.id > 0 && root.groupOf(Hyprland.focusedWorkspace.id) === modelData
 
         bar: root.bar
-        text: focused ? "󱓻" : (modelData === 10 ? "0" : String(modelData))
+        text: Labels.safeText(Labels.buttonLabel(modelData, project, root.vertical))
+        tooltipText: Labels.safeText((modelData === 10 ? "0" : String(modelData)) + (project ? " " + project : ""))
+        active: focused
         opacity: occupied || focused ? 1 : 0.5
         horizontalMargin: 6
         verticalPadding: 6
-        fixedWidth: root.vertical ? root.barSize : Style.space(20)
+        fixedWidth: root.vertical ? root.barSize : (project ? -1 : Style.space(20))
         fixedHeight: root.barSize
         onPressed: function() { root.showGroup(modelData) }
+
+        Rectangle {
+          anchors.bottom: parent.bottom
+          anchors.horizontalCenter: parent.horizontalCenter
+          anchors.bottomMargin: 2
+          width: parent.width - Style.space(8)
+          height: Style.space(2)
+          radius: height / 2
+          color: button.activeColor
+          visible: button.focused
+        }
       }
     }
   }

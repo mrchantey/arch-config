@@ -13,7 +13,8 @@
 	"agent_servers": {
 		"claude-acp": {
 			"default_config_options": {
-				"fast": false,
+				"ultracode": false,
+    "fast": false,
     "effort": "xhigh",
 				"model": "opus",
 				"mode": "bypassPermissions",
@@ -76,7 +77,7 @@
 		// resolve; the gpt-6 ids exist in the binary but the inline assistant
 		// rejected gpt-6-luna with "does not support the configured model".
 		"default_model": {
-			"effort": "xhigh",
+			"effort": "high",
    "provider": "openai-subscribed",
 			"model": "gpt-6.1-sol",
 			"enable_thinking": true,
@@ -111,7 +112,7 @@
     "provider": "openai-subscribed",
     "model": "gpt-6.1-sol",
     "enable_thinking": true,
-    "effort": "xhigh"
+    "effort": "high"
    },
    {
     "provider": "openai-subscribed",
