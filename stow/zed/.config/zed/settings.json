@@ -2,7 +2,9 @@
 // https://zed.dev/docs/configuring-zed
 {
 	// "show_completions_on_input": false,
-	"git_commit_buffer_font_size": 20.0,
+	"agent_buffer_font_size": 19.0,
+ "agent_ui_font_size": 24.0,
+ "git_commit_buffer_font_size": 20.0,
 	// Agents run behind ~/me/arch-config/scripts/acp-tee.sh, which taps the ACP stream on its way
 	// to Zed so CTRL+PAUSE can read the last reply aloud (see scripts/acp-last.sh). The
 	// tap is protocol-level, so the same wrapper fits any agent listed here.
@@ -53,7 +55,6 @@
 	"toolbar": {
 		"agent_review": false,
 	},
-	"agent_buffer_font_size": 19.0,
 	"project_panel": {
 		"dock": "left",
 		"hide_hidden": false,
@@ -184,7 +185,6 @@
 		"line_width": 2,
 	},
 	"ui_font_size": 24.0,
-	"agent_ui_font_size": 23.0,
 	"buffer_font_size": 19.0,
 	"colorize_brackets": true,
 	"language_models": {

@@ -54,7 +54,7 @@ Never use `.claude/projects/../memory`, all content related to this project must
 - all diagrams should be in mermaid format unless specified
 - all shared dependencies are declared in the workspace Cargo.toml; if one needs no-default-features, disable that at the workspace level and reenable as required
 - for reserved keyword idents, use escaping `r#struct`, never misspelling `strukt`
-
+- Never make a commit as an agent, ie as `Claude`, instead the default git credentials
 - `.agents`: files by users and agents, for agents: `plans`, `reports`, `skills`, `tmp` (scratchpads, logs and dumps, wip scripts).
 - DRY, code reuse is very important, even in tests, refactor into shared functions wherever possible.
 - Never mention agent plans, steps or temporary tasks in code docs.
