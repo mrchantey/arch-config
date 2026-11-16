@@ -17,7 +17,7 @@
 			"default_config_options": {
 				"ultracode": false,
     "fast": false,
-    "effort": "medium",
+    "effort": "high",
 				"model": "opus",
 				"mode": "bypassPermissions",
 			},
