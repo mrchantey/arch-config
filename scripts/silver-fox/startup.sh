@@ -16,34 +16,17 @@ brightnessctl -d intel_backlight set 100% >/dev/null
 # scripts were deleted.
 #
 # the Logitech Brio 100 is the dictation mic here: the chassis has no working mic
-# (camera-less SKU, see the info-silver-fox skill), so voxtype hears through the
+# (camera-less SKU, see docs/devices/silver-fox.md), so voxtype hears through the
 # webcam. It powers on at full-scale capture gain (wpctl 1.0 = hardware +30dB), and at
 # that level the empty room alone sits at -25dBFS RMS, so speech clips hard and wrecks
-# voxtype accuracy. amixer can't fix this: WirePlumber owns the gain and re-applies its
-# saved value when it initializes the card, clobbering any amixer call that races ahead
-# of it. Set the gain THROUGH WirePlumber instead -- it persists per device
-# (~/.local/state/wireplumber/default-routes) and restores it on every boot AND replug.
-# The gain is cubic: total dB = 30 + 60*log10(vol), reaching the +6dB hardware floor at
+# voxtype accuracy. The gain is cubic: total dB = 30 + 60*log10(vol), reaching the +6dB hardware floor at
 # 0.40; below that WirePlumber adds software attenuation, which scales the noise floor
 # down with the voice and buys nothing. 0.4 is the mic's minimum analog gain, a 24dB
-# cut from power-on (measured 2026-09-11; re-tune procedure in the info-silver-fox skill).
-# Browser calls raised it mid-session until their AGC was flagged off, see "Browser calls
-# must not move the mic gain" in AGENTS.md.
-#
-# Targeted by node NAME, not @DEFAULT_AUDIO_SOURCE@. The old line set the default source
-# to 0.13, the internal Realtek calibration carried over from the XPS, and with the Brio
-# now the default source that would have landed it 29dB below its own hardware floor.
-# The Realtek line is gone: there is no mic behind that codec on this machine. wpctl
-# only takes IDs, so the name is resolved through pw-dump. The serial is left out of the
-# match so a replacement unit is covered too. Backgrounded so a login without the camera
-# plugged in (10s of polling) does not hold up the rest of startup.
-(
-	for _ in $(seq 1 50); do
-		id="$(pw-dump 2>/dev/null | jq -r '.[] | select(.type == "PipeWire:Interface:Node" and (.info.props["node.name"] // "" | test("^alsa_input\\.usb-046d_Brio_100_"))) | .id' | head -1)"
-		[ -n "$id" ] && wpctl set-volume "$id" 0.4 >/dev/null 2>&1 && break
-		sleep 0.2
-	done
-) &
+# cut from power-on (measured 2026-09-11; re-tune procedure in docs/devices/silver-fox.md).
+# Browser calls raised it mid-session until their AGC was flagged off, see
+# docs/chromium-flags.md.
+# mic-gain.sh has why it is set through WirePlumber and by node name.
+"$(dirname "$(realpath "$0")")/../mic-gain.sh" '^alsa_input\.usb-046d_Brio_100_' 0.4 &
 sleep 0.1
 # quattro's hyprctl takes Lua, not the old bare-word dispatcher syntax.
 hyprctl dispatch "hl.dsp.focus({ workspace = '1' })"

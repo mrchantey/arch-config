@@ -32,8 +32,8 @@
 -- broken: `EGL (blit): glCheckFramebufferStatus failed: 1282` on every cursor
 -- move, with stale unrepainted regions left on screen until something forces
 -- full damage. A monitor on DP-4/DP-5 (USB-C DP-alt, Intel side) has no blit at
--- all. See the "rendering corrupts after the monitor sleeps" trap in the
--- info-silver-fox skill.
+-- all. See the "rendering corrupts after the monitor sleeps" trap in
+-- docs/devices/silver-fox.md.
 
 -- Keep GTK's global scale at 1; the panel's output scale is 1 undocked and 1.5
 -- with an external display. Do not use "auto", which picks 1.5 on this panel.

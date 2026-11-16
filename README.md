@@ -16,13 +16,11 @@ mkdir ~/me && cd ~/me && git clone https://github.com/mrchantey/arch-config.git 
 gh auth login
 # pick the recipe for this machine:
 just init             # device-agnostic base (no monitor / input / GPU opinions)
-just init-rainbow-cat # rainbow-cat: the desktop (dual monitor, NVIDIA primary)
+just init-rainbow-cat # rainbow-cat: the desktop (ultrawide, NVIDIA primary)
 just init-silver-fox  # silver-fox: Dell Precision 7560 laptop (Intel compositor, NVIDIA for CUDA/offload)
 ```
 
-A new device gets its own `stow/hypr-<name>` package (`monitors.lua`, `input-device.lua`,
-`layout-device.lua`) plus an `init-<name>` recipe that runs `just init`, `stow-device <name>`, and the
-shared `install-extras` gaming/GPU stack.
+A new device gets its own `stow/hypr-<name>` package (`monitors.lua`, `input-device.lua`, `layout-device.lua`), an `init-<name>` recipe that runs `just init`, `stow-device <name>` and the shared `install-extras` gaming/GPU stack, and a record in `docs/devices/<name>.md`.
 
 # Additional Steps
 

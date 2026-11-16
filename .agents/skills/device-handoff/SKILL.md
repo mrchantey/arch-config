@@ -40,7 +40,7 @@ Each section stands on its own, because the agent reading it starts with no cont
 ```md
 ## 2026-10-07 synced workspaces (from silver-fox)
 
-Workspace switches now apply to every monitor together, see "Workspaces switch on every monitor together" in AGENTS.md.
+Workspace switches now apply to every monitor together, see the header of `stow/hypr/.config/hypr/workspaces.lua`.
 
 - [ ] `just stow-symlinks`, links the new `hypr/workspaces.lua` and the `pete.workspaces` bar plugin
 - [ ] `hyprctl reload && hyprctl configerrors`, expect no errors
@@ -50,7 +50,7 @@ Verify: Super+3 shows workspace 3 on the ultrawide and 13 on the side monitor.
 ```
 
 - **Heading**: date, a few words on the change, and the sending device.
-- **Context**: one or two sentences, citing AGENTS.md or a skill for the detail rather than restating it.
+- **Context**: one or two sentences, citing the doc or skill that holds the detail (AGENTS.md's index says where) rather than restating it.
 - **Steps**: exact commands in order, each with what it does. Every step must be idempotent, since the receiver's git-sync may already have run some of them. Mark anything that needs `sudo`, a password, a reboot or a judgement call as `(ask first)`.
 - **Verify**: how to tell it worked on that machine, especially anything this device could not test.
 - Never put secrets in a task, it is committed.

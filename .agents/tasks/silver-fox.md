@@ -4,7 +4,7 @@
 
 ## 2026-11-12 updated shell layout (from rainbow-cat)
 
-`files/omarchy/shell.json` now uses Omarchy's split `centerBegin` / `center` / `centerEnd` layout instead of `centerAnchor`, keeping the clock centered. It preserves rainbow-cat's updated Elsewhen cities and Voxtype settings plugin, restores `pete.workspaces`, and keeps the repo's idle timings. The compose source also preserves rainbow-cat's local `poopie` expansion. See AGENTS.md, "The bar, launcher, and idle are one Quickshell process".
+`files/omarchy/shell.json` now uses Omarchy's split `centerBegin` / `center` / `centerEnd` layout instead of `centerAnchor`, keeping the clock centered. It preserves rainbow-cat's updated Elsewhen cities and Voxtype settings plugin, restores `pete.workspaces`, and keeps the repo's idle timings. The compose source also preserves rainbow-cat's local `poopie` expansion. See `files/README.md`.
 
 - [ ] `omarchy-version`, check the installed version; rainbow-cat validated this config on 4.5.0-3
 - [ ] (ask first, only if this machine still predates the split-center layout) `omarchy update`, then reconcile with the `os-update` skill before copying the newer shell config
@@ -18,7 +18,7 @@ Verify: `omarchy-shell shell ping` prints `ok`; the clock is centered and the sy
 
 ## 2026-11-13 backup scope and Claude metadata (from rainbow-cat)
 
-Downloads is temporary and excluded from backups, see AGENTS.md, "Backups". The next successful mirror removes any old Downloads objects from the active device prefix; version history retains them for its existing 90-day period. `beet_egress` commit `21ccf76` preserves Claude Code's `accountUuid`, `organizationUuid` and `tools` fields without relaxing strict validation. All 44 egress tests and real ingestion passed on rainbow-cat, and its full backup succeeded.
+Downloads is temporary and excluded from backups, see `docs/backups.md`. The next successful mirror removes any old Downloads objects from the active device prefix; version history retains them for its existing 90-day period. `beet_egress` commit `21ccf76` preserves Claude Code's `accountUuid`, `organizationUuid` and `tools` fields without relaxing strict validation. All 44 egress tests and real ingestion passed on rainbow-cat, and its full backup succeeded.
 
 - [ ] Check `git -C ~/me/beet status --short`, `git -C ~/me/beet_atproto status --short` and `git -C ~/me/beet_egress status --short`; preserve local work before updating, never reset it
 - [ ] `git -C ~/me/beet pull --ff-only`, updates the shared dependency; stop and reconcile if it is dirty or diverged
@@ -34,7 +34,7 @@ Verify: `cat ~/.local/state/backup/last-run` prints `ok`, `systemctl --user list
 
 ## 2026-11-14 dynamic Zed workspace labels (from rainbow-cat)
 
-`pete.workspaces` now labels each workspace group with its most recently focused Zed project while retaining numeric shortcuts. See AGENTS.md, "Workspaces switch on every monitor together". The existing `omarchy` stow package includes the helper and tests, so fresh installs need no new recipe.
+`pete.workspaces` now labels each workspace group with its most recently focused Zed project while retaining numeric shortcuts. See `stow/omarchy/.config/omarchy/plugins/pete.workspaces/README.md`. The existing `omarchy` stow package includes the helper and tests, so fresh installs need no new recipe.
 
 - [ ] `stow -d stow -t /home/pete -R omarchy`, links the widget's new helper even if the plugin directory is unfolded; run from `~/me/arch-config`
 - [ ] `omarchy restart shell`, clears Qt's cached workspace widget
@@ -66,7 +66,7 @@ Verify: Eval and Beetmash resolve their declared source dependencies when resume
 
 ## 2026-11-14 Mullvad VPN app (from rainbow-cat)
 
-`just install-mullvad` installs Arch's official `mullvad-vpn` package, including its daemon and CLI, and enables `mullvad-daemon.service`. Fresh installs run it through `install-apps`. Account credentials and connection preferences stay local; the recipe does not log in, connect, change auto-connect or lockdown mode, or enable early-boot blocking. `wireguard.md` now contains only the historical server list.
+`just install-mullvad` installs Arch's official `mullvad-vpn` package, including its daemon and CLI, and enables `mullvad-daemon.service`. Fresh installs run it through `install-apps`. Account credentials and connection preferences stay local; the recipe does not log in, connect, change auto-connect or lockdown mode, or enable early-boot blocking. The old `wireguard.md` server list has since been deleted.
 
 - [ ] (ask first, needs administrator authentication) `just install-mullvad`, installs the app and starts/enables its daemon without changing existing VPN preferences
 - [ ] `pacman -Q mullvad-vpn mullvad-vpn-daemon`, verifies both packages are installed
@@ -91,7 +91,7 @@ Verify: preferences survive saving and restarting, the download path is `/home/p
 
 ## 2026-11-14 workspace app-name fallback (from rainbow-cat)
 
-`pete.workspaces` now falls back to the most recently focused app when a group has no Zed window. Friendly names come from desktop entries, with Chrome shortened to `Chrome`; Zed still takes priority. See AGENTS.md, "Workspaces switch on every monitor together". The existing stow package includes this change for fresh installs.
+`pete.workspaces` now falls back to the most recently focused app when a group has no Zed window. Friendly names come from desktop entries, with Chrome shortened to `Chrome`; Zed still takes priority. See `stow/omarchy/.config/omarchy/plugins/pete.workspaces/README.md`. The existing stow package includes this change for fresh installs.
 
 - [ ] `omarchy restart shell`, reloads the label selection and desktop-entry lookup
 - [ ] `omarchy-shell shell ping`, expect `ok`

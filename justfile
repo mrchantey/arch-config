@@ -40,8 +40,8 @@ install-transcribe:
 	ln -sf ~/me/arch-config/scripts/transcribe.sh ~/.local/bin/transcribe
 	@echo "PASS install-transcribe"
 
-# symlink the file transcriber and the GPU handoff helper onto PATH (see AGENTS.md,
-# "Transcription"). The venv and model behind transcribe-file come from setup-transcribe-file.
+# symlink the file transcriber and the GPU handoff helper onto PATH (see
+# docs/transcription.md). The venv and model behind transcribe-file come from setup-transcribe-file.
 # `gpu-exclusive <cmd>` runs cmd with voxtype and kokoro stopped, restarting them after.
 # usage: `transcribe-file lecture.mp4` -> lecture.md + lecture.srt + lecture.segments.json
 install-transcribe-file:
@@ -233,7 +233,7 @@ init-user:
 	just pull-assets
 
 # omarchy's preinstalled apps, launchers and agent wrappers go first, so nothing below
-# installs on top of them. The lists live in the script; see AGENTS.md "Preinstalls".
+# installs on top of them. The lists, and why, live in the script.
 install-apps-init:
 	bash scripts/remove-preinstalls.sh
 	@echo "INIT install-apps"
@@ -466,7 +466,7 @@ install-user-apps:
 	voxtype-bin
 	@echo "PASS install-user-apps"
 
-# Dev runtimes and global CLIs, all via mise -- the omarchy quattro model (see AGENTS.md).
+# Dev runtimes and global CLIs, all via mise -- the omarchy quattro model (see docs/dev-tooling.md).
 # Omarchy writes its own agent fleet in install/user/mise.sh, but remove-preinstalls
 # deletes every wrapper not written below, so the two we keep (claude, gh) are installed
 # here on purpose. Idempotent; `omarchy update` (or the `mup` alias) upgrades everything.
@@ -770,7 +770,7 @@ assets *args:
 # assets/ is a manifest of symlinks, one per noun, each pointing at where that noun
 # lives on the machine (assets/pictures -> ~/Pictures/assets: wallpapers, headshots,
 # the omarchy-logo template). It mirrors the bucket under the same prefixes, shared
-# across machines and tracked in no repo (AGENTS.md, Shared assets).
+# across machines and tracked in no repo (docs/assets.md).
 #
 # Hydrate assets/ from the bucket (remote -> local, additive). Deliberately not
 # beet: init-user runs this on a fresh machine before any Rust toolchain or AWS
@@ -793,7 +793,7 @@ push-assets:
 	@echo "PASS - push-assets"
 
 # Push what git can, ingest Claude Code sessions and mirror everything git cannot hold
-# to this device's prefix of the private backup bucket (AGENTS.md, Backups).
+# to this device's prefix of the private backup bucket (docs/backups.md).
 #   just backup --dry-run   # stage and report, push and upload nothing
 #   just backup --first     # the first backup on a machine with nothing to restore
 #

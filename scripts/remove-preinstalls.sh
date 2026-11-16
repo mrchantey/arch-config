@@ -8,7 +8,7 @@
 # user-created web apps with it (#4830). This is the same operation made idempotent
 # and scriptable, so `just init` runs it on a fresh machine and the post-update hook
 # re-runs it after every `omarchy update`, which is what keeps the fleet from creeping
-# back (#7107; the fix in #9703 is still open). See AGENTS.md "Preinstalls".
+# back (#7107; the fix in #9703 is still open).
 #
 # Three things carry the opt-out:
 #   - ~/.local/state/omarchy/preinstalls-removed: the flag omarchy's migrations check
@@ -17,6 +17,12 @@
 #   - the mise wrappers, detected by shape rather than listed, so a new agent omarchy
 #     adds is caught without this file changing. The ones `just install-mise-tools`
 #     writes are the allowlist.
+#
+# hyprland.lua also sets _G.omarchy_preinstalled_bindings = false, so the preinstall
+# keybinds are off by config whatever the flag says. LibreOffice is kept: `just
+# install-libreoffice` puts it back on a machine that lost it. Restoring everything
+# is Menu > Install > Preinstalls, which clears the flag, after which the post-update
+# hook stays out of the way.
 set -euo pipefail
 
 OMARCHY_PATH="${OMARCHY_PATH:-/usr/share/omarchy}"

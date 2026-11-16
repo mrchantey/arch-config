@@ -6,7 +6,7 @@ description: >
 
 # Backup
 
-`just backup` does the work and prints a report; this skill runs it, acts on the report, and covers what it refuses. What is staged, why, and how the timer paces it: "Backups" in AGENTS.md. Don't restate it here.
+`just backup` does the work and prints a report; this skill runs it, acts on the report, and covers what it refuses. What is staged, why, and how the timer paces it: `docs/backups.md`. Don't restate it here.
 
 Treat `~/Downloads` as temporary. Never stage or upload its contents. After changing backup scope, use `--dry-run` and verify the staged tree excludes it before uploading.
 

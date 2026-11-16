@@ -34,7 +34,7 @@ if [ "$on_battery" = "1" ]; then
 else
 	export USE_GPU=true
 	# free VRAM as soon as each tensor dies: torch's caching allocator otherwise holds the
-	# peak of the longest read forever and starves voxtype's transcribe buffers (AGENTS.md)
+	# peak of the longest read forever and starves voxtype's transcribe buffers (docs/transcription.md)
 	export PYTORCH_NO_CUDA_MEMORY_CACHING=1
 fi
 

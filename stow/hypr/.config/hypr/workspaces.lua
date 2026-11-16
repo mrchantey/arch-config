@@ -12,6 +12,29 @@
 -- window elsewhere, a swipe) brings the other monitors along. The binds that
 -- pick a workspace by number or by order live in bindings.lua and go through
 -- `show`, `move`, `swap`, `cycle` and `previous` below.
+--
+-- Only the focused monitor can be told what to show, so for each monitor that is
+-- out of step, sync focuses it, shows its member of the group with
+-- `hl.dsp.focus({ workspace = ..., on_current_monitor = true })`, which creates
+-- the workspace or pulls it over from wherever it is, then hands focus and the
+-- cursor back. A monitor that goes away leaves workspaces whose rank no longer
+-- exists, out of reach of every bind, so `heal` folds their windows into the same
+-- group on the monitor now holding them. Plugging it back in does not split them
+-- out again.
+--
+-- The primary must sit leftmost, which needs no per-device config as long as each
+-- device pins its main monitor to 0x0: Hyprland places explicitly positioned
+-- monitors before `auto` ones.
+--
+-- bindings.lua replaces every Omarchy bind that addresses a workspace by raw id:
+-- Super+N and the move binds; Super+Tab, Super+Page_Up/Page_Down and Super+scroll,
+-- whose `e+1` steps by id and would wander into the next monitor's range;
+-- Super+Ctrl+Tab, since Hyprland's own history counts the catch-up switches, so
+-- `previous` keeps its own; and Super+Shift+Alt+arrows, which moved a whole
+-- workspace to another monitor and now `swap` this monitor's windows with that
+-- one's. Per-monitor workspace rules go on a monitor selector (`m[desc:...]`),
+-- never an id range. Scripts can keep using a plain
+-- `hl.dsp.focus({ workspace = "1" })`, the event brings the rest along.
 
 local workspaces = {}
 

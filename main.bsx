@@ -14,7 +14,7 @@ The backup bucket, `arch-config--shared--backup`: private, one prefix per
 device, each a mirror of the tree `scripts/backup.sh` stages under
 `target/backup/<device>`, laid out as the device's home directory
 (`silver-fox/me/beet/.agents/..`). Driven by `just backup` and `just restore`
-(AGENTS.md, Backups).
+(docs/backups.md).
 
     just assets plan       # eyeball the plan
     just assets deploy --dry-run   # each credential, what it would become, and whether --elevated is needed

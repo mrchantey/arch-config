@@ -19,7 +19,7 @@
 -- Chrome on another workspace -- yanking us over there. We always want the new
 -- window here, on the current workspace.
 -- Note this is focus stealing, NOT the placement bug that scripts/launch-here.sh
--- handles for clicked links: the launch itself was always correct. See AGENTS.md.
+-- handles for clicked links: the launch itself was always correct.
 local browser = "uwsm app -- google-chrome-stable --new-window"
 
 -- Not `uwsm app -- $EDITOR`: in the Hyprland session $EDITOR is omarchy's own

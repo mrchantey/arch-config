@@ -14,7 +14,7 @@
 #              nor restored, whose mirror would otherwise prune the prefix a
 #              reinstall of the same hostname should have restored from
 #
-# What is staged and why: "Backups" in AGENTS.md.
+# What is staged and why: docs/backups.md.
 set -euo pipefail
 
 repo_dir="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"

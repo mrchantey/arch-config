@@ -45,7 +45,7 @@
 # `just pull-repos` could not clone the private beet-draft or beetmash.
 #
 # A credential helper's stdout is a data channel that git parses, which is
-# normally a reason NOT to front a tool with a mise wrapper (see AGENTS.md).
+# normally a reason NOT to front a tool with a mise wrapper (see docs/dev-tooling.md).
 # It is safe here: omarchy-mise-install now writes `mise use -g --quiet`, and
 # both the shim and the wrapper were verified to emit nothing but the four
 # credential lines.

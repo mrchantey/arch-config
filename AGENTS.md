@@ -1,10 +1,42 @@
 # Editing OS Config
 
-This is my omarchy config, located at `~/me/arch-config`.
-Omarchy 4 ("quattro") installs to `/usr/share/omarchy` (read-only, never edit; the Omarchy 3 path `~/.local/share/omarchy` no longer exists, so anything still pointing there is broken), and to `~/.config`, some of which is overridden via stow.
-Generated state (current theme, toggles, workspace layouts) lives in `~/.local/state/omarchy`, which is where `current/theme/...` moved to from `~/.config/omarchy/current`.
+This is my omarchy config, located at `~/me/arch-config`. Omarchy 4 ("quattro") installs to `/usr/share/omarchy` (read-only, never edit; the Omarchy 3 path `~/.local/share/omarchy` no longer exists, so anything still pointing there is broken), and to `~/.config`, some of which is overridden via stow. Generated state (current theme, toggles, workspace layouts) lives in `~/.local/state/omarchy`, which is where `current/theme/...` moved to from `~/.config/omarchy/current`.
 
 When asked to make changes use these files as reference to understand the system, and ensure install scripts are updated so the changes are reflected in a fresh install.
+
+## Where docs live
+
+This file holds only what applies to any change in the repo, plus the index below. Everything else lives as close to its code as it can, with one home per fact; every other mention cites it.
+
+| Kind of knowledge | Home |
+| --- | --- |
+| Why one file is the way it is | that file's header comment |
+| A self-contained unit (a stow package, a plugin, `neverlost/`, `files/`) | `README.md` in its directory; stow skips one at a package's top level |
+| A topic spanning several packages or scripts | `docs/<topic>.md` |
+| One machine's hardware, device config and traps | `docs/devices/<hostname>.md` |
+| A procedure run on a trigger | a skill in `.agents/skills` |
+
+When adding one, add its line to the index. Never grow a section here for a single subsystem.
+
+## Index
+
+Read the entry before touching its subject.
+
+- Workspace sync, or any bind or rule that names a workspace: header of `stow/hypr/.config/hypr/workspaces.lua`
+- Bar workspace labels: `stow/omarchy/.config/omarchy/plugins/pete.workspaces/README.md`
+- Bar, launcher, notifications, idle and lock (one Quickshell process), `shell.json`, logind drop-ins: `files/README.md`
+- Runtimes, CLI tools, PATH, uv: `docs/dev-tooling.md`
+- Removing Omarchy's preinstalled apps, launchers and agent wrappers: header of `scripts/remove-preinstalls.sh`
+- Global agent instructions and user skills: `stow/agents/README.md`
+- Dictation, transcription, TTS and sharing the GPU between them: `docs/transcription.md`
+- Chrome, Chromium and Electron flags (mic gain during calls, the keyring): `docs/chromium-flags.md`
+- Codex `/voice`: header of `stow/pipewire/.config/pipewire/client.conf.d/codex-voice.conf`
+- Links opening on the wrong workspace: headers of `scripts/launch-here.sh` and `scripts/chrome-here.sh`
+- Cursor theme: `neverlost/readme.md`
+- Shared assets bucket: `docs/assets.md`
+- Backups: `docs/backups.md`, run through the `backup` skill
+- Handing changes to other devices: the `device-handoff` skill
+- A device's hardware and device config: `docs/devices/<hostname>.md`
 
 ## Changes reach the other devices by handoff
 
@@ -24,209 +56,19 @@ Three gotchas that differ from the old `.conf` files:
 
 Only `hyprsunset.conf` and `xdph.conf` are still `.conf`: they are read by separate processes, not Hyprland, so `hyprctl` neither applies nor validates them.
 
+Workspace N is a group spanning every monitor, so never address a workspace by raw id in a bind or a rule, see the header of `workspaces.lua`.
+
 ## Per-device config
 
-Most config is common, stowed by the `hypr` package and shared `just` recipes.
-Naming convention: `*.lua` is shared (common `hypr` package); `*-device.lua` and `monitors.lua` are per-device and live in a stow package named after the machine (`stow/hypr-rainbow-cat`, `stow/hypr-silver-fox`), stowed by `stow-device <name>` and selected via `init-<name>`. The per-device files are `monitors.lua`, `input-device.lua`, `layout-device.lua`, `envs-device.lua`.
+Most config is common, stowed by the `hypr` package and shared `just` recipes. `*.lua` is shared; `monitors.lua` and `*-device.lua` (`input-device.lua`, `layout-device.lua`, `envs-device.lua`) are per-device and live in a stow package named after the machine (`stow/hypr-rainbow-cat`, `stow/hypr-silver-fox`), stowed by `stow-device <name>` and selected via `init-<name>`. Device modules are loaded with `require_optional` after their shared counterpart, so a machine whose device package isn't stowed still boots and a device setting always wins. When editing monitors or window layout, edit the right device package; shared input or anything else goes in the common `hypr` package.
 
-Device modules are loaded with `require_optional` so a machine whose device package isn't stowed still boots.
+## Tools and preinstalls
 
-Input is split: shared settings (keyboard, scroll speed, trackball) live in the common `hypr/input.lua`, and each device's `input-device.lua` holds only its overrides (left_handed, touchpad gestures). `input.lua` is required before `input-device.lua` so per-device settings win. When editing monitors or window-layout settings, edit the right device package; shared input or anything else goes in the common `hypr` package.
+- **CLI tools go through mise wrappers** written by `just install-mise-tools`, never `npm install -g` or a second pacman/AUR copy of a wrapped tool. Runtimes are global mise installs, Rust is rustup. Don't prepend a runtime ahead of the mise shims in `.bashrc`. Details in `docs/dev-tooling.md`.
+- **Preinstalls stay removed** by `scripts/remove-preinstalls.sh`, re-run after every `omarchy update`, so a new Omarchy app, launcher or agent wrapper reappearing is expected and handled there, not one-off.
+- **Never edit `/usr/share/omarchy/shell/plugins/`**; clone a widget with `omarchy plugin clone omarchy.<widget>`, which switches the bar to `<username>.<widget>` under `~/.config/omarchy/plugins/`.
 
-`layout-device.lua` holds the master-layout `master` block (required after the shared `looknfeel.lua` so it overrides it): rainbow-cat opens a centered master column for its ultrawide; silver-fox opens windows full-screen.
+## Devices
 
-`monitors.lua` also owns `GDK_SCALE`. On silver-fox, eDP-1 is scale 1 undocked and changes to scale 1.5 whenever another real display is active; monitor add/remove events restore the appropriate scale. Workspaces are not pinned per device, see "Workspaces switch on every monitor together" below. `envs-device.lua` holds per-device environment overrides and is required right after the shared `envs.lua`; only silver-fox has one. It exists because Omarchy's `default/hypr/nvidia.lua` does not detect hybrid laptops: it only checks that an NVIDIA GPU is present and then sets `NVD_BACKEND` / `LIBVA_DRIVER_NAME=nvidia` / `__GLX_VENDOR_LIBRARY_NAME=nvidia` for the whole session. On silver-fox (Intel iGPU composites, NVIDIA is for CUDA) that made Chrome decode video on the dGPU and fail to import every frame, so the window blanked and flickered on video calls. silver-fox overrides `LIBVA_DRIVER_NAME` to `iHD` there; rainbow-cat (NVIDIA is the compositing GPU) needs no override. Upstream: omacom/omarchy#12704.
-
-## Workspaces switch on every monitor together
-
-Super+3 shows workspace 3 on every screen, not just the focused one. Hyprland has no such mode, since each workspace belongs to exactly one monitor, so the shared `hypr/workspaces.lua` builds it: workspace N is a group of real workspaces, N on the primary, N + 10 on the second monitor, N + 20 on a third. Monitors are ranked by position, left to right then top to bottom, so the leftmost is the primary. That needs no per-device config as long as the primary sits leftmost: rainbow-cat's ultrawide is at `0x0`, and silver-fox pins its desk monitor to `0x0` because Hyprland places explicitly positioned monitors before `auto` ones, so the panel always lands to its right.
-
-The sync hangs off the `workspace.active` event, not the binds, so anything that changes workspace brings the other monitors along: a keybind, a bar click, a launcher focusing a window elsewhere, a swipe. Only the focused monitor can be told what to show, so for each monitor that is out of step it focuses that monitor, shows its member of the group with `hl.dsp.focus({ workspace = ..., on_current_monitor = true })`, which creates the workspace or pulls it over from wherever it is, then hands focus and the cursor back. Nothing is pinned with `hl.workspace_rule`; that pull is what keeps the mapping right when monitors come, go or swap order. A monitor that goes away leaves workspaces whose rank no longer exists, out of reach of every bind, so their windows are folded into the same number on the monitor now holding them. Plugging the monitor back in does not split them out again.
-
-Every Omarchy bind that addresses a workspace by raw id is replaced in `bindings.lua`: Super+N and the move binds; Super+Tab, Super+Page_Up/Page_Down and Super+scroll, since Omarchy's `e+1` steps by id and would wander into the next monitor's range; Super+Ctrl+Tab, since Hyprland's own history counts the catch-up switches, so `workspaces.lua` keeps its own; and Super+Shift+Alt+arrows, which moved a whole workspace to another monitor and now trade this monitor's windows with that one's instead. Per-monitor workspace rules go on a monitor selector rather than an id range, the way rainbow-cat's side monitor gets its left-oriented master column from `workspace = "m[desc:...]"`. Scripts can keep using the plain `hl.dsp.focus({ workspace = "1" })`, the event brings the rest along.
-
-The bar's workspace widget is our clone of Omarchy's, `pete.workspaces`, which the `omarchy` package stows into `~/.config/omarchy/plugins/`. The stock widget only knows ids 1-10, so it lost its focused marker whenever focus sat on another monitor. The clone treats each number as its group and switches through `hyprctl eval 'require("hypr.workspaces").show(N)'`, which keeps focus on the monitor you are on. Buttons retain their shortcut number and show the most recently focused Zed project's name across the group, updating on title changes and window moves without polling; other apps do not displace a Zed label. A linked Git worktree reads the same as its main checkout, ie `~/me/worktrees/beet/misc/beet` shows `beet`, and that is accepted: Zed's title carries only the root's basename, and nothing outside Zed can reliably tell which project a window shows, since its session database keeps one row per path and has no mapping from its window IDs to Hyprland's. A task-based reporter was tried and dropped, it needed a manual trigger and cleared Zed's task rerun history. Without Zed, the most recently focused app supplies its desktop-entry name (Chrome is shortened to `Chrome`), with a cleaned-up window class as the fallback; empty groups keep just their number. The active group is colored and underlined, long names are shortened with the full name in a tooltip, and vertical bars show numbers with project tooltips. Label logic and regression tests live beside the widget in `Labels.js` and `tests/`. Edits to it do not always hot-reload, Qt keeps the old component cached; `omarchy restart shell` picks them up.
-
-## Dev tooling goes through mise
-
-Quattro made mise (pacman package, `/usr/bin/mise`) the backbone for language runtimes and CLI tools. Two distinct mechanisms, don't mix them up:
-
-- **Runtimes** are plain global mise installs: `omarchy-install-dev-env <node|deno|zig|go|python|bun|java|ruby|elixir|dotnet|clojure|scala>`, which is the same entry point as Menu > Install > Development. It boils down to `mise use -g <tool>@latest`.
-- **CLI tools** are `omarchy-mise-install <package> [command] [bin]`, which writes a four-line wrapper into `~/.local/bin/<command>`. Every invocation runs `mise use -g <package>` then `mise x`, so the tool installs on first use and self-updates thereafter. `MISE_MINIMUM_RELEASE_AGE=0` is exported inside the wrapper to bypass mise's release cooldown. Omarchy ships a fleet of these in `install/user/mise.sh` (claude, codex, gemini, crush, copilot, opencode, gh, playwright, pi, omp, grok, ghui, hunk, hermes, muse); we keep claude, codex and gh and remove the rest, see Preinstalls below. The `codex` wrapper is the CLI alone (mise resolves it to `aqua:openai/codex`, the standalone release binary); the desktop app is a separate pacman package, `openai-codex-desktop`, which only Menu > Install > AI > ChatGPT Desktop installs. Never install a wrapped tool a second way, `omarchy-mise-install` starts by `rm -f`-ing the target path, so a competing pacman/AUR/npm install just becomes shadowed dead weight.
-
-**Former gotcha, now fixed upstream: those wrappers used to write to stdout.** `mise use -g` prints `mise <config> tools: <pkg>@<version>` on stdout every run, not just on an install, so every `omarchy-mise-install` tool prepended a junk line to its own output, which is harmless for a TUI but not when the output is piped or parsed (`gh api ... | jq` got a bad first line). As of the omarchy on this machine (`omarchy-version` reports 4.0.3-1, checked 2026-09-10) `omarchy-mise-install` writes `mise use -g --quiet`, which silences that line while leaving install progress visible, so the wrappers are stdout-clean. Verified directly: `gh --version` through the wrapper, and `gh auth git-credential get` (whose stdout git itself parses), both emit only their own output.
-
-Re-check `omarchy-mise-install` before relying on this. If a version ever drops `--quiet`, the rule returns: do not front a tool whose stdout is a data channel with it. `scripts/claude-agent-acp.sh` is the worked example from when that mattered: a hand-rolled copy of the wrapper with the `mise use` line redirected to stderr, because Zed speaks JSON-RPC to it over stdio. It is belt-and-braces now rather than load-bearing, and is kept because it costs nothing. Don't reach for `MISE_QUIET=1` as a global fix, it also silences install progress, so a first run that downloads 100MB looks like a hang.
-
-Not everything is mise. Rust is rustup (we take pacman's `rustup` rather than omarchy's rustup.rs curl installer, same toolchain manager either way), PHP is pacman, OCaml is opam, and uv comes from astral's install script, which `omarchy-install-dev-env python` runs alongside the mise interpreter.
-
-Python is worth understanding rather than copying. Arch's `/usr/bin/python` rolls minor versions and takes every venv built against it along, which is the actual reason python hurts on this distro; mise's interpreter is what insulates you from that, so install it even though nothing here calls `python` directly. Two things to know about the uv half. Pass `UV_NO_MODIFY_PATH=1`, or astral's installer appends a `. ~/.local/bin/env` line to our *stowed* `.bashrc` on every run, editing a tracked file to add a `~/.local/bin` that `.bashrc` already puts on PATH itself. And because a curl-installed uv is in neither pacman nor mise, nothing in `omarchy update` moves it, so `stow/omarchy/.config/omarchy/hooks/post-update.d/uv-self-update` runs `uv self update` from omarchy's own post-update hook. Never add a second uv from pacman: `~/.local/bin` is *prepended* by `.bashrc` but *appended* by `env-bootstrap`, so terminals would get one uv and GUI apps the other, which is the same split that Vite+ caused for node.
-
-Our additions live in `just install-mise-tools`: the node/deno/zig/python runtimes, plus the kept `claude`, `codex` and `gh`, `wrangler`, `cf` and the Zed ACP adapter as wrappers. Anything that needs a global CLI belongs there, not in an `npm install -g`. It runs before `init-user` in `just init` because `setup-tts` builds the kokoro venv with uv and would otherwise hit `uv: command not found`.
-
-PATH is assembled by `/usr/share/omarchy/default/bash/env-bootstrap`, which appends `~/.local/share/mise/shims` then `~/.local/bin`; `default/bash/init` adds `mise activate bash` for interactive shells, and a `PATH` line in `/etc/security/pam_env.conf` covers `ssh host cmd`, which runs no shell setup at all. Because that all happens outside `.bashrc`, anything prepended in `stow/bashrc/.bashrc` wins over mise for terminals only, and GUI-launched apps keep getting the mise version. That split is exactly what removing Vite+ fixed, so think twice before putting another runtime ahead of the shims there.
-
-Updates flow through `omarchy update`, which calls `omarchy-update-mise` (`MISE_MINIMUM_RELEASE_AGE=0 mise up`). The `mup` alias is the same thing by hand.
-
-## Preinstalls are removed, by one flag
-
-Omarchy has no install-time opt-out. Bare mode was rejected (omacom/omarchy#1155, "defaults over decisions"): the ISO pacstraps every package in `install/omarchy-base.packages`, and `omarchy-provision-user` lays down every shipped web app and TUI launcher from `$OMARCHY_PATH/applications/` plus the agent wrappers in `install/user/mise.sh`. The sanctioned exit is Menu > Remove > Preinstalls (`omarchy-remove-preinstalls`), and its one durable effect is the flag `~/.local/state/omarchy/preinstalls-removed`: `default/hypr/helpers.lua` reads it to skip the whole block of preinstall keybinds (HEY on Super+Shift+E, Spotify, X, ChatGPT and the rest), and new-preinstall migrations check it before adding another wrapper. Everything else it does is a one-off that updates undo: `omarchy-refresh-applications` recopies every launcher and rewrites every wrapper without reading the flag, migrations have called it (1786183928) and `omarchy-pkg-add`ed new preinstalls unguarded (omacalc). That is the whack-a-mole, tracked as omacom/omarchy#7107 with the fix in #9703, both open as of 4.0.4.
-
-`scripts/remove-preinstalls.sh` is our unattended version of that command and the one place the lists live. `install-apps-init` runs it on a fresh machine, and `stow/omarchy/.config/omarchy/hooks/post-update.d/remove-preinstalls` re-runs it after every `omarchy update` whenever the flag is set, so anything an update put back is gone before the update reports. Three deliberate differences from upstream. Launchers are removed by shipped name rather than by sweeping every web app (upstream's sweep deletes user-made ones, #4830), with a keep list for the few we use. Wrappers are detected by shape (a bash script in `~/.local/bin` whose body runs `mise use -g`) against an allowlist of the ones `install-mise-tools` writes, so a new agent omarchy adds is caught without editing this repo. And each removed wrapper is also `mise unuse -g`'d, because upstream only deletes the stub and leaves the tool in `~/.config/mise/config.toml`, where `omarchy-update-mise` keeps downloading it (codex alone held 1.1 GB across three versions). The package list is upstream's own, unioned across the installed release and master, except LibreOffice, which we keep. `install-apps` calls `install-libreoffice` to ensure it is installed even when missing from the base system; `just install-libreoffice` also restores it on existing machines.
-
-`hyprland.lua` also sets `_G.omarchy_preinstalled_bindings = false` before loading the defaults, the override `helpers.lua` checks ahead of the flag, so the keybinds are off by config and not by machine state, and `bindings.lua` carries no unbinds for preinstall keys. Restoring everything is Menu > Install > Preinstalls, which clears the flag; the hook then stays out of the way, and the Lua global keeps the keybinds off regardless.
-
-## Agent instructions and skills live in `.agents`
-
-Every agent reads one set of global instructions, `stow/agents/.agents/AGENTS.md`, stowed to `~/.agents/AGENTS.md`, which is where Zed reads it. Claude Code and Codex each insist on their own path, so the `agents` package also stows `.claude/CLAUDE.md` and `.codex/AGENTS.md` as links back to it. Edit the one file; never give a tool its own copy. `stow-symlinks` keeps `~/.codex` a real dir before stowing, since folded it would take `codex login`'s `auth.json` into the repo.
-
-User skills live in `stow/agents/.agents/skills`, which `just stow-symlinks` links to `~/.agents/skills` by hand, since omarchy pre-creates that path as a real dir and stow cannot fold it. Zed's own agent and Codex read `~/.agents/skills`; Claude Code reads only `~/.claude/skills`, so the `agents` package also stows `.claude/skills -> ../.agents/skills`, the same link a project uses. That covers both the `claude` CLI and Zed's Claude agent, whose ACP adapter bundles its own Claude Code. Omarchy pre-creates `~/.claude/skills` as a real dir too, so the recipe clears it first: stow cannot replace a real dir with a link, and one conflict aborts every package.
-
-Omarchy's migrations `ln -sfn` their skills (`omarchy`, `diagnose-crash`) into both dirs. With the links in place those writes land in the repo, so they are gitignored and re-dropped by `stow-symlinks` from `$OMARCHY_PATH/default/agents/skills/*`. Claude Code also writes its claude.ai skill sync to `~/.claude/skills/synced/`, which likewise lands in the repo, is gitignored, and is visible to every other agent reading the dir.
-
-Project skills follow the same pattern: they live in `.agents/skills`, with a `.claude/skills -> ../.agents/skills` link beside it.
-
-## Transcription
-
-Three tools, all on PATH from `scripts/` via `just install-transcribe` and `just install-transcribe-file`, and all sharing one 4 GB GPU with the voxtype and kokoro daemons:
-
-- `voxtype` is dictation: push-to-talk, whisper.cpp on Vulkan running large-v3-turbo, model kept resident so capture is instant, clips capped at 60 s, with the replacement dictionary in `stow/voxtype/.config/voxtype/config.toml`. Do not use it for files.
-- `transcribe [name]` records the mic to `name.wav` and transcribes it with voxtype's engine to `name.txt`. Plain text, no timestamps; for a quick note, not a lecture.
-- `transcribe-file <file> [--out BASE] [--title TEXT]` is for existing audio or video. faster-whisper (CTranslate2 on CUDA), Silero VAD so long silences do not turn into hallucinated text, segment timestamps, and a model ladder that picks the biggest Whisper that fits: on the A2000 that is large-v3-turbo, since large-v3 shares turbo's encoder (which alone peaks near 3.5 GB) and its extra decoder weights do not fit in any configuration. Writes `BASE.md` (paragraphs prefixed `**[hh:mm:ss]**`, header names the model), `BASE.srt` and `BASE.segments.json`. A 75 minute recording takes about 2.5 minutes. `transcribe-file --help` has the options. Setup is `just setup-transcribe-file`: a uv venv at `~/.local/share/whisper-venv` with the CUDA runtime wheels, and large-v3-turbo in `~/.cache/huggingface`.
-
-`gpu-exclusive <cmd>` is the handoff both transcribers use: it stops whichever of `voxtype.service` and `kokoro-tts.service` are running, runs the command, and restarts exactly those from an EXIT trap, so an error or Ctrl-C still brings dictation back. Its status lines go to stderr, the command's stdout is untouched, and `GPU_EXCLUSIVE_SERVICES=voxtype.service` narrows it (the mic `transcribe` does this so kokoro keeps talking). Nested calls are no-ops via `GPU_EXCLUSIVE=1`. Anything else that wants the whole card should go through it rather than growing its own stop/start.
-
-The two daemons share the card permanently, so their footprints have to add up on the A2000. voxtype holds 1.55 GB with the model resident and builds two whisper states (~450 MB each) per clip, peaking near 2.45 GB; kokoro idles at 750 MB. Stock PyTorch does not stay there: its caching allocator keeps the peak of every request reserved for the life of the process, and Kokoro-FastAPI's own cleanup compares live tensors against a hardcoded 0.8 GB that never trips. One long read took kokoro to 1.35 GB, after which every clip failed `vk::Device::allocateMemory: ErrorOutOfDeviceMemory` and voxtype segfaulted rather than reporting it, then restarted into the same wall: recording indicator shows, no text comes out. `scripts/tts-server.sh` sets `PYTORCH_NO_CUDA_MEMORY_CACHING=1` on the GPU path, which holds kokoro flat at 750 MB for ~0.2 s more to first audio (165 to 380 ms) and ~2.5x slower synthesis, still ~20x faster than playback. `PYTORCH_CUDA_ALLOC_CONF=backend:cudaMallocAsync` does not help, PyTorch pins that pool's release threshold to max. If dictation goes silent, `journalctl --user -u voxtype | grep ErrorOutOfDevice` plus `nvidia-smi` says whether something else is holding the card.
-
-Lessons that cost time: Hugging Face downloads through `hf_xet` stall indefinitely on silver-fox (75 MB then nothing), so both the setup recipe and the script export `HF_HUB_DISABLE_XET=1`; if a model still will not come down, `curl -L https://huggingface.co/<repo>/resolve/main/<file>` the four files (`config.json`, `model.bin`, `tokenizer.json`, `vocabulary.txt`) into a folder and pass it to `--model`. CTranslate2 dlopens `libcublas.so.12` and `libcudnn*.so.9`, which the script supplies from the pip wheels via `LD_LIBRARY_PATH`, so pacman's CUDA is not involved. A stopped kokoro sits in `failed` rather than `inactive` (uvicorn exits non-zero on SIGTERM); `systemctl --user start` works from there. Neither pipeline does speaker diarisation; WhisperX with pyannote would, at the cost of gated model downloads and another 2 GB of VRAM, so it is not set up.
-
-## Codex voice needs small capture chunks
-
-Codex's `/voice` captures through its own `codex-voice-host` process, an ALSA client of PipeWire, and that host loses most of its mic audio whenever PipeWire delivers capture in chunks above about 1024 frames: the gaps reach OpenAI as zero-filled 10ms blocks, so the model hears fragments and never answers while the mic meter still moves. The host asks for 2400-frame periods itself, which lands the graph at its 2048 max quantum. It only failed some of the time because anything else capturing the same mic at a lower latency, voxtype in particular, holds the whole graph at 1024. `stow/pipewire/.config/pipewire/client.conf.d/codex-voice.conf` caps that one binary's ALSA period at 1024 frames. The PipeWire ALSA plugin reads it when the host starts, so it applies from the next Codex launch. A `node.latency` override in the same rule does not work, the plugin derives latency from the period. Check it with `pw-top` during `/voice`: `alsa_capture.codex-voice-host` should read 1024.
-
-## Browser calls must not move the mic gain
-
-WebRTC's AGC does not stop at its own digital gain, it also turns the OS mic level. During a call it raises the source volume while it hears speech it judges too quiet and never lowers it again, and WirePlumber persists that like any user change, so the raised gain outlives the call, survives replug and reaches voxtype as clipped garbage. On silver-fox it took the Brio from its calibrated +6dB to +22dB. Chrome, Chromium and every Electron app (Element calls are WebRTC) do this through the `WebRtcAllowInputVolumeAdjustment` feature, which `--disable-features=WebRtcAllowInputVolumeAdjustment` turns off; the call keeps its digital gain, it just stops reaching outside the browser. The flag lives in three places:
-
-- `stow/chrome/.config/chrome-flags.conf`, read by `/usr/bin/google-chrome-stable`
-- `stow/electron/.config/electron-flags.conf`, read by the Arch electron wrappers, see "Electron apps need the keyring flag"
-- `~/.config/chromium-flags.conf`, which is omarchy's own copy rather than ours, so `just stow-files` appends the line if missing
-
-Flags apply only when the main process starts, so an already-running Chrome needs every window, PWAs included, closed first. Chromium keeps only the last `--disable-features` switch, so further features join the existing line comma separated, never a second line.
-
-Verified 2026-10-11 with a headless loopback call (`RTCPeerConnection` pair on `getUserMedia({ audio: true })`, scratch `--user-data-dir`) while quiet espeak speech played into the room. Unflagged Chrome raised the Brio from wpctl 0.40 to 0.47 and 0.50 in two 30 s runs, unflagged Electron to 0.45; through the flags files both held at 0.40. The AGC only moves the gain while it hears speech, so a test in a silent room, or with speech already near -20 dBFS, shows nothing.
-
-The tell is in WirePlumber's saved route. `wpctl` prints cubic volume and PipeWire stores linear, so the drift read as wpctl 0.74 beside `channelVolumes` 0.400713 in `~/.local/state/wireplumber/default-routes`. That linear value is exactly PulseAudio's raw 48316, ie `188/255 × 65536` truncated, an AGC level out of 255, which is what pointed at WebRTC rather than the bar's mic slider.
-
-## Cursor theme
-
-The pointer is Never-Lost Rainbow, converted from the Windows `.ani` set in `neverlost/` (see its readme for what the conversion changes). `just install-cursor-theme` runs `scripts/install-cursor-theme.py`, which builds the XCursor theme into `~/.local/share/icons/Never-Lost-Rainbow`. That script also owns the Windows-role-to-X11-name mapping, so it is the file to edit to change which cursor plays which role.
-
-`cursor-toggle` (on PATH, from `scripts/cursor-toggle.sh`) turns it on and off, falling back to the system default theme. State is the flag file `~/.local/state/cursor-off`, on the same pattern as `presentation-mode`.
-
-`XCURSOR_THEME` and `XCURSOR_SIZE` are set in the shared `hypr/envs.lua`, which is required from `hyprland.lua` after Omarchy's defaults so it overrides their size of 24. It reads the same flag the toggle writes, which is what makes the choice survive a reload. Both branches assign every variable, because `hyprctl reload` can overwrite an env var but never unsets one. GTK apps read the theme from gsettings instead, which the toggle sets.
-
-## Shared assets
-
-`assets/` is a manifest of symlinks, one per noun, each pointing at where that noun lives on the machine: today only `assets/pictures -> ~/Pictures/assets` (wallpapers, headshots, the omarchy-logo template). The tree is mirrored to the `arch-config--shared--assets` S3 bucket under the same prefixes (`pictures/...`), shared across machines and tracked in no repo. The bucket is declared in `main.bsx` and driven by beet: `just assets plan|deploy|destroy` provision it, and `just push-assets` (`just assets push`) mirrors the tree up with delete, so a file removed locally is removed from the bucket on the next push. beet refuses to push an empty or unhydrated link, which is what makes the delete safe, and object versioning keeps overwritten and deleted objects for 90 days. The `assets` recipe runs the stock `beet` binary out of `~/me/beet` with the `infra,extra` features, so the first push on a machine builds it; the tofu work dir lands in `target/` (gitignored) and the state in this account's own `beet-state-<account-id>` bucket, which beet derives and finds without either repo declaring it, so the verbs need AWS credentials and `tofu`. Those credentials are this repo's own IAM user, `arch-config-deployer`, whose `arch-config--deploy` policy is derived from what the stack renders and reaches this stack's buckets and state key and nothing else. A plain deploy checks the pair against the declarations first and refuses, naming `--elevated`, when it needs more than it holds, ie for a new bucket, or for versioning and lifecycle changes, which can make data final and so need the administrator's six-digit code; `just assets deploy --dry-run` says which, and `just assets deploy --elevated` asks for the code and converges the user, its policy and its key, since a deployer holds no `iam:` action over itself.
-
-Hydrating does not go through beet. `just pull-assets` is a plain `aws s3 sync --no-sign-request`, because `init-user` runs it on a fresh machine before any Rust toolchain or AWS credentials exist; the bucket's public read grants `ListBucket` as well as `GetObject`, which is what lets an unsigned sync list before it gets. Individual files are fetchable unsigned at `https://arch-config--shared--assets.s3.us-west-2.amazonaws.com/pictures/<path>`, which is how `stow-files-init` gets the Firewatch wallpaper. Adding a noun is one more symlink under `assets/` pointing at the directory that owns it, plus a `mkdir -p` of that target in `pull-assets`, since the aws cli cannot write through a dangling link.
-
-This replaced the SST-managed `mrchantey-os` bucket on 2026-09-22, the last SST resource in the account; `~/Pictures/shared` became `~/Pictures/assets` at the same time, so a machine set up before then needs the `mv` before its first pull.
-
-## Backups
-
-`just backup` (`scripts/backup.sh`) makes sure losing a device loses nothing that lives only on it, and `just install-backup-timer` runs it once a day, whenever the machine happens to be on. The `backup` skill reads its report and handles what it refuses. One run does three things.
-
-**Git.** In every repo of ours under `~/me`, meaning one with a remote under github.com/mrchantey, each branch ahead of its upstream is pushed, fast-forward only. A diverged branch, a gone upstream or a branch without one is reported, never rebased or created. Uncommitted work is reported and left alone, since the mirror below holds it, and so are the commits on a linked worktree's detached HEAD, which only the mirrored `.git` holds.
-
-**Claude Code sessions.** `ingest pete --source=claude-code` then `push` in `~/me/beet_egress`, whose own bucket is the record of them (its README). Claude Code deletes a transcript `cleanupPeriodDays` after its last activity, 30 by default, which found a month-old gap on 2026-10-20: the oldest transcript on disk was the same day as the last ingest. `stow/claude/.claude/settings.json` sets 3650, so the backup is no longer racing the deletion. Never set it to 0, which turns transcripts off.
-
-**The mirror.** A tree staged under `target/backup/<hostname>`, laid out as the home directory, is mirrored to that device's prefix of the private `arch-config--shared--backup` bucket, ie `s3://arch-config--shared--backup/silver-fox/me/beet/.agents/plans/..`. What is staged:
-
-- A checkout of ours, main repo or linked worktree: the working tree as git sees it (`git ls-files -co --exclude-standard`, so uncommitted edits and untracked files are in), its `.git` (a worktree's is the pointer file into its main repo, whose `.git` holds the commits), `.agents` less `tmp`, build output and repos cloned into it for reference, and the gitignored `assets` dirs that hydrate from beet's own buckets. Each prefix is therefore a working clone.
-- Anyone else's checkout (iroh, openclaw, omarchy, ..): only what is ours in it, its uncommitted changes and untracked `.agents`, and nothing at all when that is nothing. Local commits there are reported as not backed up.
-
-`~/Downloads` is temporary and excluded from backups. Everything else gitignored stays out: `target/`, `data.db`, dumps, `.env`, `.secrets/`. The tree is staged rather than synced in place because beet's `DirSync` filters are aws globs, which cannot express `.gitignore`. Staging is reflink copies on the btrfs home, which cost no space, hold still while the upload reads them, and keep mtimes, so `aws s3 sync` uploads only what changed. On silver-fox it is about 15k files and 1.3 GB and stages in two seconds.
-
-The push mirrors, so a file deleted locally is pruned from the prefix, and object versioning keeps every overwrite and deletion for 90 days. `bucket_dir` is declared rather than read from the request, so `main.bsx` holds a `backup/push/<device>` and `backup/pull/<device>` pair per device; a new device needs its pair, and the script refuses to run without one. A reinstalled machine keeps its hostname, and its first run would prune the prefix it should have restored from, so the script refuses to upload from a machine with no `~/.local/state/backup/last-run` until it is restored or run with `--first`.
-
-The upload needs beet built with `infra,extra`, and the ingest needs beet_egress's binary. Both run from a saved copy of their last good build in `~/.local/state/backup/bin`, rebuilt when a week old and once more when a run fails, so a beet checkout that is mid-refactor, or locked by an agent's build, does not stop the backup.
-
-The timer fires hourly, and `--if-due` makes each firing a no-op until 23 hours after the last run, or 3 hours after a failed one, so a machine that is off overnight catches up in the first hour it is on. The service is niced and on idle IO. A failure raises a critical notification; `journalctl --user -u backup` holds every report. S3 costs pennies a month per device: a run lists the prefix (one request per thousand objects) and uploads only changed files, and the churn is git's index and the odd repack, kept 90 days as noncurrent versions. The real cost is CPU, a beet build when the saved one is a week old.
-
-Restoring needs the age identity (from the USB, `just setup-age-identity`) to open the deployer pair in `secrets.toml`, and beet to run the pull, so on a fresh machine it comes after `just init`: `just restore <device> --replace` pulls the prefix to `~/.cache/backup-restore/<device>` and swaps each backed up checkout in whole, keeping the fresh clone beside it as `<path>.pre-restore`. Without `--replace` it only fills in missing files, which is safe on a live machine. S3 keeps neither symlinks nor executable bits, so the restore puts both back from each checkout's index.
-
-## Keeping single-instance apps on the current workspace
-
-Chrome, Zed, Nautilus and Element all hand a second invocation to the already-running process over an IPC socket instead of starting fresh. That process places the payload (a URL, a file, a folder) in whichever of its windows was activated last, which is routinely on a workspace you cannot see. Hyprland cannot fix this: no window is created, so there is no event for a window rule to match on. It has to be handled at the launch site.
-
-`scripts/launch-here.sh` is the shared helper:
-
-```
-launch-here <class-regex> <new-window-flag> <command> [args...]
-```
-
-It focuses the most recently focused matching window on the *active* workspace, making it the one the app considers last-activated, then hands the payload over. With no match here it falls back to `<new-window-flag>`, so a fresh window opens on this workspace instead of joining one elsewhere. Invocations with no payload (`--help`, `--incognito` from `omarchy-launch-browser`) pass straight through, so nothing that merely launches an app is affected.
-
-Anchor the class regex. `^google-chrome$` deliberately excludes Chrome PWA windows, whose class is `chrome-<appid>-Default`. Matching follows `omarchy-hyprland-focus-app` in checking `.class` then `.initialClass`.
-
-Only Chrome is wired up so far, via `stow/mimeapps/.local/share/applications/google-chrome.desktop`, which **shadows** the packaged entry. Reusing the `google-chrome.desktop` ID rather than adding a new one is deliberate: `mimeapps.list` already points at that ID, and Chrome's own default-browser check compares against it, so a differently-named wrapper would make Chrome nag on every launch. The cost is that the shadowing copy is a hand-trimmed subset of the packaged file, so a Chrome release that adds a field will not reach us until it is copied across. Adding another app is one more shadowing `.desktop` with a different `Exec` line; Zed is the obvious next candidate, since files opened from elsewhere land in an arbitrary one of its windows.
-
-`Exec` does not point at `launch-here` directly, it points at `scripts/chrome-here.sh`, which bakes in the class regex, the new-window flag and the chrome binary. That indirection is load-bearing. `omarchy-launch-webapp` and `omarchy-launch-browser` both resolve "the browser" by `sed`-ing the *first whitespace-delimited token* out of `Exec=` and then calling it with chrome's own flags (`--app=<url>`, `--incognito`). With `launch-here` first they called it as `launch-here --app=<url>`, which misses its `<class-regex> <new-window-flag> <command>` signature and exits 2; `omarchy-launch-webapp` wraps the call in `setsid`, so every webapp keybind failed silently. Anything put first in that `Exec` line has to be a drop-in for the browser binary. One residue remains: `omarchy-launch-browser` derives its post-launch focus regex from `basename` of that token, so with a shim there it matches nothing and the focus call no-ops (harmless here, `bindings.lua` avoids that focuser deliberately).
-
-### The related Super+B bug is a different failure mode
-
-`bindings.lua` bypasses `omarchy-launch-browser` for a problem that looks the same but is not. There the launch was always correct, `--new-window` opens here; the damage came afterwards from `omarchy-hyprland-focus-app`, which picks `first(...)` in `hyprctl clients` order with no regard for workspace and yanked focus away. That is focus stealing, fixed by not calling the focuser, so those bindings stay as plain `--new-window` launches and do not route through `launch-here`, which in that mode would add indirection and no behaviour change.
-
-## Electron apps need the keyring flag
-
-Element opens with "Your system has an unsupported keyring meaning the database cannot be opened" and offers weaker encryption. Nothing is wrong with the keyring: `gnome-keyring-daemon` runs with `--components=pkcs11,secrets`, and Chrome and Chromium both hold Safe Storage items in it. Electron picks its `safeStorage` backend from the desktop environment, and Chromium only auto-selects libsecret for GNOME-family desktops, so under `XDG_CURRENT_DESKTOP=Hyprland` it falls back to the "basic" store and calls the keyring unsupported.
-
-Omarchy fixes this for exactly one app: `--password-store=gnome-libsecret` is in its `config/chromium-flags.conf`, with a migration that appends it when missing. Every other Electron app is on its own, which is what the `electron` stow package is for. Arch's `element-desktop` is nothing but `exec electron43 /usr/lib/element/app.asar "$@"`, and `/usr/bin/electron43` reads `~/.config/electron43-flags.conf` first, then falls back to the unversioned `electron-flags.conf`, passing every non-comment line through as a flag. We stow the unversioned name so the file survives Element moving to electron44 on its own schedule; the cost is that a versioned file appearing later would shadow ours silently.
-
-**Never accept the weaker encryption offer.** The basic backend derives its key from a hardcoded password, so once this flag is in place the database written under it cannot be decrypted, and the app needs a fresh login, which for Element means re-verifying the session. Worth reporting upstream: this hits every Electron app on Hyprland, and only chromium is patched.
-
-## The bar, launcher, and idle are one Quickshell process
-
-Quattro replaced waybar (bar), walker + elephant (launcher), mako (notifications), swayosd (OSD), and hypridle + hyprlock (idle/lock) with a single long-running Quickshell process, `omarchy-shell`. All of those packages are uninstalled and their stow packages are deleted.
-
-It is configured by `~/.config/omarchy/shell.json`, which hot-reloads on save. Our copy is tracked at `files/omarchy/shell.json` and **copied** into place by `just stow-files`, not stowed: `omarchy-shell-config` writes the file with `mktemp` + `mv`, which would replace a symlink with a regular file the first time anything edits the bar. Use `just pull-files` to capture GUI-made changes back into the repo.
-
-Idle timings (`idle.screensaver`, `idle.lock`, in seconds) live there too, replacing `hypridle.conf`. There is no display-off setting: `omarchy-system-lock` turns the display off itself.
-
-To customize a built-in widget, never edit `/usr/share/omarchy/shell/plugins/`; clone it with `omarchy plugin clone omarchy.<widget>`, which switches the bar to `<username>.<widget>` under `~/.config/omarchy/plugins/`.
-
-### Locking a laptop used to suspend it
-
-Diagnosed on silver-fox on 2026-09-25, where locking the screen slept the machine and an unattended agent run died 11 minutes after the last keypress. Nothing in Omarchy suspends on idle (`IdleAction` is `ignore`, and the only `systemctl suspend` in the tree is the power menu entry), so the cause is worth knowing before chasing the shell again.
-
-It is logind's lid handling, arriving late. logind suppresses the lid-close action while an external display is attached, because `HandleLidSwitchDocked` defaults to `ignore`, but it does not then forget the closed lid: it installs a repeating re-check timer (`button_recheck`) and re-asks "still docked?" roughly every 30 seconds for as long as the lid stays shut. `omarchy-system-lock` turns the display off as part of locking, the monitor drops HDMI hot-plug detect a few seconds later, and the next re-check finds no external display, falls through to `HandleLidSwitch` (stock default `suspend`) and sleeps a working machine. In the journal it reads as a bare `systemd-logind: Suspending...` five or six seconds after `omarchy lock ... lock-requested`, with no lid event anywhere near it, and `drm: Connector HDMI-A-1 disconnected` in the Hyprland log just before.
-
-`files/systemd/logind.conf.d/30-lid-external-power.conf` fixes it by setting `HandleLidSwitchExternalPower=ignore`, which logind ignores entirely unless it is set, and which is exactly why the fall-through reached `HandleLidSwitch`. That splits the two cases the machine has: clamshelled at a desk on mains, where nothing should sleep on its own, and unplugged, where a closed lid still means "in a bag" and suspend is right. `just install-logind` copies it into `/etc/systemd/logind.conf.d/` and reloads logind (it is `Type=notify-reload`, so no restart). It runs from `init-sudo`, so both devices get it, and it exits early on rainbow-cat, which has no lid and so no lid action to override. The one edge it leaves: unplugging the charger while clamshelled hands the decision back to `HandleLidSwitch`, so the next re-check suspends within ~30s.
-
-The same display loss also breaks locking outright. Quickshell cannot create a lock surface with zero outputs, so it answers `lock-pending: no-real-screen`, never reports secure, and `omarchy-system-sleep-lock` gives up after its 12 second budget and fires the "Screen did not lock before suspend" notification, leaving the session exposed. Omarchy self-heals that (the clamshell watcher re-enables the laptop panel when no external display is active, retrying at 1s/3s/7s), but only if the internal panel is free to come back. Omarchy turns `eDP-1` off through exactly two flags, and they do not recover equally. The clamshell flag (`internal-monitor-clamshell.lua`) is dropped as soon as sysfs shows no external connected. The manual flag (`~/.local/state/omarchy/toggles/hypr/internal-monitor-disable.lua`, set by Super+Ctrl+Delete or Menu > Display) is only deleted by `omarchy-hyprland-monitor-internal recover` once `omarchy-hyprland-monitor-external-active` says no external is active, and that check asks `hyprctl`, which lists Hyprland's `FALLBACK` placeholder the moment the last real output goes. So with the manual flag set and the lid open, losing the external leaves no screen at all, found on 2026-10-06 by unplugging the desk monitor. silver-fox's `monitors.lua` leaves the panel enabled when the desk monitor connects and clears any manual disable flag itself on `monitor.removed` for that reason. Anything else that sets it needs the same. **Never turn the panel off any other way**, such as a `disabled = true` rule for `eDP-1`: the clamshell script re-enables any panel it finds disabled without one of those flags, so anything else fights the watcher instead of being undone by it.
-
-### Devices
-
-`silver-fox`
-	- Dell Precision 7560 laptop (replaced the XPS 15 9500 on 2026-09-10; the XPS
-	  is dead and gone). Full record: the `info-silver-fox` skill.
-	- i7-11850H (8c/16t, Tiger Lake-H), 64GB RAM
-	- NVIDIA RTX A2000 Mobile, 4GB of GDDR6 VRAM + Intel UHD iGPU (drives eDP-1)
-	- internal panel is 1920x1080 16:9 at scale 1, NOT the XPS's 4K 16:10 panel,
-	  so `GDK_SCALE` is 1 here and omarchy's `scale = "auto"` is deliberately not used
-	- unlike the XPS, the dGPU drives real outputs: HDMI + mDP are on the NVIDIA
-	  card, eDP-1 and the USB-C DP-alt ports are on the Intel one
-	- **no built-in camera and no working built-in microphone** (camera-less SKU;
-	  the array mics live in that module). A capture source still enumerates and
-	  hears nothing. A Logitech Brio 100 (USB) provides both since 2026-09-11 and
-	  is the voxtype mic; it powers on at +30dB and clips, so
-	  `scripts/silver-fox/startup.sh` sets it to wpctl 0.4 (the +6dB hardware
-	  floor) by node name. Calibration and re-tune in the `info-silver-fox` skill.
-	- OS and home are on the 1TB KIOXIA NVMe (one drive, like rainbow-cat); the 256GB SK hynix it shipped with is a blank spare in the CPU-attached, Gen4-capable M.2 slot. Never address either by node number. See the `info-silver-fox` skill.
-
-`rainbow-cat`
-	- desktop, NVIDIA (primary GPU)
-	- Samsung C49RG9x ultrawide (5120x1440@120, scaled 1.25) is the only display in use as of 2026-11-12; no second monitor is planned in the immediate future.
-	- The C24F390 1080p side-monitor configuration remains in place for possible future use, positioned to the ultrawide's right. Its two-monitor workspace behavior is not yet hardware-verified on this machine.
+- `silver-fox`: Dell Precision 7560 laptop, Intel iGPU composites and an RTX A2000 4GB for CUDA, Brio 100 as the only mic and camera. Record: `docs/devices/silver-fox.md`.
+- `rainbow-cat`: desktop, RTX 3080 Ti as the compositing GPU, Samsung C49RG9x ultrawide as its only display in use. Record: `docs/devices/rainbow-cat.md`.

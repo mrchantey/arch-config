@@ -16,7 +16,7 @@ dofile((os.getenv("OMARCHY_PATH") or "/usr/share/omarchy") .. "/default/hypr/boo
 -- No keybinds for Omarchy's preinstalled apps (HEY, Spotify, X, ChatGPT, ...). The
 -- default reads ~/.local/state/omarchy/preinstalls-removed for this; the global is the
 -- override helpers.lua checks first, so the config says so itself rather than depending
--- on machine state. See AGENTS.md "Preinstalls".
+-- on machine state. See scripts/remove-preinstalls.sh.
 _G.omarchy_preinstalled_bindings = false
 
 -- Omarchy defaults first, so every override below lands on top of them.

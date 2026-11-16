@@ -25,6 +25,13 @@
 #   execs. Nothing points Exec= here directly: omarchy-launch-webapp and
 #   omarchy-launch-browser call the first Exec token with chrome's own flags,
 #   which do not fit this script's signature.
+#
+# Only Chrome is wired up. Adding another app is one more shadowing .desktop
+# with its own *-here.sh shim; Zed is the obvious next candidate, since files
+# opened from elsewhere land in an arbitrary one of its windows. One residue of
+# the shim: omarchy-launch-browser derives its post-launch focus regex from the
+# basename of the first Exec token, so it matches nothing and that focus call
+# no-ops, which is harmless since bindings.lua avoids that focuser anyway.
 
 set -euo pipefail
 
