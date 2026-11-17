@@ -204,9 +204,12 @@ setup-ssh-key host="tangled.org":
 setup-age-identity backup="":
 	bash scripts/setup-age-identity.sh {{backup}}
 
-# stow the per-device hypr overrides; idempotent
-# quattro moved Hyprland config to Lua, so these are *.lua now. envs-device is
-# gone entirely: omarchy detects the NVIDIA GPU and sets the render env itself.
+# stow the per-device overrides (hypr device modules, plus anything else the
+# hypr-<device> package holds); idempotent. The rm clears regular files Omarchy
+# may have written in their place. Hyprland autoreloads the moment they vanish,
+# before stow relinks them, and require_optional silently skips the missing
+# modules, leaving the session on default monitors and input. The closing reload
+# re-reads them once linked.
 stow-device device:
 	rm -f 														\
 	~/.config/hypr/monitors.lua 					\
@@ -214,6 +217,7 @@ stow-device device:
 	~/.config/hypr/layout-device.lua 			\
 	~/.config/hypr/envs-device.lua
 	cd stow && stow -vt ~ hypr-{{device}}
+	[ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ] || hyprctl reload
 	@echo "PASS stow-device {{device}}"
 
 init-sudo:

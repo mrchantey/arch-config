@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Runs the Omarchy shell without Wayland explicit sync, rainbow-cat only.
+#
+# On NVIDIA 615.78.08 a sync-FD fence still in flight when the machine suspends
+# never signals after resume (nvidia-drm logs "Failed to register auto-value-
+# update on pre-wait value for sync FD semaphore surface"). Sleep-lock draws the
+# lock surface just before suspend, so the shell always owns one of those
+# fences, and on unlock its render thread spins on it forever, freezing the
+# shell. Symptom, evidence and recovery: docs/devices/rainbow-cat.md, Traps.
+#
+# The fence comes from egl-wayland2's explicit sync path: the compositor's
+# release point is exported as a sync_file and queued as a GPU wait
+# (eglWaitSync). With it disabled, a direct (non-PRIME) swapchain also has no
+# implicit sync, so buffers are reused on wl_buffer.release and each frame is
+# glFinish'd before commit: no fence is ever handed to the GPU. That costs a CPU
+# wait per frame, negligible for a bar, which is why this is scoped to the
+# shell rather than set session-wide in envs-device.lua.
+#
+# Found ahead of /usr/bin/quickshell because ~/.local/bin precedes /usr/bin on
+# the PATH Hyprland hands to omarchy-launch-shell. Delete this file once a
+# driver update stops logging the semsurf error on resume.
+
+export __NV_DISABLE_EXPLICIT_SYNC=1
+exec /usr/bin/quickshell "$@"
