@@ -18,7 +18,7 @@ device, each a mirror of the tree `scripts/backup.sh` stages under
 
     just assets plan       # eyeball the plan
     just assets deploy --dry-run   # each credential, what it would become, and whether --elevated is needed
-    just assets deploy --elevated  # converge the deployer user, policy and key as an administrator, then deploy
+    just assets deploy --elevated  # converge the account and the deploy user, policy and key as an administrator, then deploy
     just assets deploy     # provision the buckets
     just assets push       # mirror assets/ up, pruning what was removed locally
     just assets backup/push/<device>  # mirror target/backup/<device> up
@@ -31,19 +31,20 @@ There is no beet `pull` for assets: hydrating is `just pull-assets`, a credentia
 `aws s3 sync` that `init-user` runs on a fresh machine before any Rust
 toolchain exists, which is what the bucket's public read is for.
 
-The deploy verbs need the aws deployer pair and this stack's tofu state
+The deploy verbs need the aws deploy pair and this stack's tofu state
 passphrase, both `env_var` records of the committed `secrets.toml`, age-sealed
 and loaded into the process environment by the launch before the entry builds;
 nothing reads `~/.aws`. The pair is this repo's own IAM user,
-`arch-config-deployer`, which reaches this stack's bucket namespace and state
-key and nothing else. A plain deploy checks the pair against what the stack
-renders and refuses, naming `--elevated`, when it needs more than it was
+`arch-config-deploy`, in this repo's own AWS account (`arch-config`, a member
+of the operator's Organization), reaching this stack's bucket namespace and
+state key and nothing else. A plain deploy checks the pair against what the
+stack renders and refuses, naming `--elevated`, when it needs more than it was
 granted, ie after a new bucket; `just assets deploy --elevated` asks for the
-administrator's six-digit code and converges the user, its
-`arch-config--deploy` policy and its key, since a deployer holds no `iam:`
-action over itself. The state passphrase is this repo's own, minted here and
-shared with no other repo, so losing it costs this stack's state and nothing
-else. Reading the document needs this machine's age identity
+administrator's six-digit code and converges the account, the user, its
+`arch-config--deploy` policy and its key, since a deploy credential holds no
+`iam:` action over itself. The state passphrase is this repo's own, minted
+here and shared with no other repo, so losing it costs this stack's state and
+nothing else. Reading the document needs this machine's age identity
 (`~/.config/beet/age/keys.txt`).
 -->
 <CliServer always=true {CallOnReady}>
@@ -54,18 +55,32 @@ else. Reading the document needs this machine's age identity
 	<!-- `app_name` composes the bucket name and the tofu state key, so renaming
 	     it would orphan the bucket -->
 	<PackageConfig title="Arch Config" app_name="arch-config" description="Shared assets and device backups for the omarchy config"/>
-	<!-- this repo's credentials (the aws deployer pair, its own tofu state
+	<!-- this repo's credentials (the aws deploy pair, its own tofu state
 	     passphrase), age-sealed in `secrets.toml` and loaded into the process
 	     environment by the launch before this entry builds; no `bx:cfg`, since
 	     the prescan reads the declaration ahead of the build walk -->
 	<Secrets/>
 	<Route path="secrets" bx:cfg="feature:vault"><SecretsRoutes/></Route>
+	<!-- this machine's OWN aws identity: `just assets aws -- ..` runs as the
+	     read-only `beet-agent` or under a live admin session, and
+	     `--account=arch-config` inside this repo's own account; `just assets
+	     admin` buys that session with one code from the phone, and
+	     `admin -- <verb>` runs one of this entry's verbs under it -->
+	<AwsExec bx:cfg="feature:vault"/>
+	<AdminElevate bx:cfg="feature:vault"/>
 	<!-- the aws identity this repo deploys as: one iam user for this document
 	     and one managed policy per app it declares, lowered from what the stack
 	     below renders. A deploy checks it against the declarations before it
 	     writes anything, and an elevated deploy converges it as an
 	     administrator: the scoped pair it seals cannot mint itself -->
-	<AwsDeployer/>
+	<AwsDeployCredential/>
+	<!-- the repo's own AWS account, a member of the Organization the deploy
+	     credential lives and deploys in. The root carries no region, so it is
+	     spread here: the state bucket and the Recycle Bin rules land there -->
+	<AwsAccount name="arch-config" {AwsRegion("us-west-2")}/>
+	<!-- `close-account --elevated`: the package's most final act, stated where
+	     the account is -->
+	<CloseDeployAccounts/>
 	<!-- `shared`: a source synced between machines is owned by no deploy stage.
 	     The region is pinned because the unsigned urls in the justfile and the
 	     omarchy-logo skill name it, and a provider address is a spread resolved
