@@ -28,9 +28,7 @@ Downloads is temporary and excluded from backups, see `docs/backups.md`. The nex
 - [ ] (ask first, only if the default nightly is too old) `rustup update nightly`, preserves installed components and targets while upgrading the compiler
 - [ ] `just backup --dry-run`, verify `target/backup/silver-fox/Downloads` is absent
 - [ ] `just backup`, verify egress and upload both succeed; a failed old cached parser triggers a rebuild from the updated source
-- [ ] `just install-backup-timer`, ensures the hourly due-check timer is enabled
-
-Verify: `cat ~/.local/state/backup/last-run` prints `ok`, `systemctl --user list-timers backup.timer` shows the next firing, and the staged backup contains no Downloads. The saved stock runner now explicitly changes to the config repo, so it also works when systemd launches it from home.
+Verify: `cat ~/.local/state/backup/last-run` prints `ok`, and the staged backup contains no Downloads. The saved stock runner now explicitly changes to the config repo, so it also works when systemd launches it from home.
 
 ## 2026-11-14 dynamic Zed workspace labels (from rainbow-cat)
 
@@ -46,7 +44,7 @@ Verify: the bar shows labels such as `2 arch-config`, with the active workspace 
 
 Rainbow Cat now continues the verified Silver Fox snapshot without replacing newer committed work. Eval, Misc and OS were recovered at `9b5840ae0` for this exceptional transfer. Worktrees are ephemeral development state, not a required cross-device or fresh-install layout. Canonical `.agents` material, historical reference bundles and sealed retired private state are in Rainbow Cat's normal backup, not necessarily in Git. See `.agents/reports/reconcile.md` and `.agents/reports/project-reentry-2026-11-14.md` in the recovered arch-config notes.
 
-- [ ] Before any earlier `just backup` step, record `systemctl --user is-enabled backup.timer` and `systemctl --user is-active backup.timer`, then `systemctl --user disable --now backup.timer`. Keep automatic uploads held across reboots until this section's source/note/coverage gates pass; restore the recorded enabled/active state afterward, not blindly on a failed reconciliation.
+- [ ] Before any earlier `just backup` step, `just uninstall-backup-timer`, so nothing uploads automatically during reconciliation. The timer stays off afterwards, see the 2026-11-17 section.
 - [ ] Create a private checkpoint outside `~/me` of this laptop's current Git metadata, edited/untracked durable files, `.agents`, relevant assets and ignored private state, preserving symlinks and modes. Inventory all eight owned repos and existing worktrees first. Keep existing identities/credentials; never source a recovered `.env` or reset a dirty/diverged checkout.
 - [ ] Once these reviewed tracked changes have reached Git, use the `git-sync` skill for this repo and fast-forward the clean owned source repos as appropriate. Stop on new local commits, dirty source or divergence instead of discarding laptop work. Do not deploy, rotate credentials or replay old archived tasks.
 - [ ] Inspect existing worktrees for laptop-only source and notes before reconciling them. Do not create or advance worktrees merely to match Rainbow Cat's recovered layout. Never copy Rainbow Cat's `.git` pointers, indices or worktree-admin directories onto this machine.
@@ -60,7 +58,7 @@ just assets secrets/exec -- aws s3 sync s3://arch-config--shared--backup/rainbow
 - [ ] Account for assets by content and consumer, retaining newer valid local files. Use the current unsigned shared-asset pull procedures only where hydration is needed; do not push incomplete local assets or revive archived wasm outputs. Historical private recovery archives open with the existing personal age identity and must never become active credentials automatically.
 - [ ] Verify `cargo metadata --locked --offline --features=cli --filter-platform x86_64-unknown-linux-gnu --format-version 1` from both `~/me/beet_eval` and `~/me/beetmash`, capturing JSON to fresh scratch files. Run `cargo test --locked -p beet_eval --lib` from Eval, expecting all 33 tests; preserve any later legitimate test changes rather than forcing this historical count. The lockfile graph repairs retain existing pins, and two test-only fixes use visible captions and order-independent filesystem membership.
 - [ ] Only after source, notes and assets are accounted for, run `just backup --dry-run`. Confirm the canonical worktrees/notes are included and Downloads, quarantine and the private rollback checkpoint are excluded. Do not use `just restore rainbow-cat`, `--replace`, a blanket Git clean or a direct mirror upload as a substitute for this semantic merge.
-- [ ] Restore the timer's recorded enabled/active state, then perform the normal `just backup` without `--first`, verifying ingest and upload to **silver-fox's own prefix** succeed. This future caught-up upload is separate from Rainbow Cat's read-only recovery of the original Silver Fox snapshot.
+- [ ] Perform the normal `just backup` without `--first`, verifying ingest and upload to **silver-fox's own prefix** succeed. This future caught-up upload is separate from Rainbow Cat's read-only recovery of the original Silver Fox snapshot.
 
 Verify: Eval and Beetmash resolve their declared source dependencies when resumed, current agent entry points resolve without wrappers, original laptop-only work survives, the backup preview contains no Downloads/quarantine, and `last-run` reports `ok` only after the reconciled upload. Complete the older desktop-specific checks on this laptop as applicable; Rainbow Cat's recovery did not test its hardware or apply laptop OS settings.
 
@@ -106,3 +104,11 @@ Verify: a Chrome-only workspace displays a label such as `3 Chrome`, not a page 
 - [ ] `dig -v`, verifies the command is available
 
 Verify: `dig -v` reports the installed BIND version.
+
+## 2026-11-17 daily backup timer off (from rainbow-cat)
+
+The daily backup timer is now opt-in: `just init` no longer installs it, and backups run by hand with `just backup`. See `docs/backups.md`.
+
+- [ ] `just uninstall-backup-timer`, disables `backup.timer` and removes its units; idempotent
+
+Verify: `systemctl --user list-timers --all | grep backup` prints nothing.

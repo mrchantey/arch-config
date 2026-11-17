@@ -28,8 +28,7 @@ init:
 	install-transcribe	\
 	install-transcribe-file	\
 	install-tts				\
-	install-cursor-theme	\
-	install-backup-timer
+	install-cursor-theme
 	chmod +x scripts/*/startup.sh
 
 # symlink the audio capture+transcribe helper onto PATH (~/.local/bin is on PATH).
@@ -812,7 +811,8 @@ restore device=`hostname` *args:
 # An hourly check that backs up once a day, whenever the machine happens to be on:
 # `--if-due` makes it a no-op until 23h after the last run (3h after a failed one),
 # so an off night costs nothing and the first hour of the morning catches up. Niced
-# and idle-IO so a build or an upload never competes with the desktop.
+# and idle-IO so a build or an upload never competes with the desktop. Opt-in, so
+# `just init` leaves it out.
 #
 # back up daily, whenever the machine is on
 install-backup-timer:
@@ -822,6 +822,14 @@ install-backup-timer:
 	systemctl --user daemon-reload
 	systemctl --user enable --now backup.timer
 	@echo "PASS install-backup-timer"
+
+# stop the daily backup and remove its units, leaving manual `just backup` intact
+uninstall-backup-timer:
+	systemctl --user disable --now backup.timer 2>/dev/null || true
+	rm -f ~/.config/systemd/user/backup.timer ~/.config/systemd/user/backup.service
+	systemctl --user daemon-reload
+	systemctl --user reset-failed backup.service 2>/dev/null || true
+	@echo "PASS uninstall-backup-timer"
 
 # before wiping this machine: a backup, then what no backup covers
 pre-reset:
