@@ -29,12 +29,12 @@ Treat `~/Downloads` as temporary. Never stage or upload its contents. After chan
 - **`Backup refused` / `nothing has been backed up or restored on this machine`**: the first-run guard. If this hostname had a backup before, ie a reinstall, restore first (below). Otherwise `just backup --first`.
 - **Egress failed**: rerun it alone to see why, `cd ~/me/beet_egress && just cli ingest pete --source=claude-code`. The usual cause is a Claude Code update adding a transcript field: the parser denies unknown fields, by design, and fails the ingest before writing anything. The fix is a parser change in beet_egress (ask first). Transcripts stay on disk for 3650 days, so this is not urgent.
 - **Upload failed with AccessDenied**: the deployer's policy predates a change to the stack. `just assets deploy --dry-run` says whether `--elevated` is needed; `just assets deploy --elevated` asks for the administrator's six-digit code, so only the user can run it.
-- **Nothing happened overnight**: `systemctl --user list-timers backup.timer` and `journalctl --user -u backup -n 200`. `cat ~/.local/state/backup/last-run` says how the last run went (`ok`, `failed`, `restored`), and its mtime says when.
+- **Nothing happened overnight**: the timer is opt-in, so first check it is installed: `systemctl --user list-timers backup.timer` and `journalctl --user -u backup -n 200`. `cat ~/.local/state/backup/last-run` says how the last run went (`ok`, `failed`, `restored`), and its mtime says when.
 
 ## Adding a device
 
 1. In `main.bsx`, add a `backup/push/<hostname>` and `backup/pull/<hostname>` pair beside the others; no deploy is needed, the prefix is just a path in the same bucket.
-2. On that device: `just install-backup-timer`, then `just backup --first`.
+2. On that device: `just backup --first`, and `just install-backup-timer` only if the user wants daily runs.
 
 ## Restoring a lost device
 
