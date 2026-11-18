@@ -766,9 +766,10 @@ pull-repo repo *args:
 # this repo rather than beet's.
 #
 # this repo's buckets through beet: just assets plan | deploy | push | destroy
+[positional-arguments]
 assets *args:
 	cd ~/me/beet && BEET_WORKSPACE_ROOT={{ justfile_directory() }} \
-	cargo run -p beet-cli --features infra,extra -- --entry={{ justfile_directory() }}/main.bsx {{ args }}
+	cargo run -p beet-cli --features infra,extra -- --entry={{ justfile_directory() }}/main.bsx "$@"
 
 # assets/ is a manifest of symlinks, one per noun, each pointing at where that noun
 # lives on the machine (assets/pictures -> ~/Pictures/assets: wallpapers, headshots,
