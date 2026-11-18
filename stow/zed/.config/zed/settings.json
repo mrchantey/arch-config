@@ -23,8 +23,8 @@
 			},
 			"favorite_config_option_values": {
 				"model": [
-     "claude-fable-5-1",
-     "opus"
+     "opus",
+     "fable"
     ],
     "mode": ["auto", "bypassPermissions"],
 			},

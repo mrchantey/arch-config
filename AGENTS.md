@@ -35,6 +35,7 @@ Read the entry before touching its subject.
 - Cursor theme: `neverlost/readme.md`
 - Shared assets bucket: `docs/assets.md`
 - Backups: `docs/backups.md`, run through the `backup` skill
+- Freeing disk space: header of `scripts/disk-cleanup.sh`, run through the `disk-cleanup` skill
 - Handing changes to other devices: the `device-handoff` skill
 - A device's hardware and device config: `docs/devices/<hostname>.md`
 

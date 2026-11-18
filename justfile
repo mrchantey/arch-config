@@ -804,6 +804,14 @@ push-assets:
 backup *args:
 	scripts/backup.sh {{ args }}
 
+# Free disk space, mostly cargo intermediates (header of scripts/disk-cleanup.sh).
+#   just disk-cleanup survey            # report what is using the disk
+#   just disk-cleanup prune --dry-run   # list what prune would clear, with sizes
+#
+# free disk space: cargo intermediates and refetchable caches
+disk-cleanup *args:
+	scripts/disk-cleanup.sh {{ args }}
+
 # Lays a device's backup over ~, filling in what is missing and never overwriting.
 # On a fresh machine, after `just init` has cloned, `just restore <device> --replace`
 # swaps each backed up checkout in whole, keeping the fresh clone as <path>.pre-restore.
