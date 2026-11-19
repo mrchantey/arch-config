@@ -15,7 +15,7 @@ A self-built tower, originally a Windows gaming and streaming machine, now runni
 | RAM | 32GB DDR4 (bought as two G.Skill Trident Z RGB 3200 kits of 2x 8GB) |
 | GPU | NVIDIA GeForce RTX 3080 Ti, GA102 `10de:2208`, 12GB, drives every display |
 | Monitor | Samsung C49RG9x ultrawide on DP-1, 5120x1440@120, scale 1.25 |
-| Side monitor | Samsung C24F390, 1920x1080@60, **not connected** as of 2026-11-12; its config stays in `monitors.lua` |
+| Side monitor | none; the Samsung C24F390 moved to silver-fox's desk on 2026-11-20. Its rule stays in `monitors.lua` |
 | Audio | Intel Z370 HD Audio `8086:a2f0`, plus the GPU's HDMI audio |
 | Microphone and camera | Logitech BRIO 4K over USB (`046d:085e`) |
 | Pointing | Kensington SlimBlade trackball, used left-handed; Logitech G903 on its Lightspeed receiver when plugged in |

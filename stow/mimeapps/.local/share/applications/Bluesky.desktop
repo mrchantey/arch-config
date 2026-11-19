@@ -3,6 +3,7 @@ Version=1.0
 Name=Bluesky
 Keywords=bsky;
 Exec=omarchy-launch-webapp "https://bsky.app"
+StartupWMClass=chrome-bsky.app__-Default
 Terminal=false
 Type=Application
 Icon=bluesky

@@ -1,4 +1,4 @@
--- silver-fox (Dell Precision 7560) — internal 1080p panel + the desk 1440p monitor.
+-- silver-fox (Dell Precision 7560) — internal 1080p panel + a desk monitor.
 -- See https://wiki.hypr.land/Configuring/Basics/Monitors/
 --
 -- Panel is a BOE 0x08CF, eDP-1, 1920x1080 at 340x190mm (~143 DPI, 16:9). Its
@@ -39,9 +39,6 @@
 -- with an external display. Do not use "auto", which picks 1.5 on this panel.
 hl.env("GDK_SCALE", "1")
 
-local desk_description = "Samsung Electric Company Odyssey G5"
-local desk = "desc:" .. desk_description
-
 -- Keep the scale expression dynamic: Omarchy's clamshell watcher parses scalar
 -- assignments in this file and would otherwise keep restoring the initial 1.
 local function update_panel_scale(removed_name, added_name)
@@ -69,39 +66,47 @@ hl.on("monitor.removed", function(monitor)
   hl.exec_cmd("hyprctl -r eval 'do end'")
 end)
 
--- The desk monitor, matched by description rather than port so it does not
--- matter which cable or which GPU it lands on: HDMI-A-1 on the NVIDIA card over
--- a plain HDMI cable, DP-4 on the Intel side through a USB-C dongle. 16:9 at
--- ~108 DPI. Its fastest 1440p mode depends on the route: @144 over direct
--- HDMI, @180 over USB-C to DisplayPort, @59.95 through the USB-C to HDMI dongle.
--- "highres" takes the largest advertised mode and the fastest refresh at it, so
--- every route gets its best. A fixed "2560x1440@144" is not safe: where @144 is
--- not advertised, Hyprland fell back to @59.95 at boot but synthesised a custom
--- @144 mode when the output was re-enabled, past the limit that kept the dongle
--- from advertising it.
+-- Desk monitors, matched by description rather than port so it does not matter
+-- which cable or which GPU they land on: HDMI-A-1 on the NVIDIA card over a
+-- plain HDMI cable, DP-4 on the Intel side through a USB-C dongle.
 --
--- scale 1.25 (125% zoom) -> a 2048x1152 logical desktop. Both axes divide
--- exactly at 1.25, so this is a clean fractional scale: no half-pixel logical
--- size for Hyprland to round, which is what makes some fractional scales blur
--- or leave a seam. It matches rainbow-cat's ultrawide, so text is the same
--- physical size on both desks. 2048x1152 is still wider than the laptop panel's
--- 1920x1080, so nothing on screen gets smaller than it was undocked.
+-- Naming each explicitly is what opts it OUT of the mirror fallback below: a
+-- desk monitor is a second desktop, not a duplicate of the laptop panel. A
+-- monitor with its own rule never falls through to the empty-output rule,
+-- whatever the order here.
 --
--- Naming it explicitly is what opts it OUT of the mirror fallback below: this is
--- a second desktop, not a duplicate of the laptop panel. A monitor with its own
--- rule never falls through to the empty-output rule, whatever the order here.
---
--- Pinned to 0x0 because the leftmost monitor is the primary for synced
+-- Each is pinned to 0x0 because the leftmost monitor is the primary for synced
 -- workspaces (workspaces.lua). Hyprland places explicitly positioned monitors
--- before "auto" ones, so the panel always lands to its right when both are on,
--- and still sits at 0x0 on its own.
-hl.monitor({ output = desk, mode = "highres", position = "0x0", scale = 1.25 })
+-- before "auto" ones, so the panel always lands to their right when both are
+-- on, and still sits at 0x0 on its own. They are alternatives, one per desk;
+-- with two connected at once they would overlap.
+local desks = {
+  -- Samsung C24F390, 24" 1920x1080@60 at ~92 DPI, moved over from rainbow-cat's
+  -- side position on 2026-11-20. scale 1 puts text at near the panel's size at
+  -- its docked 1.5 (~95 effective DPI).
+  { description = "Samsung Electric Company C24F390", mode = "1920x1080@60", scale = 1 },
+  -- Samsung Odyssey G5, 1440p at ~108 DPI. Its fastest 1440p mode depends on
+  -- the route: @144 over direct HDMI, @180 over USB-C to DisplayPort, @59.95
+  -- through the USB-C to HDMI dongle. "highres" takes the largest advertised
+  -- mode and the fastest refresh at it, so every route gets its best. A fixed
+  -- "2560x1440@144" is not safe: where @144 is not advertised, Hyprland fell
+  -- back to @59.95 at boot but synthesised a custom @144 mode when the output
+  -- was re-enabled, past the limit that kept the dongle from advertising it.
+  -- scale 1.25 -> a 2048x1152 logical desktop, which divides exactly on both
+  -- axes so nothing rounds to a half pixel and blurs, and matches
+  -- rainbow-cat's ultrawide so text is the same physical size on both desks.
+  { description = "Samsung Electric Company Odyssey G5", mode = "highres", scale = 1.25 },
+}
+
+for _, desk in ipairs(desks) do
+  hl.monitor({ output = "desc:" .. desk.description, mode = desk.mode, position = "0x0", scale = desk.scale })
+end
 
 -- Fallback auto-mirror: any UNKNOWN external plugged in mirrors the internal
 -- panel, which is what you want from a projector in a meeting room. The
 -- empty-output rule is Hyprland's fallback -- it applies to any monitor without
 -- its own rule, so it catches whatever the cable enumerates as (DP-1..DP-5
--- depending on which port and which GPU). eDP-1 and the desk monitor keep their
+-- depending on which port and which GPU). eDP-1 and the desk monitors keep their
 -- explicit rules above and are not mirrored.
 --
 -- Hyprland mirroring copies the SOURCE framebuffer and stretches it to fill the
@@ -132,13 +137,17 @@ hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1, mirr
 -- omarchy-hyprland-monitor-external-active reports no external, and that check
 -- counts Hyprland's FALLBACK placeholder, which appears the moment the last real
 -- output goes. Unplugging the G5, or the G5 dropping off in standby, therefore
--- left no screen at all. So the removal of the desk monitor turns the panel back
+-- left no screen at all. So the removal of a desk monitor turns the panel back
 -- on here, only when the flag is set: an unconditional `on` also wakes every
 -- output, which would undo a lock's blanking.
 local function is_desk(monitor)
-  return monitor.description:sub(1, #desk_description) == desk_description
+  for _, desk in ipairs(desks) do
+    if monitor.description:sub(1, #desk.description) == desk.description then
+      return true
+    end
+  end
+  return false
 end
-
 
 hl.on("monitor.removed", function(monitor)
   if is_desk(monitor) then
