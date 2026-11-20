@@ -348,26 +348,27 @@ install-user-apps-init:
 	just setup-tts
 	just setup-transcribe-file
 
-# base (CPU): download whisper model and install the user systemd service
-# note: config.toml is managed via stow (built-in hotkey disabled there)
+# base (CPU): download this device's whisper model and the VAD model, then install the
+# user systemd service. config.toml is managed via stow (built-in hotkey disabled there)
 setup-voxtype:
-	voxtype setup --download --model large-v3-turbo	|| true
-	voxtype setup systemd														|| true
-	just setup-voxtype-isolation
+	bash scripts/voxtype-render-config.sh
+	voxtype setup --download --no-post-install --model "$(voxtype -c "$XDG_RUNTIME_DIR/voxtype/config.toml" config get whisper.model)" || true
+	voxtype setup vad		|| true
+	voxtype setup systemd	|| true
+	just setup-voxtype-service
 	@echo "PASS setup-voxtype"
 
-# render gpu_isolation per power-state at daemon start (see scripts/voxtype-render-config.sh):
-# isolate on battery so the dGPU can suspend between clips, stay warm on AC / desktop for
-# instant capture. keeps ONE shared config.toml (dictionary etc.) — the flag is injected
-# into a runtime copy the daemon reads via -c, never the stowed file. machine-agnostic:
-# the script self-detects, so this drop-in is identical on every device.
-setup-voxtype-isolation:
+# run the daemon on a config rendered at each start (see scripts/voxtype-render-config.sh):
+# per-device overrides plus gpu_isolation on battery, applied to a runtime copy the daemon
+# reads via -c, so the stowed config.toml stays one shared file. machine-agnostic: the
+# script self-detects, so this drop-in is identical on every device.
+setup-voxtype-service:
 	chmod +x scripts/voxtype-render-config.sh
 	mkdir -p ~/.config/systemd/user/voxtype.service.d
-	printf '[Service]\nExecStartPre=%%h/me/arch-config/scripts/voxtype-render-config.sh\nExecStart=\nExecStart=/usr/bin/voxtype -c %%t/voxtype/config.toml daemon\n' > ~/.config/systemd/user/voxtype.service.d/battery-isolation.conf
+	printf '[Service]\nExecStartPre=%%h/me/arch-config/scripts/voxtype-render-config.sh\nExecStart=\nExecStart=/usr/bin/voxtype -c %%t/voxtype/config.toml daemon\n' > ~/.config/systemd/user/voxtype.service.d/render-config.conf
 	systemctl --user daemon-reload || true
 	systemctl --user restart voxtype.service || true
-	@echo "PASS setup-voxtype-isolation"
+	@echo "PASS setup-voxtype-service"
 
 # device: enable GPU (Vulkan) acceleration, otherwise large models run on CPU.
 # hybrid-graphics laptops (silver-fox: Intel iGPU + NVIDIA dGPU) enumerate the slow

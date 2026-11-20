@@ -1,0 +1,7 @@
+# silver-fox overrides, applied by scripts/voxtype-render-config.sh (dotted keys only).
+#
+# medium.en: with context_window_optimization off (see config.toml), turbo pays for a
+# full 30s encode on every clip, ~4.85s on the 20W-capped A2000. medium.en's encoder is
+# roughly half of turbo's, which is where nearly all of that time goes; its decoder is
+# deeper, but short clips decode few tokens. On rainbow-cat the two are level.
+whisper.model = "medium.en"

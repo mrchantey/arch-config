@@ -4,8 +4,9 @@
 state_file = "auto"
 
 [hotkey]
-# built-in evdev hotkey disabled — recording is driven by Hyprland binds on
-# Scroll Lock (see ~/.config/hypr/bindings.conf), so no 'input' group is needed
+# built-in evdev hotkey disabled, recording is driven by Hyprland push-to-talk binds
+# on Pause and Insert (DICTATION in ~/.config/hypr/bindings.lua), so no 'input' group
+# is needed
 enabled = false
 key = "SCROLLLOCK"
 modifiers = []
@@ -32,11 +33,13 @@ model = "large-v3-turbo"
 language = "en"
 translate = false
 on_demand_loading = false
-# Encode only the clip's length instead of Whisper's padded 30s window, which was a
-# fixed ~3.5s per clip on silver-fox's 20W-capped dGPU; flash attention trims a little
-# more. Benchmarked 2026-11-20 on a 5.8s clip: 4.85s off, 1.36s with the first, 1.15s
-# with both, same transcript.
-context_window_optimization = true
+# context_window_optimization stays OFF. It encodes only the clip's length instead of
+# Whisper's padded 30s window, which cut a 5.8s clip on silver-fox's 20W-capped dGPU
+# from 4.85s to 1.36s, but the truncated window sends turbo into repetition loops: the
+# same sentence typed 2 to 4 times in one transcript, mostly on short clips at the
+# audio_ctx=384 floor. With it on (2026-11-20) 11 of 125 dictations repeated, against
+# 0 of ~540 in the week before. Flash attention is a pure speedup and stays.
+context_window_optimization = false
 flash_attention = true
 # gpu_isolation is intentionally OFF (the schema default). It spawns a fresh worker
 # per clip, which reloads the model (~1.7s) and only opens the mic after — that delay
@@ -44,6 +47,15 @@ flash_attention = true
 # hybrid-graphics laptops is instead pinned by GGML_VK_VISIBLE_DEVICES in the per-device
 # drop-in (~/.config/systemd/user/voxtype.service.d/gpu.conf, written by `just
 # setup-voxtype-gpu`), which the persistent daemon honors — so isolation isn't needed.
+# Per-device overrides (silver-fox runs medium.en) live in devices/<hostname>.toml.
+
+# Whisper turns a clip with no speech into a stock phrase ("Thank you.", "Welcome back
+# to the show."), which happens whenever push-to-talk is pressed and then released
+# without speaking. Silero VAD (`voxtype setup vad`) drops those clips before whisper
+# sees them; a lone "Yes." still measures ~0.5s of speech, well over the 100ms floor.
+[vad]
+enabled = true
+backend = "whisper"
 
 [output]
 mode = "type"
@@ -55,6 +67,8 @@ pre_type_delay_ms = 0
 on_recording_start = false
 on_recording_stop = false
 on_transcription = false
+# releasing without speaking is deliberate, not a mic fault, so a VAD skip stays silent
+on_no_speech = false
 
 [status]
 icon_theme = "emoji"
