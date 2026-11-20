@@ -17,6 +17,7 @@ A self-built tower, originally a Windows gaming and streaming machine, now runni
 | Monitor | Samsung C49RG9x ultrawide on DP-1, 5120x1440@120, scale 1.25 |
 | Side monitor | none; the Samsung C24F390 moved to silver-fox's desk on 2026-11-20. Its rule stays in `monitors.lua` |
 | Audio | Intel Z370 HD Audio `8086:a2f0`, plus the GPU's HDMI audio |
+| Speakers | KEF LSX II LT, as a USB sink |
 | Microphone and camera | Logitech BRIO 4K over USB (`046d:085e`) |
 | Pointing | Kensington SlimBlade trackball, used left-handed; Logitech G903 on its Lightspeed receiver when plugged in |
 | Keyboard | Kinesis Advantage2 |
@@ -36,9 +37,11 @@ OS and home share one drive, the same layout as silver-fox. SATA letters (`sda`,
 
 ## Per-device config, and why
 
-`stow/hypr-rainbow-cat/` holds three modules and a `quickshell` wrapper, stowed by `just stow-device rainbow-cat`. There is no `envs-device.lua`: Omarchy's `nvidia.lua` sets the session for an NVIDIA compositing GPU, which is exactly what this machine is.
+`stow/hypr-rainbow-cat/` holds three modules, a `quickshell` wrapper and two WirePlumber drop-ins, stowed by `just stow-device rainbow-cat`. There is no `envs-device.lua`: Omarchy's `nvidia.lua` sets the session for an NVIDIA compositing GPU, which is exactly what this machine is.
 
 **`.local/bin/quickshell`** runs the Omarchy shell with `__NV_DISABLE_EXPLICIT_SYNC=1`, the workaround for the shell freezing after suspend (see Traps). Its header has the mechanism and when to delete it.
+
+**`.config/wireplumber/wireplumber.conf.d/`** keeps the KEF's USB sink from ever suspending (`kef-lsx-no-suspend.conf`, see Traps) and auto-connects the A2DP profiles of Bluetooth audio devices (`bluetooth-a2dp-autoconnect.conf`). Stow links them beside the shared `pipewire` package's drop-ins, so that directory is a real one here. WirePlumber reads them only at startup.
 
 **`monitors.lua`** matches both monitors by description rather than port, so moving a cable to another DP or HDMI port does not break the config. The ultrawide sits at `0x0`, so it is the primary for synced workspaces and shows 1-10 (see the header of the shared `workspaces.lua`); the side monitor sits to its right at `4096x0` and shows 11-20. Workspace 1 is named `beet`. The side monitor gets a left-oriented master column from a `workspace = "m[desc:...]"` rule, which follows whatever workspace it is showing rather than an id range. That two-monitor behaviour has not been verified on this hardware since the side monitor was disconnected. `GDK_SCALE` is 1.
 
@@ -106,4 +109,5 @@ Omarchy `4.5.0-3` (`omarchy-version`), kernel `7.2.15-1-omarchy`, NVIDIA driver 
 - **The shell froze on the first unlock after every suspend**, from 2026-11-13 to 2026-11-18 on driver 615.78.08 (open modules, `NVreg_UseKernelSuspendNotifiers=1`), until the `quickshell` wrapper above disabled explicit sync for it on 2026-11-18; the next resume logged no semsurf error and the shell unlocked normally. The bar stops updating and `omarchy restart shell` fails after two minutes with "did not become ready". It is not CPU load: the system is idle while one `QSGRenderThread` pins a core inside `libnvidia-eglcore` (in `QOpenGLContext::makeCurrent`), and the main thread waits on it, so IPC (including `quickshell kill`) is never served and the replacement `quickshell -n` refuses to start beside it. Sleep-lock draws the lock surface about 150ms before logind suspends, and on resume nvidia-drm logs `Failed to register auto-value-update on pre-wait value for sync FD semaphore surface`: that frame's fence never signals, and unlocking tears down the lock surface onto it. Diagnose with `journalctl -k -b | grep semsurf` and `top -H -p $(pgrep -x quickshell)`. Recover with `pkill -TERM -x quickshell`; the original `omarchy-launch-shell` relaunches it within a second.
 - **The lock screen looks like it won't wake.** While locked, Omarchy's lock blanks every display 5s after the last input (`idleBlankTimer` in `/usr/share/omarchy/shell/plugins/lock/Service.qml`, hardcoded). The C49RG9x takes about 4s to come out of standby, so a single keypress shows the lock for about a second before it blanks again, which reads as a failed resume. The machine is awake and the password field takes input while dark, so typing the password unlocks regardless.
 - **Audio can vanish after a resume.** If WirePlumber rescans the sound cards before logind re-grants the session's device ACLs, it logs `snd_pcm_info() failed Permission denied`, keeps only "Dummy Output" and no sources, and dictation fails with `Recording timeout: exceeded 2 seconds` even though Insert reaches voxtype. Seen once in seven resumes (2026-11-18). `systemctl --user restart wireplumber` restores every device, and the BRIO's persisted gain with it.
+- **The KEF stops answering after an idle suspend.** Its USB firmware fails control requests (`usb_set_interface -110`) once the host stops the stream, and only a replug recovers it, so `kef-lsx-no-suspend.conf` keeps the stream open.
 - **The BRIO clips at its power-on gain.** If dictation goes to garbage, check `wpctl get-volume` on the BRIO's node reads 0.30, the value in `startup.sh`; if it has drifted up after a call, a browser flag is missing or the browser has not been restarted since it was added.
