@@ -237,6 +237,56 @@ function workspaces.heal()
 end
 
 --------------------------------------------------------------------------------
+-- Omarchy interface
+--------------------------------------------------------------------------------
+-- Omarchy 4.5 ships its own default.hypr.monitor-workspaces, which gives each
+-- monitor an independent block remembered by identity, the laptop panel 1-10.
+-- It reconciles on start, reload and hotplug, moving workspaces back to their
+-- home monitor, so beside this module it fought every sync and made the panel
+-- the primary. hyprland.lua preloads this module under that name instead, and
+-- this table is what Omarchy's binds, scripts and keybindings menu reach as
+-- `o.workspaces`. Each returns a dispatchable function, registered with its
+-- expression so `hyprctl dispatch 'o.workspaces.focus(3)'` replays it.
+
+local function action(func, expression)
+  o.bind_expressions[func] = expression
+  return func
+end
+
+workspaces.omarchy = { slots = GROUPS }
+
+--- switches every monitor to `slot`; a monitor name is accepted and ignored, since all switch
+function workspaces.omarchy.focus(slot)
+  return action(function()
+    workspaces.show(slot)
+  end, "o.workspaces.focus(" .. slot .. ")")
+end
+
+--- moves the active window to `slot` on its monitor, following unless `follow` is false
+function workspaces.omarchy.move_window(slot, follow)
+  return action(function()
+    workspaces.move(slot, follow ~= false)
+  end, "o.workspaces.move_window(" .. slot .. (follow == false and ", false" or "") .. ")")
+end
+
+--- trades this monitor's windows with the one in `direction`, as moving a workspace would desync it
+function workspaces.omarchy.move_to_monitor(direction)
+  return action(function()
+    workspaces.swap(direction)
+  end, string.format("o.workspaces.move_to_monitor(%q)", direction))
+end
+
+--- moves the active window onto the workspace the monitor in `direction` shows
+function workspaces.omarchy.move_window_to_monitor(direction)
+  return action(function()
+    local target = hl.get_monitor(direction)
+    if target then
+      hl.dispatch(hl.dsp.window.move({ monitor = target.name }))
+    end
+  end, string.format("o.workspaces.move_window_to_monitor(%q)", direction))
+end
+
+--------------------------------------------------------------------------------
 -- Implementation
 --------------------------------------------------------------------------------
 

@@ -32,6 +32,12 @@ model = "large-v3-turbo"
 language = "en"
 translate = false
 on_demand_loading = false
+# Encode only the clip's length instead of Whisper's padded 30s window, which was a
+# fixed ~3.5s per clip on silver-fox's 20W-capped dGPU; flash attention trims a little
+# more. Benchmarked 2026-11-20 on a 5.8s clip: 4.85s off, 1.36s with the first, 1.15s
+# with both, same transcript.
+context_window_optimization = true
+flash_attention = true
 # gpu_isolation is intentionally OFF (the schema default). It spawns a fresh worker
 # per clip, which reloads the model (~1.7s) and only opens the mic after — that delay
 # swallows short push-to-talk recordings ("No audio was captured"). GPU selection on

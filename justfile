@@ -392,7 +392,7 @@ setup-voxtype-gpu:
 	idx="${idx:-0}"
 	echo "voxtype: pinning whisper to NVIDIA ggml Vulkan device ${idx}"
 	mkdir -p ~/.config/systemd/user/voxtype.service.d
-	printf '[Service]\nEnvironment="VOXTYPE_VULKAN_DEVICE=nvidia"\nEnvironment="GGML_VK_VISIBLE_DEVICES=%s"\n' "$idx" > ~/.config/systemd/user/voxtype.service.d/gpu.conf
+	printf '[Service]\nEnvironment="GGML_VK_VISIBLE_DEVICES=%s"\n' "$idx" > ~/.config/systemd/user/voxtype.service.d/gpu.conf
 	systemctl --user daemon-reload || true
 	# the daemon caches its backend/device at startup; restart so the dGPU takes effect
 	# now (otherwise a fresh install keeps running on the iGPU until the next login)

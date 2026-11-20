@@ -106,19 +106,13 @@ dur="$(ffprobe -hide_banner -loglevel error -show_entries format=duration -of cs
 printf 'Saved %s (%.1fs)\n' "$out" "$dur"
 
 # Pin the same GPU the daemon uses (its drop-in is generated per device, so this
-# stays correct across machines). Use exactly ONE selector: GGML_VK_VISIBLE_DEVICES
-# if present, else VOXTYPE_VULKAN_DEVICE. Passing both poisons the CLI's GPU pick and
-# silently drops it to CPU (~15x slower). Empty array => plain `env`, harmless.
+# stays correct across machines). Without it the CLI picks Vulkan device 0, which on
+# silver-fox is the iGPU (~7x slower). Empty array => plain `env`, harmless.
 gpu_conf="$HOME/.config/systemd/user/voxtype.service.d/gpu.conf"
 gpu_env=()
 if [[ -f "$gpu_conf" ]]; then
 	ggml="$(sed -n 's/^Environment="\(GGML_VK_VISIBLE_DEVICES=[^"]*\)"$/\1/p' "$gpu_conf" | head -1)"
-	vox="$(sed -n 's/^Environment="\(VOXTYPE_VULKAN_DEVICE=[^"]*\)"$/\1/p' "$gpu_conf" | head -1)"
-	if [[ -n "$ggml" ]]; then
-		gpu_env=("$ggml")
-	elif [[ -n "$vox" ]]; then
-		gpu_env=("$vox")
-	fi
+	[[ -n "$ggml" ]] && gpu_env=("$ggml")
 fi
 
 printf 'Transcribing...\n'

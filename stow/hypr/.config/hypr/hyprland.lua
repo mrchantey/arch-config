@@ -19,6 +19,15 @@ dofile((os.getenv("OMARCHY_PATH") or "/usr/share/omarchy") .. "/default/hypr/boo
 -- on machine state. See scripts/remove-preinstalls.sh.
 _G.omarchy_preinstalled_bindings = false
 
+-- Our synced workspaces replace Omarchy's per-monitor blocks, which would fight
+-- them (see workspaces.lua). A preload rather than package.loaded, so it runs
+-- when omarchy.lua requires it, after helpers.lua has created `o`.
+package.preload["default.hypr.monitor-workspaces"] = function()
+  local workspaces = require("hypr.workspaces")
+  o.workspaces = workspaces.omarchy
+  return workspaces.omarchy
+end
+
 -- Omarchy defaults first, so every override below lands on top of them.
 require("default.hypr.omarchy")
 

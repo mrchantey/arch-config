@@ -110,3 +110,12 @@ hl.device({
   name = "logitech-g102-prodigy-gaming-mouse",
   sensitivity = -0.3,
 })
+
+-- Logitech G903, ambidextrous, used left-handed on every machine, so its buttons
+-- are swapped explicitly rather than inherited. Speed is left at libinput's
+-- default; it has firmware DPI buttons like the G102. `logitech-g903` without the
+-- suffix is its macro-key keyboard node and generates no motion.
+hl.device({
+  name = "logitech-g903-1",
+  left_handed = true,
+})
