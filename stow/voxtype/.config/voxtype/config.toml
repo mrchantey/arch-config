@@ -53,6 +53,12 @@ flash_attention = true
 # to the show."), which happens whenever push-to-talk is pressed and then released
 # without speaking. Silero VAD (`voxtype setup vad`) drops those clips before whisper
 # sees them; a lone "Yes." still measures ~0.5s of speech, well over the 100ms floor.
+# Cost: the check runs on the CPU with ggml's default 4 spin-waiting threads, which
+# voxtype does not expose. ~25ms idle, but while every core is busy (a cargo build, even
+# at nice 19) it stalls 1 to 8s between release and typing; 4 threads pinned to one core
+# take 60s. whisper.cpp's "vad time" log line is a running total, the per-clip cost is
+# the jump between lines. The energy backend avoids the threads but cannot separate
+# room noise from a soft "yes" at any threshold.
 [vad]
 enabled = true
 backend = "whisper"
