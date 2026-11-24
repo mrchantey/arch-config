@@ -211,6 +211,9 @@ o.bind("SUPER + Y", "YouTube", { webapp = "https://youtube.com/" })
 --   SUPER CTRL ALT, Z   -> Reset zoom (fully zoom out)
 hl.unbind("SUPER + CTRL + Z")
 hl.unbind("SUPER + CTRL + ALT + Z")
+-- Monitor scaling (default/hypr/bindings/tiling.lua), too easy to hit by accident:
+hl.unbind("SUPER + SLASH") -- was: Monitor scaling up
+hl.unbind("SUPER + ALT + SLASH") -- was: Monitor scaling down
 
 --------------------------------------------------------------------------------
 -- DICTATION (voxtype)

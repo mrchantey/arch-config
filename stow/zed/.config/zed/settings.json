@@ -2,7 +2,8 @@
 // https://zed.dev/docs/configuring-zed
 {
 	// "show_completions_on_input": false,
-	"agent_buffer_font_size": 19.0,
+	"buffer_font_size": 20.0,
+ "agent_buffer_font_size": 19.0,
  "agent_ui_font_size": 24.0,
  "git_commit_buffer_font_size": 20.0,
 	// Agents run behind ~/me/arch-config/scripts/acp-tee.sh, which taps the ACP stream on its way
@@ -18,7 +19,7 @@
 				"ultracode": false,
     "fast": false,
     "effort": "high",
-				"model": "fable",
+				"model": "opus",
 				"mode": "bypassPermissions",
 			},
 			"favorite_config_option_values": {
@@ -185,7 +186,6 @@
 		"line_width": 2,
 	},
 	"ui_font_size": 24.0,
-	"buffer_font_size": 19.0,
 	"colorize_brackets": true,
 	"language_models": {
 		// api_url is already the default; the block is here as the place to hang

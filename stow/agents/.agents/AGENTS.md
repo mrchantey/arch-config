@@ -60,6 +60,7 @@ Never use `.claude/projects/../memory`, all content related to this project must
 - Never mention agent plans, steps or temporary tasks in code docs.
 - Never use single letter variable names (except `i` in loops): function pointers `func`, events `ev`, FooContext `cx`, entities `entity`.
 - Never add extension methods to a framework's central type (bevy's `App`), which grows it into a mega type: the type or value being registered decides what it registers, ie a plugin (`app.add_plugins(..)`), or in beet an installer, by type (`app.install_type::<Route>()`) or by value (`app.install(UnregisteredTag::allow("Foo"))`).
+- When asking me to run a command, ie for elevated priveledges, where appropriate always run it youself first to pre-compile and check for pre-auth errors.
 
 ## Responses
 
