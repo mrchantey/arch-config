@@ -1,7 +1,7 @@
 # silver-fox overrides, applied by scripts/voxtype-render-config.sh (dotted keys only).
 #
-# medium.en: with context_window_optimization off (see config.toml), turbo pays for a
-# full 30s encode on every clip, ~4.85s on the 20W-capped A2000. medium.en's encoder is
-# roughly half of turbo's, which is where nearly all of that time goes; its decoder is
-# deeper, but short clips decode few tokens. On rainbow-cat the two are level.
-whisper.model = "medium.en"
+# Measured 2026-11-24 on the 20W-capped A2000, 40 TTS clips, flash attention on and
+# context_window_optimization off (see config.toml), median / max seconds per clip:
+# small.en 1.1 / 1.6, large-v3-turbo 2.8 / 3.3, medium.en 3.0 / 4.7. All three made no
+# errors, so clean TTS says nothing about which copes best with a real voice.
+whisper.model = "small.en"

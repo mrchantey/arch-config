@@ -9,7 +9,7 @@
 # Overrides, applied in order through `voxtype config set`, which type-checks each key:
 #
 # 1. `devices/<hostname>.toml` next to config.toml, if present: dotted `key = value`
-#    lines, ie `whisper.model = "medium.en"`. Keys come from `voxtype config schema`.
+#    lines, ie `whisper.model = "small.en"`. Keys come from `voxtype config schema`.
 # 2. On battery, `whisper.gpu_isolation = true`: each clip runs in a short-lived worker
 #    that releases the dGPU between uses so it can suspend, at the cost of a ~1.7s
 #    spin-up that swallows the start of short push-to-talk clips. On AC, or a desktop

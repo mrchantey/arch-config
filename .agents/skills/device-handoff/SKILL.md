@@ -60,11 +60,11 @@ Verify: Super+3 shows workspace 3 on the ultrawide and 13 on the side monitor.
 `git-sync` checks for `.agents/tasks/$(hostname).md` after it pulls. When it exists:
 
 1. Read the whole file before running anything, oldest section first, and do the sections in that order.
-2. Run each step, ticking it (`- [x]`) as it succeeds. Stop at an `(ask first)` step and ask. Do not skip ahead past a failure: fix it if the cause is clear, otherwise leave it unticked and report.
-3. Run the section's Verify. Delete the section once every step is ticked and it verifies.
+2. Run each step, deleting it as it succeeds. Stop at an `(ask first)` step and ask. Do not skip ahead past a failure: fix it if the cause is clear, otherwise leave it in place and report.
+3. Run the section's Verify. Delete the section once no steps remain and it verifies.
 4. When no sections remain, delete the file. Commit the file's new state, `patch: complete <device> handoff` or `patch: partial <device> handoff` when steps remain, and push.
 
-A partly done file stays committed with its ticks, so the next sync resumes where this one stopped. Only ever edit or delete the file for this hostname; another device's tasks are that device's to complete.
+A partly done file stays committed with only its remaining steps, so the next sync resumes where this one stopped. Only ever edit or delete the file for this hostname; another device's tasks are that device's to complete.
 
 ## Gotchas
 

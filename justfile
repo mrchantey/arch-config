@@ -348,10 +348,11 @@ install-user-apps-init:
 	just setup-tts
 	just setup-transcribe-file
 
-# base (CPU): download this device's whisper model and the VAD model, then install the
-# user systemd service. config.toml is managed via stow (built-in hotkey disabled there)
+# base (CPU): download the shared whisper model, which `transcribe` and setup-voxtype-gpu
+# use, this device's dictation model and the VAD model, then install the user systemd service. config.toml is managed via stow (built-in hotkey disabled there)
 setup-voxtype:
 	bash scripts/voxtype-render-config.sh
+	voxtype setup --download --no-post-install --model "$(voxtype -c ~/.config/voxtype/config.toml config get whisper.model)" || true
 	voxtype setup --download --no-post-install --model "$(voxtype -c "$XDG_RUNTIME_DIR/voxtype/config.toml" config get whisper.model)" || true
 	voxtype setup vad		|| true
 	voxtype setup systemd	|| true

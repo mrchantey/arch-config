@@ -47,7 +47,7 @@ flash_attention = true
 # hybrid-graphics laptops is instead pinned by GGML_VK_VISIBLE_DEVICES in the per-device
 # drop-in (~/.config/systemd/user/voxtype.service.d/gpu.conf, written by `just
 # setup-voxtype-gpu`), which the persistent daemon honors — so isolation isn't needed.
-# Per-device overrides (silver-fox runs medium.en) live in devices/<hostname>.toml.
+# Per-device overrides (silver-fox runs small.en) live in devices/<hostname>.toml.
 
 # Whisper turns a clip with no speech into a stock phrase ("Thank you.", "Welcome back
 # to the show."), which happens whenever push-to-talk is pressed and then released

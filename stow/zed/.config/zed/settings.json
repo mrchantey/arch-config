@@ -111,12 +111,6 @@
 		"favorite_models": [
    {
     "provider": "openai-subscribed",
-    "model": "gpt-6.1-sol",
-    "enable_thinking": true,
-    "effort": "high"
-   },
-   {
-    "provider": "openai-subscribed",
     "model": "gpt-6-astra",
     "enable_thinking": true,
     "effort": "xhigh"
@@ -131,6 +125,12 @@
     "provider": "openai",
     "model": "gpt-4o-mini",
     "enable_thinking": false
+   },
+   {
+    "provider": "openai-subscribed",
+    "model": "gpt-6.2-sol",
+    "enable_thinking": true,
+    "effort": "low"
    }
   ],
 		"model_parameters": [],
