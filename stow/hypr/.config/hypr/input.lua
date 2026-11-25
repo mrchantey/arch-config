@@ -113,9 +113,22 @@ hl.device({
 
 -- Logitech G903, ambidextrous, used left-handed on every machine, so its buttons
 -- are swapped explicitly rather than inherited. Speed is left at libinput's
--- default; it has firmware DPI buttons like the G102. `logitech-g903` without the
--- suffix is its macro-key keyboard node and generates no motion.
+-- default; it has firmware DPI buttons like the G102.
+-- It changes identity with the cable: plugged in it leaves the receiver and
+-- enumerates as its own USB device (046d:c086), so there is a block per connection.
+-- Under hid-generic the receiver hides the mouse's name and neither matches, see
+-- the G903 trap in docs/devices/rainbow-cat.md; the global swap there covers it.
+
+-- Lightspeed receiver. `logitech-g903` without the suffix is the macro-key
+-- keyboard node and generates no motion.
 hl.device({
   name = "logitech-g903-1",
+  left_handed = true,
+})
+
+-- USB cable. The doubled vendor is real, and here the suffix is the other way
+-- round: `logitech-g903-wired/wireless-gaming-mouse-1` is the macro-key keyboard.
+hl.device({
+  name = "logitech-logitech-g903-wired/wireless-gaming-mouse",
   left_handed = true,
 })
