@@ -210,13 +210,29 @@ setup-age-identity backup="":
 # before stow relinks them, and require_optional silently skips the missing
 # modules, leaving the session on default monitors and input. The closing reload
 # re-reads them once linked.
+#
+# WirePlumber's state (saved per-app volumes) is per device and lives in the
+# package, so an app turned down shows up in git. WirePlumber saves by atomic
+# rename, which would replace a stowed file symlink, so the whole
+# ~/.local/state/wireplumber dir is folded. A real dir there is merged in, the
+# tracked copy winning, with WirePlumber stopped: it holds the state in memory
+# and rewrites the whole file on its next save. For the same reason, change a
+# saved volume through a mixer rather than by editing the file while it runs.
 stow-device device:
 	rm -f 														\
 	~/.config/hypr/monitors.lua 					\
 	~/.config/hypr/input-device.lua 			\
 	~/.config/hypr/layout-device.lua 			\
 	~/.config/hypr/envs-device.lua
+	if [ -d ~/.local/state/wireplumber ] && [ ! -L ~/.local/state/wireplumber ]; then \
+		systemctl --user stop wireplumber; \
+		mkdir -p stow/hypr-{{device}}/.local/state/wireplumber; \
+		find ~/.local/state/wireplumber -mindepth 1 -maxdepth 1 \
+			-exec mv -n -t stow/hypr-{{device}}/.local/state/wireplumber {} +; \
+		rm -rf ~/.local/state/wireplumber; \
+	fi
 	cd stow && stow -vt ~ hypr-{{device}}
+	systemctl --user is-active -q wireplumber || systemctl --user start wireplumber
 	[ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ] || hyprctl reload
 	@echo "PASS stow-device {{device}}"
 

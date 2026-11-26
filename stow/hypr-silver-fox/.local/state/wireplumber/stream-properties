@@ -1,0 +1,24 @@
+[stream-properties]
+Audio/Sink:node.name:auto_null={"channelVolumes":[1.000000, 1.000000], "mute":false, "channelMap":["FL", "FR"], "volume":1.000000}
+Input/Audio:application.name:PipeWire\sALSA\s\ovoxtype-vulkan\c={"channelVolumes":[1.000000, 1.000000], "mute":false, "channelMap":["FL", "FR"], "volume":1.000000}
+Output/Audio:application.name:Google\sChrome={"channelMap":["FL", "FR"], "mute":false, "volume":1.000000, "channelVolumes":[1.000000, 1.000000]}
+Output/Audio:application.name:Chromium={"volume":1.000000, "channelMap":["FL", "FR"], "mute":false, "channelVolumes":[1.000000, 1.000000]}
+Output/Audio:application.id:mpv={"volume":1.000000, "channelMap":["FL", "FR"], "mute":false, "channelVolumes":[1.000000, 1.000000]}
+Input/Audio:application.name:Google\sChrome\sinput={"volume":1.000000, "channelMap":["FL", "FR"], "channelVolumes":[1.000000, 1.000000], "mute":false}
+Output/Audio:application.name:paplay={"channelMap":["MONO"], "mute":false, "channelVolumes":[1.000000], "volume":1.000000}
+Output/Audio:application.name:pw-play={"channelMap":["FL", "FR"], "channelVolumes":[1.000000, 1.000000], "mute":false, "volume":1.000000}
+Output/Audio:media.role:Notification={"channelMap":["MONO"], "mute":false, "channelVolumes":[1.000000], "volume":1.000000}
+Input/Audio:application.name:Quickshell\sPeak\sDetect={"volume":1.000000, "channelVolumes":[1.000000, 1.000000], "mute":false}
+Output/Audio:application.name:Element={"channelMap":["FL", "FR"], "mute":false, "channelVolumes":[1.000000, 1.000000], "volume":1.000000}
+Output/Audio:application.name:PipeWire\sALSA\s\obeet\c={"channelMap":["FL", "FR"], "mute":false, "volume":1.000000, "channelVolumes":[1.000000, 1.000000]}
+Input/Audio:application.name:PipeWire\sALSA\s\ocodex-voice-host\c={"channelVolumes":[1.000000, 1.000000], "mute":false, "channelMap":["FL", "FR"], "volume":1.000000}
+Output/Audio:application.name:PipeWire\sALSA\s\ocodex-voice-host\c={"channelVolumes":[1.000000, 1.000000], "mute":false, "channelMap":["FL", "FR"], "volume":1.000000}
+Audio/Source/Virtual:node.name:cxv_mic={"channelVolumes":[1.000000], "mute":false, "channelMap":["MONO"], "volume":1.000000}
+Input/Audio:application.name:pw-record={"channelMap":["MONO"], "mute":false, "volume":1.000000, "channelVolumes":[1.000000]}
+Audio/Sink:node.name:cxv_sink={"channelVolumes":[1.000000], "mute":false, "channelMap":["MONO"], "volume":1.000000}
+Input/Audio:application.name:parecord={"channelVolumes":[1.000000], "mute":false, "channelMap":["MONO"], "volume":1.000000}
+Output/Audio:application.name:PipeWire\sALSA\s\obeet-ml\c={"volume":1.000000, "mute":false, "channelVolumes":[1.000000, 1.000000], "channelMap":["FL", "FR"]}
+Input/Audio:application.name:agc={"volume":1.000000, "mute":false, "channelVolumes":[1.000000, 1.000000], "channelMap":["FL", "FR"]}
+Output/Audio:application.name:agc={"volume":1.000000, "mute":false, "channelVolumes":[1.000000, 1.000000], "channelMap":["FL", "FR"]}
+Output/Audio:application.name:FMOD={"volume":1.000000, "mute":false, "channelVolumes":[1.000000, 1.000000]}
+Output/Audio:application.name:FMOD\sEx\sApp={"volume":1.000000, "mute":false, "channelVolumes":[1.000000, 1.000000]}

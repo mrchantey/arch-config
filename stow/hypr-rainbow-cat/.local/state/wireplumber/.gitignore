@@ -1,0 +1,5 @@
+# WirePlumber's saved state, folded by `just stow-device`, see its comment there.
+# Only the per-app volumes are tracked; routes and defaults churn on every volume key.
+*
+!.gitignore
+!stream-properties
