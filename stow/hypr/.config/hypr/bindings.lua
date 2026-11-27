@@ -40,6 +40,7 @@ o.bind("SUPER + SHIFT + S", "󰐥 Shutdown", "systemctl poweroff")
 o.bind("SUPER + SHIFT + Z", "󰤄 Suspend", "systemctl suspend")
 o.bind("SUPER + SHIFT + H", " Relaunch Hyprland", "uwsm stop")
 o.bind("SUPER + SHIFT + O", "󱄄 Omarchy Screensaver", "omarchy-launch-screensaver force")
+o.bind("SUPER + SHIFT + W", "Count selected words", "~/me/arch-config/scripts/word-count.sh")
 
 --------------------------------------------------------------------------------
 -- WINDOWING (SUPER ALT)

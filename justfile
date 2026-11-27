@@ -270,7 +270,8 @@ install-apps-init:
 	@echo "INIT install-apps"
 	just install-apps
 
-# libnotify, gtk4-layer-shell,wl-clipboard, wtype dependencies of voxtype
+# libnotify, gtk4-layer-shell, wl-clipboard, wtype dependencies of voxtype
+# libnotify and wl-clipboard also power scripts/word-count.sh (Super+Shift+W)
 # espeak-ng (phonemizer), jq (json) for kokoro tts (see setup-tts)
 # ffmpeg is the gain stage in scripts/tts.sh -- only a transitive dep of omarchy base
 # python, uv, pip and pipx are deliberately NOT here: they come from install-mise-tools
