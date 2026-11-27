@@ -8,13 +8,13 @@
 # pasted into the host's key settings page. A key is per ACCOUNT, not per repo,
 # so this is a once-per-device-per-host job.
 #
-# usage: just setup-ssh-key [host]   (default host: tangled.org)
+# usage: just setup-ssh-key <host>
 
 set -euo pipefail
 
-HOST="${1:-tangled.org}"
-# key name is derived from the host, matching the IdentityFile in
-# stow/ssh/.ssh/config, so the same config works on every device
+HOST="${1:?Usage: setup-ssh-key.sh <host>}"
+# Derive the key name from the host. Set the matching IdentityFile in
+# stow/ssh/.ssh/config to use the key on every device.
 SLUG="${HOST%%.*}"
 KEY=~/.ssh/"id_ed25519_${SLUG}"
 DEVICE="$(hostnamectl --static 2>/dev/null || hostname)"
@@ -36,7 +36,7 @@ chmod 600 "$KEY"
 chmod 644 "$KEY.pub"
 
 echo
-echo "== public key -- paste this into the keys page of your $HOST settings, ie https://tangled.org/settings/keys"
+echo "== public key -- paste this into the keys page of your $HOST settings"
 echo
 cat "$KEY.pub"
 echo
