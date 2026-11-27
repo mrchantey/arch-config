@@ -241,7 +241,14 @@ end
 --------------------------------------------------------------------------------
 -- THEME — toggle between dark (Everforest) and light (Solarized Light)
 --------------------------------------------------------------------------------
-o.bind("SUPER + SHIFT + T", "Toggle light/dark theme", "~/me/arch-config/scripts/theme-toggle.sh")
+-- Replace the default Activity binding; btop remains on SUPER + T.
+o.rebind("SUPER + SHIFT + T", "Toggle light/dark theme", "~/me/arch-config/scripts/theme-toggle.sh")
+
+--------------------------------------------------------------------------------
+-- WEBCAM PHOTO: beside Omarchy's PRINT capture family (screenshot, ALT
+-- screenrecording, SUPER color picker, SUPER CTRL OCR); SHIFT + PRINT is free.
+--------------------------------------------------------------------------------
+o.bind("SHIFT + PRINT", "Webcam photo", "~/me/arch-config/scripts/webcam-snap.sh")
 
 --------------------------------------------------------------------------------
 -- PRESENTATION (SUPER ALT P) — modal step-through for demos
