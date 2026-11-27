@@ -9,3 +9,11 @@ Thunderbird now has shared stowed preferences and a point-in-time account snapsh
 - [ ] Open Thunderbird and verify the five mail accounts, saved logins, remote calendars and address books work. An existing Primary Password still needs to be entered in Thunderbird. Remote data may take time to download.
 
 Verify `~/.thunderbird` is a real directory, `~/.thunderbird/arch-config/user.js` links to the shared stowed file, and Config Editor shows `mailnews.headers.sendUserAgent = false`. Never print decrypted snapshot contents while verifying. Local-only mail, calendar events and OpenPGP keys are outside this snapshot and remain in any previous profile.
+
+## 2026-11-27 install Firefox (from rainbow-cat)
+
+Firefox is now included in `just install-apps` through `just install-omarchy-apps` in `justfile`.
+
+- [ ] (ask first) `just install-omarchy-apps`, installs missing packages including Firefox and enables the Mullvad daemon, and may require a sudo password.
+
+Verify `pacman -Q firefox` reports the installed version and Firefox appears in the app launcher.

@@ -20,7 +20,7 @@
 #
 # hyprland.lua also sets _G.omarchy_preinstalled_bindings = false, so the preinstall
 # keybinds are off by config whatever the flag says. LibreOffice is kept: `just
-# install-libreoffice` puts it back on a machine that lost it. Restoring everything
+# install-omarchy-apps` puts it back on a machine that lost it. Restoring everything
 # is Menu > Install > Preinstalls, which clears the flag, after which the post-update
 # hook stays out of the way.
 set -euo pipefail

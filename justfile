@@ -278,10 +278,7 @@ install-apps-init:
 # chromium ships chromedriver, which beet's webdriver drives (google-chrome does not)
 # age is the identity and file cipher behind beet's secrets, the no-beet escape hatch
 install-apps:
-	just install-libreoffice
-	just install-mullvad
-	just install-qbittorrent
-	just install-dig
+	just install-omarchy-apps
 	sudo pacman -S --noconfirm --needed 	\
 	age															\
 	aws-cli-v2														\
@@ -306,22 +303,11 @@ install-apps:
 	curl -f https://zed.dev/install.sh | sh
 	@echo "PASS install-apps"
 
-# Keep LibreOffice independently of the preinstall cleanup; also restores existing machines.
-install-libreoffice:
-	omarchy pkg add libreoffice-fresh
-
-# Arch's packaged GUI includes the daemon and CLI; account and connection settings stay local.
-install-mullvad:
-	omarchy pkg add mullvad-vpn
+# Keep LibreOffice independently of the preinstall cleanup. Arch bundles dig in bind.
+# Mullvad's package includes the GUI, daemon and CLI; account and connection settings stay local.
+install-omarchy-apps:
+	omarchy pkg add bind firefox libreoffice-fresh mullvad-vpn qbittorrent
 	sudo systemctl enable --now mullvad-daemon.service
-
-# Preferences, including the download path and Mullvad binding, are in the qbittorrent stow package.
-install-qbittorrent:
-	omarchy pkg add qbittorrent
-
-# Arch bundles dig and the other DNS lookup utilities in bind.
-install-dig:
-	omarchy pkg add bind
 
 # Rust is the one runtime omarchy does NOT put behind mise -- its Menu > Install >
 # Development > Rust runs the rustup.rs installer and guards on ~/.rustup. We use the
