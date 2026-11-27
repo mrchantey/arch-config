@@ -32,6 +32,7 @@ Read the entry before touching its subject.
 - Chrome, Chromium and Electron flags (mic gain during calls, the keyring): `docs/chromium-flags.md`
 - Saved per-app volumes (WirePlumber state, tracked per device): comment on `stow-device` in `justfile`
 - Codex `/voice`: header of `stow/pipewire/.config/pipewire/client.conf.d/codex-voice.conf`
+- Thunderbird shared preferences, encrypted account snapshots and restore: `stow/thunderbird/README.md`
 - Links opening on the wrong workspace: headers of `scripts/launch-here.sh` and `scripts/chrome-here.sh`
 - Cursor theme: `neverlost/readme.md`
 - Shared assets bucket: `docs/assets.md`

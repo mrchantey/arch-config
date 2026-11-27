@@ -59,6 +59,8 @@ Never use `.claude/projects/../memory`, all content related to this project must
 - DRY, code reuse is very important, even in tests, refactor into shared functions wherever possible.
 - Never mention agent plans, steps or temporary tasks in code docs.
 - Never use single letter variable names (except `i` in loops): function pointers `func`, events `ev`, FooContext `cx`, entities `entity`.
+- When writing and editing my prose, respect my conventions:
+	- Breaking sentences with `,` instead of `:` or `;`
 - Never add extension methods to a framework's central type (bevy's `App`), which grows it into a mega type: the type or value being registered decides what it registers, ie a plugin (`app.add_plugins(..)`), or in beet an installer, by type (`app.install_type::<Route>()`) or by value (`app.install(UnregisteredTag::allow("Foo"))`).
 - When asking me to run a command, ie for elevated priveledges, where appropriate always run it youself first to pre-compile and check for pre-auth errors.
 
@@ -66,7 +68,7 @@ Never use `.claude/projects/../memory`, all content related to this project must
 
 - Don't take my responses as gospel, they're just ideas. be objective, if you think they are good, good. If you think that they would create problems, explain why and propose alternatives
 - Do not assume I'm across the plan, you can reference item and phase numbers but in context, otherwise I would need to go look them up to know what they mean
-- use concise code snippets and diagrams where appropriate to illustrate a point
+- use concise code snippets and diagrams where appropriate to illustrate a point. prefer top down flow charts over left right
 - Use the following format for responses larger than a few hundred words.
 ```md
 <!-- include this header if this is the last in a string of workload responses -->

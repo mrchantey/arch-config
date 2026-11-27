@@ -190,10 +190,10 @@ secure-clipboard-history:
 	chmod 600 ~/.local/state/omarchy/clipboard-history.json
 	@echo "PASS secure-clipboard-history"
 
-# generate this device's SSH key for a git host (default tangled.org) and print
+# generate this device's SSH key for a git host and print
 # the public half to paste into that host's account settings. Run once per
 # device per host; the private key never leaves the machine. Idempotent.
-setup-ssh-key host="tangled.org":
+setup-ssh-key host:
 	bash scripts/setup-ssh-key.sh {{host}}
 
 # put this person's age identity at ~/.config/beet/age/keys.txt: restored from a
@@ -203,6 +203,17 @@ setup-ssh-key host="tangled.org":
 # Idempotent. See scripts/setup-age-identity.sh.
 setup-age-identity backup="":
 	bash scripts/setup-age-identity.sh {{backup}}
+	just setup-thunderbird
+
+# Account snapshots are point-in-time; setup never overwrites an existing account profile.
+# Uses age directly so fresh installs do not need Beet or Rust built yet.
+setup-thunderbird *args:
+	python3 scripts/thunderbird.py prepare
+	stow --no-folding -d stow -vt ~ thunderbird
+	python3 scripts/thunderbird.py setup {{args}}
+
+capture-thunderbird *args:
+	python3 scripts/thunderbird.py capture {{args}}
 
 # stow the per-device overrides (hypr device modules, plus anything else the
 # hypr-<device> package holds); idempotent. The rm clears regular files Omarchy
@@ -244,6 +255,7 @@ init-sudo:
 init-user:
 	just stow-files-init
 	just stow-symlinks-init
+	just setup-thunderbird
 	just setup-theme
 	just setup-editor
 	just secure-clipboard-history
@@ -536,6 +548,8 @@ install-mise-tools:
 # required to run after fresh install or omarchy update
 # this may break hyprland, if so run Menu > System > Rel
 stow-symlinks-init:
+	# Only the shared template is stowed, never delete Thunderbird's profile/state.
+	python3 scripts/thunderbird.py prepare
 	# qBittorrent atomically replaces its config, so stow must fold the whole directory.
 	# Preserve an existing real directory rather than deleting its RSS and other state.
 	if [ -d ~/.config/qBittorrent ] && [ ! -L ~/.config/qBittorrent ]; then \
@@ -592,6 +606,8 @@ stow-symlinks-init:
 	just stow-symlinks
 
 stow-symlinks:
+	# Keep ~/.thunderbird real so generated profiles and passwords never land in git.
+	python3 scripts/thunderbird.py prepare
 	# hyprland.lua is special: a LIVE Hyprland regenerates a default *stub* the
 	# instant this file goes missing, and stow refuses to overwrite that regular
 	# file -- which aborts the ENTIRE hypr package (and cascades init to failure).
@@ -677,10 +693,13 @@ stow-symlinks:
 	qbittorrent						\
 	ssh									\
 	starship 							\
+	thunderbird						\
 	uwsm 									\
 	voxtype								\
 	xcompose								\
 	zed
+	# Profile directory names are device-local; link the shared startup prefs into the default.
+	python3 scripts/thunderbird.py link
 	# mimeapps stows our web-app launchers and the Chrome override (see
 	# scripts/launch-here.sh); refresh the desktop database after linking them.
 	update-desktop-database ~/.local/share/applications

@@ -1,0 +1,6 @@
+# Profiles, credentials and runtime state must never enter git.
+*
+!.gitignore
+!README.md
+!.thunderbird/
+!.thunderbird/user.js
