@@ -81,12 +81,12 @@ pub async fn Check(
 A group is a plain `Reflect` struct whose doc comments are the flag descriptions:
 
 ```rust
-/// The repo store selector every entry-loading command shares.
+/// The package store selector every entry-loading command shares.
 #[derive(Reflect)]
 pub(crate) struct EntryParams {
-	/// The repo store the entry argument loads through, eg
-	/// `--entry-repo=s3://my-bucket`.
-	entry_repo: Option<StoreUri>,
+	/// The package store the entry argument loads through, eg
+	/// `--entry-package=s3://my-bucket`.
+	entry_package: Option<StoreUri>,
 }
 ```
 
@@ -98,7 +98,7 @@ Rules for a param's type, the same for a `#[param]` and a field of a `Params<T>`
 - A value parses through its type's `LiteralParser`, the same table markup attributes use, so a param is typed as what it is: `store: Option<StoreUri>`, `timeout: Duration`, `created: Timestamp`, a unit enum named by its variant, a numeric primitive, `String`/`SmolStr`.
 - A nested struct with no authored form flattens into its parent's flags, declared and parsed alike.
 - A group needs no `Default` or `#[reflect(Default)]`, the read supplies every field.
-- No param takes a launch only knob's name (`--entry`, `--repo`, `--required-features`, `--stage`, ..): the launch strips those from the request before the `CliServer` sees it, so the route tree refuses to build. The entry commands take `--entry-repo` for this reason.
+- No param takes a launch only knob's name (`--entry`, `--package`, `--required-features`, `--stage`, ..): the launch strips those from the request before the `CliServer` sees it, so the route tree refuses to build. The entry commands take `--entry-package` for this reason.
 - A markup-authored preset that flags override field by field is declared by hook and read with `apply_params`, which touches only the flags present: `#[component(on_add = RouteParams::declare::<Self, BuildWasm>)]`, then `cx.input.apply_params(&mut preset)?` (see `BuildWasmAction`).
 
 ## 4. `--help` is free

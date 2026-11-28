@@ -326,6 +326,9 @@ install-rust:
 	rustup default nightly
 	# cargo install cargo-binstall
 	rustup target add wasm32-unknown-unknown
+	# a bare-metal target with prebuilt core, beet's `check-embedded` compiles its
+	# embedded feature set for it without the esp toolchain
+	rustup target add thumbv7em-none-eabihf
 	# cargo-zigbuild links against the zig that install-mise-tools puts on PATH
 	cargo binstall --no-confirm \
 	cargo-edit 									\

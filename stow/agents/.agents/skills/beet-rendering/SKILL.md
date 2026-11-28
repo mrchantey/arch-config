@@ -5,7 +5,7 @@ description: Iterate on the beet rendering pipeline, which renders target-agnost
 
 # Iterating on Beet Rendering
 
-Pages are authored once as target-agnostic scenes and rendered to three sinks: the web (HTML + CSS, and in the browser the live DOM the same world patches in place) and the terminal (charcell ANSI). This skill is how to change them and get it right. System reference: `rendering-system.md`. Charcell internals + true terminal width: `charcell.md`. Screenshots: `webdriver.md`. No-code (markup) sites + matching a compiled reference for parity: `no-code-sites.md`. Live reference (previous, web-only site): `.agents/references/beet_old`. Bare repo paths in these pages are relative to the beet checkout (`/home/pete/me/beet`); the `.md` pages sit beside this file.
+Pages are authored once as target-agnostic scenes and rendered to three sinks: the web (HTML + CSS, and in the browser the live DOM the same world patches in place) and the terminal (charcell ANSI). This skill is how to change them and get it right. System reference: `rendering-system.md`. Charcell internals + true terminal width: `charcell.md`. Screenshots: `webdriver.md`. No-code (markup) sites + matching a compiled reference for parity: `no-code-sites.md`. Live reference (previous, web-only site): `.agents/references/beet_old`. Bare paths in these pages are relative to the beet checkout (`/home/pete/me/beet`); the `.md` pages sit beside this file.
 
 ## Attitude
 

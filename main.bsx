@@ -89,7 +89,7 @@ nothing else. Reading the document needs this machine's age identity
 		<!-- public read (GetObject + ListBucket) so a fresh machine hydrates
 		     unsigned; never force-destroyed; versioned so a bad mirror push is
 		     recoverable for 90 days -->
-		<S3BucketBlock label="assets" deploy_versioned=false public_read=true force_destroy=false object_versioning=true/>
+		<S3BucketBlock bx:ref="assets" label="assets" deploy_versioned=false public_read=true force_destroy=false object_versioning=true/>
 		<Group bx:ref="deploy_up">
 			<TofuApply/>
 		</Group>
@@ -102,27 +102,27 @@ nothing else. Reading the document needs this machine's age identity
 		     `follow_symlinks` materializes each noun's link, and the push refuses
 		     an empty or unhydrated one, which is what makes the delete safe -->
 		<Route path="push" {ExchangeSequence}>
-			<DirSync bucket="assets" local_dir="assets" {SyncS3Bucket{delete:true, follow_symlinks:true}}/>
+			<StoreSync src="fs:assets" dest={$assets} delete=true follow_symlinks=true/>
 		</Route>
 		<!-- private, never force-destroyed, versioned so a pruning push is
 		     recoverable for 90 days -->
-		<S3BucketBlock label="backup" deploy_versioned=false force_destroy=false object_versioning=true/>
-		<!-- one push and one pull per device, since `bucket_dir` is declared rather
-		     than read from the request. The push mirrors the staged tree, so a file
+		<S3BucketBlock bx:ref="backup" label="backup" deploy_versioned=false force_destroy=false object_versioning=true/>
+		<!-- one push and one pull per device, since the device's folder is declared
+		     rather than read from the request. The push mirrors the staged tree, so a file
 		     removed locally is pruned from the device's prefix and no other; a
 		     staged symlink is skipped, git restores those. The pull lands beside
 		     the staging tree rather than in it, so a restore never feeds a push -->
 		<Route path="backup/push/silver-fox" {ExchangeSequence}>
-			<DirSync bucket="backup" local_dir="target/backup/silver-fox" {SyncS3Bucket{delete:true, bucket_dir:"silver-fox"}}/>
+			<StoreSync src="fs:target/backup/silver-fox" dest={$backup} dest_dir="silver-fox" delete=true/>
 		</Route>
 		<Route path="backup/pull/silver-fox" {ExchangeSequence}>
-			<DirSync bucket="backup" local_dir="target/restore/silver-fox" {SyncS3Bucket{direction:Pull, bucket_dir:"silver-fox"}}/>
+			<StoreSync src={$backup} src_dir="silver-fox" dest="fs:target/restore/silver-fox"/>
 		</Route>
 		<Route path="backup/push/rainbow-cat" {ExchangeSequence}>
-			<DirSync bucket="backup" local_dir="target/backup/rainbow-cat" {SyncS3Bucket{delete:true, bucket_dir:"rainbow-cat"}}/>
+			<StoreSync src="fs:target/backup/rainbow-cat" dest={$backup} dest_dir="rainbow-cat" delete=true/>
 		</Route>
 		<Route path="backup/pull/rainbow-cat" {ExchangeSequence}>
-			<DirSync bucket="backup" local_dir="target/restore/rainbow-cat" {SyncS3Bucket{direction:Pull, bucket_dir:"rainbow-cat"}}/>
+			<StoreSync src={$backup} src_dir="rainbow-cat" dest="fs:target/restore/rainbow-cat"/>
 		</Route>
 	</Stack>
 </Router>
